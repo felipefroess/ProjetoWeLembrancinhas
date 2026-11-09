@@ -111,7 +111,7 @@
 }
 
 /* ========================================================
-   COLUNA DA ESQUERDA: Foto, Título, Descrição, Meta
+   COLUNA DA ESQUERDA: Foto Inteira, Título, Descrição
    ======================================================== */
 .leftColumn {
   display: flex;
@@ -129,29 +129,39 @@
 .imageGalleryWrapper {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.625rem;
 }
 
+/* Container da Foto Principal (Sem cortes) */
 .mainImageContainer {
   width: 100%;
-  height: 260px;
+  height: 280px;
   border-radius: 1rem;
   overflow: hidden;
   background-color: #FAF7F2;
   border: 1px solid #DACFBF;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
 }
 
 @media (min-width: 640px) {
   .mainImageContainer {
-    height: 310px;
+    height: 360px;
+    padding: 0.75rem;
   }
 }
 
+/* Foto com object-fit: contain para mostrar 100% da imagem sem cortar nada */
 .productMainImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0.625rem;
   transition: transform 0.3s ease;
 }
 
@@ -169,8 +179,11 @@
   opacity: 0.7;
   cursor: pointer;
   padding: 0;
-  background: none;
+  background-color: #FAF7F2;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .thumbnailButton:hover {
@@ -186,10 +199,13 @@
   opacity: 1;
   cursor: pointer;
   padding: 0;
-  background: none;
+  background-color: #FAF7F2;
   border: 2px solid #6D4C3D;
   transform: scale(1.04);
   box-shadow: 0 2px 4px rgba(109, 76, 61, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .thumbnailButton img,
@@ -275,7 +291,7 @@
 }
 
 /* ========================================================
-   COLUNA DA DIREITA: Formulário e Variações
+   COLUNA DA DIREITA: Formulário e Modelos
    ======================================================== */
 .rightColumn {
   display: flex;
@@ -288,7 +304,7 @@
   gap: 1.125rem;
 }
 
-/* Variações estilo Mercado Livre */
+/* Card de Modelos (Estilo Mercado Livre) */
 .variationsCard {
   padding: 0.875rem;
   background-color: #FAF7F2;
@@ -372,6 +388,9 @@
   border-radius: 0.625rem;
   overflow: hidden;
   background-color: #FAF7F2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media (min-width: 640px) {

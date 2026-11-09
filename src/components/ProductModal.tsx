@@ -42,6 +42,7 @@ export function ProductModal() {
     return null;
   }
 
+  const hasVariations = Boolean(product.variations && product.variations.length > 1);
   const subtotal = product.price * quantity;
 
   const handleConfirm = (e: React.FormEvent) => {
@@ -81,10 +82,10 @@ export function ProductModal() {
           <div className={styles.modalGrid}>
             
             {/* ========================================================
-                COLUNA DA ESQUERDA: Foto maior, Título e Descrição
+                COLUNA DA ESQUERDA: Foto Inteira, Título e Descrição
                ======================================================== */}
             <div className={styles.leftColumn}>
-              {/* Foto Principal Maior */}
+              {/* Foto Principal (Exibida por inteiro, sem cortes) */}
               <div className={styles.imageGalleryWrapper}>
                 <div className={styles.mainImageContainer}>
                   <img
@@ -94,8 +95,12 @@ export function ProductModal() {
                   />
                 </div>
 
-                {/* Miniaturas da Galeria (se houver mais de uma foto) */}
-                {product.images && product.images.length > 1 && (
+                {/* 
+                  Miniaturas de fotos adicionais:
+                  APENAS para produtos de modelo único que possuem múltiplos ângulos/fotos.
+                  Para produtos com múltiplos modelos, não exibe miniaturas aqui (a escolha é feita nos Modelos).
+                */}
+                {!hasVariations && product.images && product.images.length > 1 && (
                   <div className={styles.thumbnailsRow}>
                     {product.images.map((img, idx) => {
                       const isCurrent = (selectedImage || product.image) === img;
@@ -105,7 +110,7 @@ export function ProductModal() {
                           type="button"
                           onClick={() => setSelectedImage(img)}
                           className={isCurrent ? styles.thumbnailButtonActive : styles.thumbnailButton}
-                          title="Clique para ampliar"
+                          title="Ver outra foto do produto"
                         >
                           <img src={img} alt="Foto adicional" />
                         </button>
@@ -145,17 +150,17 @@ export function ProductModal() {
             </div>
 
             {/* ========================================================
-                COLUNA DA DIREITA: Modelo, Personalização e Quantidade
+                COLUNA DA DIREITA: Modelos (se houver), Formulário e Quantidade
                ======================================================== */}
             <div className={styles.rightColumn}>
               <form onSubmit={handleConfirm} id="customization-form" className={styles.formSpace}>
                 
-                {/* Seletor de Modelo com Imagem (Estilo Mercado Livre) */}
-                {product.variations && product.variations.length > 0 && (
+                {/* Seletor de Modelo com Imagem (Estilo Mercado Livre) - APENAS para produtos com mais de um modelo */}
+                {hasVariations && product.variations && (
                   <div className={styles.variationsCard}>
                     <div className={styles.variationsHeader}>
                       <label className={styles.variationsTitle}>
-                        Escolha o Modelo:
+                        Modelos:
                       </label>
                       {selectedVariation && (
                         <span className={styles.selectedVariationPill}>
@@ -177,7 +182,7 @@ export function ProductModal() {
                               setSelectedImage(v.image);
                             }}
                             className={isSelected ? styles.variationItemSelected : styles.variationItem}
-                            title={v.name}
+                            title={`Modelo: ${v.name}`}
                           >
                             <div className={styles.variationImageWrap}>
                               <img
