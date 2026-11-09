@@ -1,0 +1,139 @@
+/* Estilos do Rodapé (Footer) */
+.footerContainer {
+  background-color: #2D231E;
+  color: #D8CDC4;
+  padding-top: 3rem;
+  padding-bottom: 2rem;
+  border-top: 1px solid #4A3B32;
+}
+
+.innerWrap {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .innerWrap {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .innerWrap {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.columnsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 2rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid #4A3B32;
+}
+
+@media (min-width: 768px) {
+  .columnsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Coluna 1: Sobre a Loja */
+.brandHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.brandName {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-style: italic;
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 1.25rem;
+}
+
+.aboutDescription {
+  font-size: 0.75rem;
+  color: #B5A89E;
+  line-height: 1.625;
+  margin-bottom: 1rem;
+}
+
+.locationNote {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #D8CDC4;
+}
+
+.pinIcon {
+  color: #D4AF37;
+  flex-shrink: 0;
+}
+
+/* Coluna 2: Redes e Contato */
+.columnTitle {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.linksList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.footerLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #D8CDC4;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footerLink:hover {
+  color: #ffffff;
+}
+
+.linkIcon {
+  color: #D4AF37;
+  flex-shrink: 0;
+}
+
+/* Rodapé inferior */
+.bottomRow {
+  padding-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 11px;
+  color: #8C7A6B;
+}
+
+@media (min-width: 640px) {
+  .bottomRow {
+    flex-direction: row;
+  }
+}
+
+.bottomRow p {
+  margin: 0;
+}

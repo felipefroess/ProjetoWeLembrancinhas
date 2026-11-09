@@ -1,0 +1,57 @@
+/* Estilos do Botão Flutuante de WhatsApp */
+.floatingContainer {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 40;
+}
+
+.whatsappLink {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  background-color: #25D366;
+  color: #ffffff;
+  padding: 0.75rem 1rem;
+  border-radius: 9999px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  transform: translateY(0);
+}
+
+.whatsappLink:hover {
+  background-color: #20bd5a;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  transform: translateY(-0.25rem);
+}
+
+.whatsappLink:active {
+  transform: translateY(0);
+}
+
+.whatsappIcon {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.buttonText {
+  display: none;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+}
+
+@media (min-width: 640px) {
+  .buttonText {
+    display: inline;
+  }
+}

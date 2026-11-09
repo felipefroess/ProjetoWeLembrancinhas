@@ -1,0 +1,189 @@
+/* Estilos da Página Principal (HomePage) */
+.pageWrapper {
+  min-height: 100vh;
+  background-color: #FAF7F2;
+  color: #2D231E;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-sans, system-ui, sans-serif);
+}
+
+.mainCatalog {
+  flex: 1;
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2.5rem 1rem;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .mainCatalog {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mainCatalog {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Cabeçalho da Seção de Produtos */
+.catalogHeader {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 640px) {
+  .catalogHeader {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.catalogTitle {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2D231E;
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .catalogTitle {
+    font-size: 1.875rem;
+  }
+}
+
+.catalogSubtitle {
+  font-size: 0.75rem;
+  color: #7C6E64;
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+}
+
+@media (min-width: 640px) {
+  .catalogSubtitle {
+    font-size: 0.875rem;
+  }
+}
+
+.itemsCountBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #8C7A6B;
+  background-color: #EFE6DC;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid #DACFBF;
+  align-self: flex-start;
+}
+
+@media (min-width: 640px) {
+  .itemsCountBadge {
+    align-self: auto;
+  }
+}
+
+/* Grades de Produtos */
+.productsGridSingle {
+  max-width: 24rem;
+}
+
+.productsGridDouble {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.5rem;
+  max-width: 42rem;
+}
+
+@media (min-width: 640px) {
+  .productsGridDouble {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.productsGridMulti {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .productsGridMulti {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .productsGridMulti {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .productsGridMulti {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Estado Vazio de Busca */
+.emptyStateCard {
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: #ffffff;
+  border-radius: 1.5rem;
+  border: 1px solid #E8DFD5;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.emptyIconCircle {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 9999px;
+  background-color: #FAF7F2;
+  border: 1px solid #DACFBF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem;
+  color: #8C7A6B;
+}
+
+.emptyStateTitle {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: #2D231E;
+  margin-bottom: 0.25rem;
+}
+
+.emptyStateText {
+  font-size: 0.75rem;
+  color: #7C6E64;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.clearFilterBtn {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background-color: #6D4C3D;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.clearFilterBtn:hover {
+  background-color: #5A3E31;
+}

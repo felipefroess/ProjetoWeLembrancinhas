@@ -4,6 +4,7 @@ import React from 'react';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { Clock, Heart } from 'lucide-react';
+import styles from './ProductCard.module.css';
 
 interface ProductCardProps {
   product: Product;
@@ -17,72 +18,70 @@ export function ProductCard({ product }: ProductCardProps) {
     currency: 'BRL',
   });
 
+  const hasMultipleImages = product.images && product.images.length > 1;
+
   return (
-    <div className="group bg-white rounded-2xl overflow-hidden border border-[#E8DFD5] hover:border-[#C89B6D] transition-all duration-300 shadow-xs hover:shadow-xl flex flex-col justify-between">
+    <div className={styles.productCard}>
       {/* Container da Imagem com Tag */}
-      <div className="relative aspect-square overflow-hidden bg-[#F5EDE4]">
+      <div className={styles.imageContainer}>
         <img
           src={product.image}
           alt={product.name}
-          className={`w-full h-full object-cover transition-all duration-500 ${
-            product.images && product.images.length > 1
-              ? 'group-hover:opacity-0'
-              : 'group-hover:scale-105'
-          }`}
+          className={`${styles.mainImage} ${hasMultipleImages ? styles.mainImageFade : styles.mainImageScale}`}
           loading="lazy"
         />
-        {product.images && product.images.length > 1 && (
+        {hasMultipleImages && (
           <img
-            src={product.images[1]}
+            src={product.images![1]}
             alt={`${product.name} verso`}
-            className="w-full h-full object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            className={styles.hoverImage}
             loading="lazy"
           />
         )}
 
         {/* Badges superiores */}
-        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
+        <div className={styles.badgesWrapper}>
           {product.popular && (
-            <span className="inline-flex items-center bg-[#D4AF37] text-[#2D231E] text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 rounded-full shadow-sm">
+            <span className={styles.popularBadge}>
               Mais Pedido
             </span>
           )}
           {product.minQuantity > 1 && (
-            <span className="bg-[#4A3B32]/90 backdrop-blur-xs text-[#FAF7F2] text-[10px] font-medium px-2 py-0.5 rounded-md">
+            <span className={styles.minQtyBadge}>
               Mínimo: {product.minQuantity} un.
             </span>
           )}
         </div>
 
         {/* Prazo de Produção */}
-        <div className="absolute bottom-2.5 right-2.5 bg-white/90 backdrop-blur-xs text-[#52443C] text-[10px] font-semibold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-2xs">
-          <Clock size={11} className="text-[#C89B6D]" />
+        <div className={styles.leadTimeBadge}>
+          <Clock size={11} className={styles.leadTimeIcon} />
           <span>{product.leadTimeDays} dias úteis</span>
         </div>
       </div>
 
       {/* Conteúdo do Card */}
-      <div className="p-4 flex-1 flex flex-col justify-between">
+      <div className={styles.cardContent}>
         <div>
-          <h3 className="font-serif font-bold text-base text-[#2D231E] group-hover:text-[#6D4C3D] transition line-clamp-1 mb-1">
+          <h3 className={styles.productName}>
             {product.name}
           </h3>
-          <p className="text-xs text-[#7C6E64] line-clamp-2 leading-relaxed mb-3">
+          <p className={styles.productDescription}>
             {product.description}
           </p>
 
           {/* Miniaturas de variação estilo Mercado Livre */}
           {product.variations && product.variations.length > 0 && (
-            <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-[10px] text-[#8C7A6B] font-semibold">Modelos:</span>
-              <div className="flex items-center gap-1.5">
+            <div className={styles.variationsRow}>
+              <span className={styles.variationsLabel}>Modelos:</span>
+              <div className={styles.variationsList}>
                 {product.variations.map((v) => (
                   <div
                     key={v.id}
-                    className="w-7 h-9 rounded-md overflow-hidden border border-[#DACFBF] hover:border-[#6D4C3D] shadow-2xs transition"
+                    className={styles.variationThumb}
                     title={v.name}
                   >
-                    <img src={v.image} alt={v.name} className="w-full h-full object-cover" />
+                    <img src={v.image} alt={v.name} />
                   </div>
                 ))}
               </div>
@@ -91,21 +90,21 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Preço e Botão */}
-        <div className="pt-3 border-t border-[#F2ECE4] flex items-center justify-between gap-2">
+        <div className={styles.cardFooter}>
           <div>
-            <span className="text-[10px] uppercase tracking-wider text-[#9E9084] block font-semibold">
+            <span className={styles.unitLabel}>
               Valor por {product.unit}
             </span>
-            <span className="font-bold text-lg text-[#6D4C3D]">
+            <span className={styles.priceValue}>
               {formattedPrice}
             </span>
           </div>
 
           <button
             onClick={() => openCustomizationModal(product)}
-            className="px-3.5 py-2 rounded-xl bg-[#FAF7F2] hover:bg-[#6D4C3D] text-[#6D4C3D] hover:text-white border border-[#DACFBF] hover:border-[#6D4C3D] text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
+            className={styles.customizeButton}
           >
-            <Heart size={13} className="text-[#D97762] group-hover:text-white" />
+            <Heart size={13} className={styles.heartIcon} />
             <span>Personalizar</span>
           </button>
         </div>

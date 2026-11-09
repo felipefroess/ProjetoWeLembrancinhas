@@ -1,0 +1,210 @@
+/* Estilos do Banner Principal (HeroBanner) */
+.heroSection {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #F5EDE4, #FAF7F2, #FAF7F2);
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  border-bottom: 1px solid #E8DFD5;
+}
+
+@media (min-width: 640px) {
+  .heroSection {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+/* Círculos decorativos com desfoque de fundo */
+.decorCircleTop {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin-right: -4rem;
+  margin-top: -4rem;
+  width: 16rem;
+  height: 16rem;
+  border-radius: 9999px;
+  background-color: rgba(232, 223, 213, 0.4);
+  filter: blur(64px);
+  pointer-events: none;
+}
+
+.decorCircleBottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  margin-left: -4rem;
+  margin-bottom: -4rem;
+  width: 16rem;
+  height: 16rem;
+  border-radius: 9999px;
+  background-color: rgba(212, 175, 55, 0.1);
+  filter: blur(64px);
+  pointer-events: none;
+}
+
+.heroContainer {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  position: relative;
+  z-index: 10;
+}
+
+@media (min-width: 640px) {
+  .heroContainer {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .heroContainer {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.heroContent {
+  text-align: center;
+  max-width: 48rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.heroTitle {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #2D231E;
+  line-height: 1.25;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 640px) {
+  .heroTitle {
+    font-size: 3rem;
+    line-height: 1.25;
+  }
+}
+
+.heroSubtitle {
+  font-size: 0.875rem;
+  color: #6B5E55;
+  line-height: 1.625;
+  margin-bottom: 2rem;
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 640px) {
+  .heroSubtitle {
+    font-size: 1rem;
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (min-width: 640px) {
+  .buttonGroup {
+    gap: 1rem;
+  }
+}
+
+.primaryButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  background-color: #6D4C3D;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+  transform: translateY(0);
+}
+
+.primaryButton:hover {
+  background-color: #5A3E31;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.primaryButton:active {
+  transform: translateY(0);
+}
+
+.whatsappButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  background-color: #ffffff;
+  color: #6D4C3D;
+  border: 1px solid #DACFBF;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+}
+
+.whatsappButton:hover {
+  background-color: #F5EDE4;
+}
+
+.valuePropsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(232, 223, 213, 0.8);
+  text-align: left;
+}
+
+@media (min-width: 640px) {
+  .valuePropsGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.valuePropCard {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.propIcon {
+  color: #C89B6D;
+  flex-shrink: 0;
+}
+
+.propTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #2D231E;
+  margin: 0;
+}
+
+.propSubtitle {
+  font-size: 11px;
+  color: #7C6E64;
+  margin: 0;
+}

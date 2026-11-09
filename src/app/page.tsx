@@ -13,6 +13,7 @@ import { Footer } from '@/components/Footer';
 import { PRODUCTS } from '@/data/products';
 import { CategoryId } from '@/types';
 import { PackageSearch } from 'lucide-react';
+import styles from './Home.module.css';
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>('todos');
@@ -34,8 +35,16 @@ export default function HomePage() {
     });
   }, [selectedCategory, searchQuery]);
 
+  // Escolhe a classe de grid de acordo com o número de itens
+  const gridClass =
+    filteredProducts.length === 1
+      ? styles.productsGridSingle
+      : filteredProducts.length === 2
+      ? styles.productsGridDouble
+      : styles.productsGridMulti;
+
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#2D231E] flex flex-col font-sans">
+    <div className={styles.pageWrapper}>
       {/* Barra de Navegação */}
       <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
@@ -51,11 +60,11 @@ export default function HomePage() {
       </div>
 
       {/* Catálogo de Produtos */}
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+      <main className={styles.mainCatalog}>
         {/* Cabeçalho da Seção de Produtos */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-8">
+        <div className={styles.catalogHeader}>
           <div>
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#2D231E]">
+            <h2 className={styles.catalogTitle}>
               {searchQuery
                 ? `Resultados para "${searchQuery}"`
                 : selectedCategory === 'natal'
@@ -64,46 +73,40 @@ export default function HomePage() {
                 ? 'Catálogo Dia dos Professores'
                 : 'Catálogo de Lembrancinhas'}
             </h2>
-            <p className="text-xs sm:text-sm text-[#7C6E64] mt-1">
+            <p className={styles.catalogSubtitle}>
               Clique em qualquer item para personalizar modelos, nomes e detalhes
             </p>
           </div>
-          <span className="text-xs font-semibold text-[#8C7A6B] bg-[#EFE6DC] px-3 py-1 rounded-full self-start sm:self-auto border border-[#DACFBF]">
+          <span className={styles.itemsCountBadge}>
             {filteredProducts.length} {filteredProducts.length === 1 ? 'modelo encontrado' : 'modelos disponíveis'}
           </span>
         </div>
 
         {/* Grade de Produtos */}
         {filteredProducts.length > 0 ? (
-          <div className={
-            filteredProducts.length === 1
-              ? 'max-w-sm'
-              : filteredProducts.length === 2
-                ? 'grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl'
-                : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'
-          }>
+          <div className={gridClass}>
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : (
           /* Estado Vazio de Busca */
-          <div className="text-center py-16 bg-white rounded-3xl border border-[#E8DFD5] p-8 max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-full bg-[#FAF7F2] border border-[#DACFBF] flex items-center justify-center mx-auto mb-3 text-[#8C7A6B]">
+          <div className={styles.emptyStateCard}>
+            <div className={styles.emptyIconCircle}>
               <PackageSearch size={28} />
             </div>
-            <h3 className="font-serif font-bold text-lg text-[#2D231E] mb-1">
+            <h3 className={styles.emptyStateTitle}>
               Nenhuma lembrancinha encontrada
             </h3>
-            <p className="text-xs text-[#7C6E64] mb-4">
-              Não encontramos nenhum produto com o termo &quot;{searchQuery}&quot;. Tente buscar por caixa milk, esfera ou topo de bolo.
+            <p className={styles.emptyStateText}>
+              Não encontramos nenhum produto com o termo &quot;{searchQuery}&quot;. Tente buscar por outros termos como talento, sonho de valsa ou lata.
             </p>
             <button
               onClick={() => {
                 setSearchQuery('');
                 setSelectedCategory('todos');
               }}
-              className="px-4 py-2 rounded-full bg-[#6D4C3D] text-white text-xs font-bold hover:bg-[#5A3E31] transition"
+              className={styles.clearFilterBtn}
             >
               Limpar Filtros
             </button>

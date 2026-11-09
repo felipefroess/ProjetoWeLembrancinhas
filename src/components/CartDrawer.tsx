@@ -3,6 +3,7 @@
 import React from 'react';
 import { useCart } from '@/context/CartContext';
 import { X, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import styles from './CartDrawer.module.css';
 
 export function CartDrawer() {
   const {
@@ -19,43 +20,44 @@ export function CartDrawer() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-black/50 backdrop-blur-xs flex justify-end">
+    <div className={styles.drawerOverlay}>
       <div 
-        className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col justify-between animate-slide-left border-l border-[#DACFBF]"
+        className={styles.drawerPanel}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Cabeçalho */}
-        <div className="p-4 sm:p-5 border-b border-[#E8DFD5] bg-[#FAF7F2] flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShoppingBag className="text-[#6D4C3D]" size={20} />
-            <h3 className="font-serif font-bold text-lg text-[#2D231E]">
+        <div className={styles.drawerHeader}>
+          <div className={styles.headerTitleWrapper}>
+            <ShoppingBag className={styles.headerIcon} size={20} />
+            <h3 className={styles.headerTitle}>
               Meu Pedido ({totalItems})
             </h3>
           </div>
           <button
             onClick={closeCart}
-            className="w-8 h-8 rounded-full bg-white border border-[#DACFBF] text-[#7C6E64] hover:text-[#2D231E] flex items-center justify-center transition"
+            className={styles.closeButton}
+            aria-label="Fechar"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Lista de Itens */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+        <div className={styles.itemsList}>
           {items.length === 0 ? (
-            <div className="text-center py-16 px-4">
-              <div className="w-16 h-16 rounded-full bg-[#FAF7F2] border border-[#DACFBF] flex items-center justify-center mx-auto mb-4 text-[#8C7A6B]">
+            <div className={styles.emptyCart}>
+              <div className={styles.emptyIconCircle}>
                 <ShoppingBag size={28} />
               </div>
-              <h4 className="font-serif font-bold text-base text-[#2D231E] mb-1">
+              <h4 className={styles.emptyTitle}>
                 Seu carrinho está vazio
               </h4>
-              <p className="text-xs text-[#7C6E64] max-w-xs mx-auto mb-6">
+              <p className={styles.emptySubtitle}>
                 Escolha uma lembrancinha linda do catálogo e personalize com o tema do seu evento!
               </p>
               <button
                 onClick={closeCart}
-                className="px-5 py-2.5 rounded-full bg-[#6D4C3D] text-white text-xs font-bold hover:bg-[#5A3E31] transition"
+                className={styles.exploreButton}
               >
                 Explorar Lembrancinhas
               </button>
@@ -64,28 +66,28 @@ export function CartDrawer() {
             items.map((item) => (
               <div
                 key={item.cartItemId}
-                className="p-3.5 bg-[#FAF7F2] rounded-2xl border border-[#E8DFD5] flex flex-col gap-3"
+                className={styles.cartItemCard}
               >
-                <div className="flex gap-3">
+                <div className={styles.itemTopRow}>
                   <img
                     src={item.product.image}
                     alt={item.product.name}
-                    className="w-16 h-16 object-cover rounded-xl border border-[#DACFBF] shrink-0"
+                    className={styles.itemThumbnail}
                   />
-                  <div className="flex-1 min-w-0">
-                    <h5 className="font-serif font-bold text-sm text-[#2D231E] truncate">
+                  <div className={styles.itemInfo}>
+                    <h5 className={styles.itemTitle}>
                       {item.product.name}
                     </h5>
-                    <p className="text-xs font-semibold text-[#6D4C3D]">
+                    <p className={styles.itemSubtotal}>
                       {item.subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </p>
-                    <p className="text-[11px] text-[#8C7A6B]">
+                    <p className={styles.itemUnitCalc}>
                       {item.quantity} x {item.product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </p>
                   </div>
                   <button
                     onClick={() => removeFromCart(item.cartItemId)}
-                    className="text-[#9E9084] hover:text-[#D97762] p-1 self-start transition"
+                    className={styles.removeButton}
                     title="Remover item"
                   >
                     <Trash2 size={16} />
@@ -93,7 +95,7 @@ export function CartDrawer() {
                 </div>
 
                 {/* Detalhes de Personalização */}
-                <div className="text-[11px] bg-white p-2.5 rounded-xl border border-[#DACFBF]/80 space-y-1 text-[#52443C]">
+                <div className={styles.customizationBox}>
                   {item.customization.variation && (
                     <p>
                       <strong>Modelo:</strong> {item.customization.variation}
@@ -120,28 +122,28 @@ export function CartDrawer() {
                     </p>
                   )}
                   {item.customization.notes && (
-                    <p className="italic text-[#7C6E64]">
+                    <p className={styles.notesQuote}>
                       &quot;{item.customization.notes}&quot;
                     </p>
                   )}
                 </div>
 
                 {/* Controle de Quantidade */}
-                <div className="flex items-center justify-between pt-1">
-                  <span className="text-[11px] text-[#8C7A6B] font-medium">Quantidade:</span>
-                  <div className="flex items-center border border-[#DACFBF] rounded-lg bg-white overflow-hidden">
+                <div className={styles.quantityRow}>
+                  <span className={styles.quantityLabel}>Quantidade:</span>
+                  <div className={styles.quantityControls}>
                     <button
                       onClick={() => updateQuantity(item.cartItemId, item.quantity - 1)}
-                      className="w-7 h-7 text-xs font-bold text-[#4A3B32] hover:bg-[#FAF7F2] transition"
+                      className={styles.qtyButton}
                     >
                       -
                     </button>
-                    <span className="w-8 text-center text-xs font-bold text-[#2D231E]">
+                    <span className={styles.qtyDisplay}>
                       {item.quantity}
                     </span>
                     <button
                       onClick={() => updateQuantity(item.cartItemId, item.quantity + 1)}
-                      className="w-7 h-7 text-xs font-bold text-[#4A3B32] hover:bg-[#FAF7F2] transition"
+                      className={styles.qtyButton}
                     >
                       +
                     </button>
@@ -154,23 +156,23 @@ export function CartDrawer() {
 
         {/* Rodapé do Carrinho com Total e Ação */}
         {items.length > 0 && (
-          <div className="p-4 sm:p-5 border-t border-[#E8DFD5] bg-[#FAF7F2] space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wider text-[#8C7A6B] font-semibold">
+          <div className={styles.drawerFooter}>
+            <div className={styles.totalRow}>
+              <span className={styles.totalLabel}>
                 Total Estimado
               </span>
-              <span className="font-serif font-bold text-2xl text-[#6D4C3D]">
+              <span className={styles.totalAmount}>
                 {subtotalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </span>
             </div>
 
-            <p className="text-[11px] text-[#7C6E64] bg-white p-2 rounded-lg border border-[#DACFBF]">
+            <p className={styles.whatsappHint}>
               O pedido será enviado diretamente para a Wenilze no WhatsApp com todos os detalhes prontos!
             </p>
 
             <button
               onClick={openCheckout}
-              className="w-full py-3.5 rounded-full bg-[#6D4C3D] hover:bg-[#5A3E31] text-white text-sm font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+              className={styles.checkoutButton}
             >
               <span>Avançar para Concluir</span>
               <ArrowRight size={18} />

@@ -1,0 +1,108 @@
+/* Estilos da Barra de Categorias (CategoryFilter) */
+.filterSection {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #E8DFD5;
+  background-color: #FAF7F2;
+}
+
+.container {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: #8C7A6B;
+}
+
+.sectionCount {
+  font-size: 0.75rem;
+  color: #9E9084;
+}
+
+.categoriesList {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scroll-snap-type: x mandatory;
+  -ms-overflow-style: none; /* Internet Explorer e Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.categoriesList::-webkit-scrollbar {
+  display: none; /* Chrome, Safari e Opera */
+}
+
+.categoryButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+  flex-shrink: 0;
+  cursor: pointer;
+  scroll-snap-align: start;
+  border: 1px solid #DACFBF;
+  background-color: #ffffff;
+  color: #4A3B32;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 640px) {
+  .categoryButton {
+    font-size: 0.875rem;
+  }
+}
+
+.categoryButton:hover {
+  background-color: #F5EDE4;
+  border-color: #C89B6D;
+}
+
+/* Quando a categoria está selecionada */
+.categoryButtonSelected {
+  composes: categoryButton;
+  background-color: #6D4C3D;
+  color: #ffffff;
+  border-color: #6D4C3D;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: scale(1.05);
+}
+
+.categoryButtonSelected:hover {
+  background-color: #5A3E31;
+  border-color: #5A3E31;
+}

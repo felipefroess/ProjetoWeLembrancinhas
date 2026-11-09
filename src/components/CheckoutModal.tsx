@@ -5,6 +5,7 @@ import { useCart } from '@/context/CartContext';
 import { X, Send, MapPin, Calendar, User, Phone, CheckCircle2 } from 'lucide-react';
 import { DeliveryMethod } from '@/types';
 import confetti from 'canvas-confetti';
+import styles from './CheckoutModal.module.css';
 
 export function CheckoutModal() {
   const {
@@ -63,19 +64,20 @@ export function CheckoutModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div className={styles.modalOverlay}>
       <div 
-        className="bg-white rounded-3xl max-w-xl w-full overflow-hidden shadow-2xl border border-[#DACFBF] relative flex flex-col max-h-[92vh]"
+        className={styles.modalCard}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Cabeçalho */}
-        <div className="p-4 sm:p-5 border-b border-[#E8DFD5] bg-[#FAF7F2] flex items-center justify-between">
-          <h3 className="font-serif font-bold text-lg sm:text-xl text-[#2D231E]">
+        <div className={styles.modalHeader}>
+          <h3 className={styles.modalTitle}>
             Finalizar Pedido via WhatsApp
           </h3>
           <button
             onClick={closeCheckout}
-            className="w-8 h-8 rounded-full bg-white border border-[#DACFBF] text-[#7C6E64] hover:text-[#2D231E] flex items-center justify-center transition"
+            className={styles.closeButton}
+            aria-label="Fechar"
           >
             <X size={18} />
           </button>
@@ -83,36 +85,36 @@ export function CheckoutModal() {
 
         {isSent ? (
           /* Tela de Sucesso */
-          <div className="p-8 text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-[#EAF7EE] text-[#22C55E] flex items-center justify-center mx-auto border-2 border-[#22C55E]/30">
+          <div className={styles.successScreen}>
+            <div className={styles.successIconCircle}>
               <CheckCircle2 size={36} />
             </div>
-            <h4 className="font-serif font-bold text-xl text-[#2D231E]">
+            <h4 className={styles.successTitle}>
               Pedido Pronto para Envio!
             </h4>
-            <p className="text-sm text-[#6B5E55] max-w-md mx-auto leading-relaxed">
+            <p className={styles.successText}>
               Abrimos a conversa com a Wenilze no WhatsApp com todos os detalhes do seu pedido formatados. Basta clicar em <strong>Enviar</strong> no chat para combinarem a data e o pagamento!
             </p>
             <button
               onClick={handleFinish}
-              className="mt-4 px-6 py-3 rounded-full bg-[#6D4C3D] hover:bg-[#5A3E31] text-white text-sm font-bold shadow-md transition"
+              className={styles.finishButton}
             >
               Concluir & Voltar à Loja
             </button>
           </div>
         ) : (
           /* Formulário de Dados */
-          <form onSubmit={handleSubmit} className="overflow-y-auto p-4 sm:p-6 space-y-4">
+          <form onSubmit={handleSubmit} className={styles.formBody}>
             
             {/* Resumo do Pedido */}
-            <div className="p-3 bg-[#FAF7F2] rounded-xl border border-[#E8DFD5] flex items-center justify-between">
+            <div className={styles.orderBrief}>
               <div>
-                <span className="text-xs text-[#8C7A6B] block">Itens selecionados</span>
-                <span className="font-bold text-sm text-[#2D231E]">{items.length} produtos no carrinho</span>
+                <span className={styles.briefLabel}>Itens selecionados</span>
+                <span className={styles.briefCount}>{items.length} produtos no carrinho</span>
               </div>
-              <div className="text-right">
-                <span className="text-xs text-[#8C7A6B] block">Total estimado</span>
-                <span className="font-serif font-bold text-lg text-[#6D4C3D]">
+              <div style={{ textAlign: 'right' }}>
+                <span className={styles.briefLabel}>Total estimado</span>
+                <span className={styles.briefTotal}>
                   {subtotalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </span>
               </div>
@@ -120,8 +122,8 @@ export function CheckoutModal() {
 
             {/* Nome Completo */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#4A3B32] mb-1.5 flex items-center gap-1.5">
-                <User size={13} className="text-[#C89B6D]" /> Seu Nome Completo <span className="text-[#C89B6D]">*</span>
+              <label className={styles.fieldLabel}>
+                <User size={13} className={styles.labelIcon} /> Seu Nome Completo <span className={styles.reqStar}>*</span>
               </label>
               <input
                 type="text"
@@ -129,97 +131,85 @@ export function CheckoutModal() {
                 placeholder="Ex: Maria Silva"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full bg-[#FAF7F2] border border-[#DACFBF] rounded-xl px-3.5 py-2.5 text-sm text-[#2D231E] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C89B6D]"
+                className={styles.formInput}
               />
             </div>
 
             {/* Telefone e Data do Evento */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className={styles.twoColsGrid}>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#4A3B32] mb-1.5 flex items-center gap-1.5">
-                  <Phone size={13} className="text-[#C89B6D]" /> WhatsApp / Celular
+                <label className={styles.fieldLabel}>
+                  <Phone size={13} className={styles.labelIcon} /> WhatsApp / Celular
                 </label>
                 <input
                   type="tel"
                   placeholder="(35) 99999-9999"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="w-full bg-[#FAF7F2] border border-[#DACFBF] rounded-xl px-3.5 py-2.5 text-sm text-[#2D231E] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C89B6D]"
+                  className={styles.formInput}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#4A3B32] mb-1.5 flex items-center gap-1.5">
-                  <Calendar size={13} className="text-[#C89B6D]" /> Data do Evento <span className="text-[#C89B6D]">*</span>
+                <label className={styles.fieldLabel}>
+                  <Calendar size={13} className={styles.labelIcon} /> Data do Evento <span className={styles.reqStar}>*</span>
                 </label>
                 <input
                   type="date"
                   required
                   value={eventDate}
                   onChange={(e) => setEventDate(e.target.value)}
-                  className="w-full bg-[#FAF7F2] border border-[#DACFBF] rounded-xl px-3.5 py-2.5 text-sm text-[#2D231E] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C89B6D]"
+                  className={styles.formInput}
                 />
               </div>
             </div>
 
             {/* Opções de Entrega / Retirada */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#4A3B32] mb-2 flex items-center gap-1.5">
-                <MapPin size={13} className="text-[#C89B6D]" /> Como deseja receber? <span className="text-[#C89B6D]">*</span>
+              <label className={styles.fieldLabel} style={{ marginBottom: '0.5rem' }}>
+                <MapPin size={13} className={styles.labelIcon} /> Como deseja receber? <span className={styles.reqStar}>*</span>
               </label>
               
-              <div className="grid grid-cols-1 gap-2">
-                <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition ${
-                  deliveryMethod === 'retirada-pouso-alegre'
-                    ? 'border-[#6D4C3D] bg-[#FAF7F2] text-[#2D231E]'
-                    : 'border-[#DACFBF] bg-white text-[#52443C] hover:bg-[#FAF7F2]'
-                }`}>
+              <div className={styles.deliveryList}>
+                <label className={deliveryMethod === 'retirada-pouso-alegre' ? styles.deliveryOptionSelected : styles.deliveryOption}>
                   <input
                     type="radio"
                     name="delivery"
                     checked={deliveryMethod === 'retirada-pouso-alegre'}
                     onChange={() => setDeliveryMethod('retirada-pouso-alegre')}
-                    className="accent-[#6D4C3D]"
+                    className={styles.radioInput}
                   />
-                  <div>
-                    <span className="font-bold text-xs block">Retirada em Pouso Alegre - MG</span>
-                    <span className="text-[11px] text-[#8C7A6B]">Ponto de encontro / retirada a combinar sem taxa de frete</span>
+                  <div className={styles.deliveryTextWrap}>
+                    <span className={styles.deliveryOptionTitle}>Retirada em Pouso Alegre - MG</span>
+                    <span className={styles.deliveryOptionDesc}>Ponto de encontro / retirada a combinar sem taxa de frete</span>
                   </div>
                 </label>
 
-                <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition ${
-                  deliveryMethod === 'retirada-paraisopolis'
-                    ? 'border-[#6D4C3D] bg-[#FAF7F2] text-[#2D231E]'
-                    : 'border-[#DACFBF] bg-white text-[#52443C] hover:bg-[#FAF7F2]'
-                }`}>
+                <label className={deliveryMethod === 'retirada-paraisopolis' ? styles.deliveryOptionSelected : styles.deliveryOption}>
                   <input
                     type="radio"
                     name="delivery"
                     checked={deliveryMethod === 'retirada-paraisopolis'}
                     onChange={() => setDeliveryMethod('retirada-paraisopolis')}
-                    className="accent-[#6D4C3D]"
+                    className={styles.radioInput}
                   />
-                  <div>
-                    <span className="font-bold text-xs block">Retirada em Paraisópolis - MG</span>
-                    <span className="text-[11px] text-[#8C7A6B]">Ponto de encontro / retirada a combinar sem taxa de frete</span>
+                  <div className={styles.deliveryTextWrap}>
+                    <span className={styles.deliveryOptionTitle}>Retirada em Paraisópolis - MG</span>
+                    <span className={styles.deliveryOptionDesc}>Ponto de encontro / retirada a combinar sem taxa de frete</span>
                   </div>
                 </label>
 
-                <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition ${
-                  deliveryMethod === 'entrega-correios'
-                    ? 'border-[#6D4C3D] bg-[#FAF7F2] text-[#2D231E]'
-                    : 'border-[#DACFBF] bg-white text-[#52443C] hover:bg-[#FAF7F2]'
-                }`}>
+                <label className={deliveryMethod === 'entrega-correios' ? styles.deliveryOptionSelected : styles.deliveryOption}>
                   <input
                     type="radio"
                     name="delivery"
                     checked={deliveryMethod === 'entrega-correios'}
                     onChange={() => setDeliveryMethod('entrega-correios')}
-                    className="accent-[#6D4C3D]"
+                    className={styles.radioInput}
                   />
-                  <div>
-                    <span className="font-bold text-xs block">Envio por Correios / Transportadora</span>
-                    <span className="text-[11px] text-[#8C7A6B]">Valor de frete calculado pela Wenilze de acordo com seu CEP</span>
+                  <div className={styles.deliveryTextWrap}>
+                    <span className={styles.deliveryOptionTitle}>Envio por Correios / Transportadora</span>
+                    <span className={styles.deliveryOptionDesc}>Valor de frete calculado pela Wenilze de acordo com seu CEP</span>
                   </div>
                 </label>
               </div>
@@ -228,7 +218,7 @@ export function CheckoutModal() {
             {/* Endereço caso tenha escolhido frete */}
             {deliveryMethod === 'entrega-correios' && (
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#4A3B32] mb-1.5">
+                <label className={styles.fieldLabel}>
                   Endereço e CEP para cálculo de frete
                 </label>
                 <input
@@ -237,14 +227,14 @@ export function CheckoutModal() {
                   placeholder="Rua, Número, Bairro, Cidade/UF e CEP"
                   value={deliveryAddress}
                   onChange={(e) => setDeliveryAddress(e.target.value)}
-                  className="w-full bg-[#FAF7F2] border border-[#DACFBF] rounded-xl px-3.5 py-2.5 text-sm text-[#2D231E] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C89B6D]"
+                  className={styles.formInput}
                 />
               </div>
             )}
 
             {/* Observações adicionais */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-[#4A3B32] mb-1.5">
+              <label className={styles.fieldLabel}>
                 Mensagem adicional para a Wenilze (opcional)
               </label>
               <textarea
@@ -252,20 +242,20 @@ export function CheckoutModal() {
                 placeholder="Ex: Preciso que fique pronto até tal dia, gostaria de ver fotos da arte antes de imprimir..."
                 value={generalNotes}
                 onChange={(e) => setGeneralNotes(e.target.value)}
-                className="w-full bg-[#FAF7F2] border border-[#DACFBF] rounded-xl p-3 text-sm text-[#2D231E] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C89B6D]"
+                className={styles.formTextarea}
               />
             </div>
 
             {/* Botão de Envio */}
-            <div className="pt-3 border-t border-[#E8DFD5]">
+            <div className={styles.submitSection}>
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white text-sm font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+                className={styles.whatsappSubmitBtn}
               >
                 <Send size={18} />
                 <span>Enviar Pedido pelo WhatsApp</span>
               </button>
-              <p className="text-center text-[11px] text-[#8C7A6B] mt-2">
+              <p className={styles.paymentSecurityNote}>
                 Nenhum dado de pagamento é cobrado agora. Você e a Wenilze combinam a arte e a forma de pagamento no chat.
               </p>
             </div>

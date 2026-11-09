@@ -4,43 +4,44 @@ import React from 'react';
 import { MapPin } from 'lucide-react';
 import { InstagramIcon } from '@/components/InstagramIcon';
 import { STORE_CONFIG } from '@/data/products';
+import styles from './Footer.module.css';
 
 export function Footer() {
   return (
-    <footer className="bg-[#2D231E] text-[#D8CDC4] pt-12 pb-8 border-t border-[#4A3B32]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10 border-b border-[#4A3B32]">
+    <footer className={styles.footerContainer}>
+      <div className={styles.innerWrap}>
+        <div className={styles.columnsGrid}>
           
           {/* Coluna 1: Sobre a Loja */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="font-serif italic font-bold text-white text-xl">
+            <div className={styles.brandHeader}>
+              <span className={styles.brandName}>
                 Wê Lembrancinhas
               </span>
             </div>
-            <p className="text-xs text-[#B5A89E] leading-relaxed mb-4">
+            <p className={styles.aboutDescription}>
               Lembrancinhas personalizadas e papelaria afetiva criadas à mão com amor e precisão por <strong>{STORE_CONFIG.artisanName}</strong>. Cada detalhe é planejado para tornar a sua celebração inesquecível.
             </p>
-            <div className="flex items-center gap-2 text-xs text-[#D8CDC4]">
-              <MapPin size={14} className="text-[#D4AF37]" />
+            <div className={styles.locationNote}>
+              <MapPin size={14} className={styles.pinIcon} />
               <span>Atendimento em Pouso Alegre - MG & Paraisópolis - MG</span>
             </div>
           </div>
 
           {/* Coluna 2: Redes & Contato */}
           <div>
-            <h4 className="font-serif font-bold text-white text-sm mb-3">
+            <h4 className={styles.columnTitle}>
               Conecte-se Conosco
             </h4>
-            <ul className="space-y-2 text-xs">
+            <ul className={styles.linksList}>
               <li>
                 <a
                   href={STORE_CONFIG.instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-[#D8CDC4] hover:text-white transition"
+                  className={styles.footerLink}
                 >
-                  <InstagramIcon size={14} className="text-[#D4AF37]" />
+                  <InstagramIcon size={14} className={styles.linkIcon} />
                   <span>Instagram: @{STORE_CONFIG.instagram}</span>
                 </a>
               </li>
@@ -49,7 +50,7 @@ export function Footer() {
                   href={`https://wa.me/${STORE_CONFIG.whatsappNumber}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-[#D8CDC4] hover:text-white transition"
+                  className={styles.footerLink}
                 >
                   <span>WhatsApp para Encomendas</span>
                 </a>
@@ -59,7 +60,7 @@ export function Footer() {
         </div>
 
         {/* Rodapé inferior */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#8C7A6B]">
+        <div className={styles.bottomRow}>
           <p>© 2026 Wê Lembrancinhas. Todos os direitos reservados.</p>
         </div>
       </div>
