@@ -70,6 +70,24 @@ export function ProductCard({ product }: ProductCardProps) {
           <p className="text-xs text-[#7C6E64] line-clamp-2 leading-relaxed mb-3">
             {product.description}
           </p>
+
+          {/* Miniaturas de variação estilo Mercado Livre */}
+          {product.variations && product.variations.length > 0 && (
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-[10px] text-[#8C7A6B] font-semibold">Modelos:</span>
+              <div className="flex items-center gap-1.5">
+                {product.variations.map((v) => (
+                  <div
+                    key={v.id}
+                    className="w-7 h-9 rounded-md overflow-hidden border border-[#DACFBF] hover:border-[#6D4C3D] shadow-2xs transition"
+                    title={v.name}
+                  >
+                    <img src={v.image} alt={v.name} className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Preço e Botão */}

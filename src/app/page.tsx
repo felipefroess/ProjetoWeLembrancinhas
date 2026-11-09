@@ -15,7 +15,7 @@ import { CategoryId } from '@/types';
 import { PackageSearch } from 'lucide-react';
 
 export default function HomePage() {
-  const [selectedCategory, setSelectedCategory] = useState<CategoryId>('natal');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryId>('todos');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filtro performático combinando categoria e busca
@@ -56,10 +56,16 @@ export default function HomePage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-8">
           <div>
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#2D231E]">
-              {searchQuery ? `Resultados para "${searchQuery}"` : 'Catálogo Especial de Natal'}
+              {searchQuery
+                ? `Resultados para "${searchQuery}"`
+                : selectedCategory === 'natal'
+                ? 'Catálogo Especial de Natal'
+                : selectedCategory === 'dia-dos-professores'
+                ? 'Catálogo Dia dos Professores'
+                : 'Catálogo de Lembrancinhas'}
             </h2>
             <p className="text-xs sm:text-sm text-[#7C6E64] mt-1">
-              Clique em qualquer item para personalizar nomes, cores e detalhes
+              Clique em qualquer item para personalizar modelos, nomes e detalhes
             </p>
           </div>
           <span className="text-xs font-semibold text-[#8C7A6B] bg-[#EFE6DC] px-3 py-1 rounded-full self-start sm:self-auto border border-[#DACFBF]">
@@ -69,7 +75,13 @@ export default function HomePage() {
 
         {/* Grade de Produtos */}
         {filteredProducts.length > 0 ? (
-          <div className={filteredProducts.length === 1 ? 'max-w-sm' : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'}>
+          <div className={
+            filteredProducts.length === 1
+              ? 'max-w-sm'
+              : filteredProducts.length === 2
+                ? 'grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl'
+                : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'
+          }>
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -89,7 +101,7 @@ export default function HomePage() {
             <button
               onClick={() => {
                 setSearchQuery('');
-                setSelectedCategory('natal');
+                setSelectedCategory('todos');
               }}
               className="px-4 py-2 rounded-full bg-[#6D4C3D] text-white text-xs font-bold hover:bg-[#5A3E31] transition"
             >

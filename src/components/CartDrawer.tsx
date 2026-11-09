@@ -94,6 +94,11 @@ export function CartDrawer() {
 
                 {/* Detalhes de Personalização */}
                 <div className="text-[11px] bg-white p-2.5 rounded-xl border border-[#DACFBF]/80 space-y-1 text-[#52443C]">
+                  {item.customization.variation && (
+                    <p>
+                      <strong>Modelo:</strong> {item.customization.variation}
+                    </p>
+                  )}
                   {item.customization.theme && (
                     <p>
                       <strong>Tema:</strong> {item.customization.theme}

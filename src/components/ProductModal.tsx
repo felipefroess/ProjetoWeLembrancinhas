@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
+import { ProductVariation } from '@/types';
 import { X, Check, Clock, AlertCircle } from 'lucide-react';
 
 export function ProductModal() {
@@ -19,6 +20,7 @@ export function ProductModal() {
   const [ribbonColor, setRibbonColor] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedImage, setSelectedImage] = useState<string>('');
+  const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null);
 
   // Reseta os campos ao abrir o modal para um novo produto
   useEffect(() => {
@@ -29,7 +31,9 @@ export function ProductModal() {
       setAgeOrDate('');
       setRibbonColor(product.availableRibbonColors?.[0] || '');
       setNotes('');
-      setSelectedImage(product.image);
+      const initialVariation = product.variations?.[0] || null;
+      setSelectedVariation(initialVariation);
+      setSelectedImage(initialVariation ? initialVariation.image : product.image);
     }
   }, [product]);
 
@@ -42,6 +46,7 @@ export function ProductModal() {
   const handleConfirm = (e: React.FormEvent) => {
     e.preventDefault();
     addToCart(product, quantity, {
+      variation: selectedVariation ? selectedVariation.name : undefined,
       theme: theme.trim() || undefined,
       childName: childName.trim() || undefined,
       ageOrDate: ageOrDate.trim() || undefined,
@@ -131,16 +136,77 @@ export function ProductModal() {
               </span>
             </div>
 
+            {/* Seletor de Variações com Imagem (Estilo Mercado Livre) */}
+            {product.variations && product.variations.length > 0 && (
+              <div className="p-3.5 bg-[#FAF7F2] rounded-2xl border border-[#DACFBF] space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[#4A3B32]">
+                    Escolha o Modelo:
+                  </label>
+                  {selectedVariation && (
+                    <span className="text-xs font-extrabold text-[#6D4C3D] bg-white px-2.5 py-1 rounded-full border border-[#DACFBF] shadow-2xs">
+                      {selectedVariation.name}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {product.variations.map((v) => {
+                    const isSelected = selectedVariation?.id === v.id;
+
+                    return (
+                      <button
+                        key={v.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedVariation(v);
+                          setSelectedImage(v.image);
+                        }}
+                        className={`group/var relative flex flex-col items-center p-1.5 rounded-2xl border-2 transition-all cursor-pointer bg-white ${
+                          isSelected
+                            ? 'border-[#6D4C3D] ring-2 ring-[#6D4C3D]/30 shadow-md scale-102'
+                            : 'border-[#DACFBF] hover:border-[#C89B6D] opacity-75 hover:opacity-100'
+                        }`}
+                        title={v.name}
+                      >
+                        <div className="w-20 h-24 sm:w-24 sm:h-28 rounded-xl overflow-hidden bg-[#FAF7F2]">
+                          <img
+                            src={v.image}
+                            alt={v.name}
+                            className="w-full h-full object-cover group-hover/var:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                        <span className="text-[11px] font-bold text-[#3E2E25] mt-1.5 px-1 pb-0.5 text-center max-w-[96px] truncate">
+                          {v.name}
+                        </span>
+                        {isSelected && (
+                          <span className="absolute top-2 right-2 bg-[#6D4C3D] text-white rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                            <Check size={12} className="stroke-[3]" />
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {selectedVariation?.description && (
+                  <p className="text-[11px] text-[#7C6E64] italic bg-white p-2 rounded-xl border border-[#DACFBF]/60">
+                    {selectedVariation.description}
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Linha 1: Tema e Nome */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-[#4A3B32] mb-1.5">
-                  Tema / Arte da Lata <span className="text-[#C89B6D]">*</span>
+                  Tema / Detalhes da Arte <span className="text-[#C89B6D]">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Papai Noel Vintage, Frase Noite Feliz..."
+                  placeholder="Ex: Corujinha, Frase Especial, Papai Noel..."
                   value={theme}
                   onChange={(e) => setTheme(e.target.value)}
                   className="w-full bg-[#FAF7F2] border border-[#DACFBF] rounded-xl px-3.5 py-2.5 text-sm text-[#2D231E] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C89B6D]"
@@ -154,7 +220,7 @@ export function ProductModal() {
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Luís, Família Silva, Professora Ana..."
+                  placeholder="Ex: Professora Leandra, Tia Amanda, Luís..."
                   value={childName}
                   onChange={(e) => setChildName(e.target.value)}
                   className="w-full bg-[#FAF7F2] border border-[#DACFBF] rounded-xl px-3.5 py-2.5 text-sm text-[#2D231E] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C89B6D]"

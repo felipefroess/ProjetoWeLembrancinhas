@@ -82,7 +82,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addToCart = (product: Product, quantity: number, customization: CustomizationOptions) => {
     // Cria um identificador único considerando as opções de personalização
-    const customKey = `${product.id}_${customization.theme || ''}_${customization.childName || ''}_${customization.ribbonColor || ''}`;
+    const customKey = `${product.id}_${customization.variation || ''}_${customization.theme || ''}_${customization.childName || ''}_${customization.ribbonColor || ''}`;
     const subtotal = product.price * quantity;
 
     setItems((prev) => {
@@ -164,6 +164,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       message += `   • Quantidade: ${item.quantity} ${item.product.unit}\n`;
       message += `   • Valor unitário: R$ ${item.product.price.toFixed(2).replace('.', ',')}\n`;
       
+      if (item.customization.variation) {
+        message += `   • Modelo / Variação: *${item.customization.variation}*\n`;
+      }
       if (item.customization.theme) {
         message += `   • Tema: *${item.customization.theme}*\n`;
       }

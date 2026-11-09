@@ -17,10 +17,10 @@ export function CategoryFilter({ selectedCategory, onSelectCategory }: CategoryF
         {/* Título de seção */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xs uppercase tracking-widest font-bold text-[#8C7A6B]">
-            Categoria em Destaque
+            Categorias em Destaque
           </h2>
           <span className="text-xs text-[#9E9084]">
-            Coleção Especial
+            {CATEGORIES.length} coleções
           </span>
         </div>
 

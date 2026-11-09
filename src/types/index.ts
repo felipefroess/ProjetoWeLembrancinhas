@@ -7,7 +7,8 @@
 
 export type CategoryId = 
   | 'todos'
-  | 'natal';
+  | 'natal'
+  | 'dia-dos-professores';
 
 export interface Category {
   id: CategoryId;
@@ -16,11 +17,19 @@ export interface Category {
   description: string;
 }
 
+export interface ProductVariation {
+  id: string;
+  name: string;
+  image: string;
+  description?: string;
+}
+
 export interface CustomizationOptions {
   theme?: string;          // Ex: "Bosque Encantado", "Safari", "Jardim das Borboletas"
-  childName?: string;      // Ex: "Maria Clara"
+  childName?: string;      // Ex: "Maria Clara", "Professora Leandra"
   ageOrDate?: string;      // Ex: "1 aninho" ou "15/10/2026"
   ribbonColor?: string;    // Ex: "Dourado", "Rosa Chá", "Verde Oliva"
+  variation?: string;      // Ex: "Chocolate Talento" ou "Sonho de Valsa"
   notes?: string;          // Observações adicionais do cliente
 }
 
@@ -33,6 +42,7 @@ export interface Product {
   minQuantity: number;
   image: string;
   images?: string[];
+  variations?: ProductVariation[];
   leadTimeDays: number; // Prazo de produção em dias úteis
   popular?: boolean;
   featured?: boolean;

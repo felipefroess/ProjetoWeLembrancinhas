@@ -34,5 +34,41 @@ export const PRODUCTS: Product[] = [
       'Laço Vermelho com Pompom Branco',
       'Dourado com Pompom Branco'
     ]
+  },
+  {
+    id: 'lembrancinha-porta-chocolate-professores',
+    name: 'Lembrancinha Porta-Chocolate Dia dos Professores',
+    category: 'dia-dos-professores',
+    description: 'Lembrancinha afetiva personalizada para o Dia dos Professores. Cartão especial em papel de alta gramatura com corujinha e mensagens afetuosas, embalado individualmente em saquinho com laço de cetim e tag temática. Escolha entre o modelo com mini chocolate Talento ou bombom Sonho de Valsa.',
+    price: 9.90,
+    minQuantity: 1,
+    unit: 'unidade',
+    leadTimeDays: 4,
+    popular: true,
+    featured: true,
+    image: '/images/professores/lembrancinha-talento.jpg',
+    images: [
+      '/images/professores/lembrancinha-talento.jpg',
+      '/images/professores/lembrancinha-sonho-de-valsa.jpg'
+    ],
+    variations: [
+      {
+        id: 'talento',
+        name: 'Chocolate Talento',
+        image: '/images/professores/lembrancinha-talento.jpg',
+        description: 'Com mini Talento Avelãs ("Para você que tem muito Talento")'
+      },
+      {
+        id: 'sonho-de-valsa',
+        name: 'Sonho de Valsa',
+        image: '/images/professores/lembrancinha-sonho-de-valsa.jpg',
+        description: 'Com bombom Sonho de Valsa ("Onde histórias começam e Sonhos se tornam possíveis")'
+      }
+    ],
+    availableRibbonColors: [
+      'Laço Rosa com Tag',
+      'Laço Verde com Tag',
+      'Laço Dourado com Tag'
+    ]
   }
 ];
