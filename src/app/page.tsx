@@ -15,7 +15,7 @@ import { CategoryId } from '@/types';
 import { Sparkles, PackageSearch } from 'lucide-react';
 
 export default function HomePage() {
-  const [selectedCategory, setSelectedCategory] = useState<CategoryId>('todos');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryId>('natal');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filtro performático combinando categoria e busca
@@ -42,7 +42,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <HeroBanner />
 
-      {/* Filtro de Categorias (estilo Stories do Instagram) */}
+      {/* Filtro de Categorias */}
       <div id="catalogo">
         <CategoryFilter
           selectedCategory={selectedCategory}
@@ -57,10 +57,10 @@ export default function HomePage() {
           <div>
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#2D231E] flex items-center gap-2">
               <Sparkles size={20} className="text-[#D4AF37]" />
-              {searchQuery ? `Resultados para "${searchQuery}"` : 'Catálogo de Lembrancinhas'}
+              {searchQuery ? `Resultados para "${searchQuery}"` : 'Catálogo Especial de Natal'}
             </h2>
             <p className="text-xs sm:text-sm text-[#7C6E64] mt-1">
-              Clique em qualquer item para escolher o tema, nome e cores da sua festa
+              Clique em qualquer item para personalizar nomes, cores e detalhes
             </p>
           </div>
           <span className="text-xs font-semibold text-[#8C7A6B] bg-[#EFE6DC] px-3 py-1 rounded-full self-start sm:self-auto border border-[#DACFBF]">
@@ -70,7 +70,7 @@ export default function HomePage() {
 
         {/* Grade de Produtos */}
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className={filteredProducts.length === 1 ? 'max-w-sm' : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'}>
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -85,12 +85,12 @@ export default function HomePage() {
               Nenhuma lembrancinha encontrada
             </h3>
             <p className="text-xs text-[#7C6E64] mb-4">
-              Não encontramos nenhum produto com o termo &quot;{searchQuery}&quot;. Tente buscar por topo de bolo, caixa milk ou batizado.
+              Não encontramos nenhum produto com o termo &quot;{searchQuery}&quot;. Tente buscar por caixa milk, esfera ou topo de bolo.
             </p>
             <button
               onClick={() => {
                 setSearchQuery('');
-                setSelectedCategory('todos');
+                setSelectedCategory('natal');
               }}
               className="px-4 py-2 rounded-full bg-[#6D4C3D] text-white text-xs font-bold hover:bg-[#5A3E31] transition"
             >

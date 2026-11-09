@@ -148,15 +148,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Formata o pedido em Markdown limpo para WhatsApp
   const generateWhatsAppOrderUrl = (orderData: CustomerOrderData): string => {
     const deliveryLabels: Record<string, string> = {
-      'retirada-pouso-alegre': '📍 Retirada em Pouso Alegre - MG',
-      'retirada-paraisopolis': '📍 Retirada em Paraisópolis - MG',
-      'entrega-correios': '🚚 Envio por Correios / Transportadora',
+      'retirada-pouso-alegre': 'Retirada em Pouso Alegre - MG',
+      'retirada-paraisopolis': 'Retirada em Paraisópolis - MG',
+      'entrega-correios': 'Envio por Correios / Transportadora',
     };
 
-    let message = `Olá, Wenilze! Tudo bem? 💕\n`;
+    let message = `Olá, Wenilze! Tudo bem?\n`;
     message += `Gostaria de fazer um pedido pela sua loja online (*Wê Lembrancinhas*):\n\n`;
     message += `━━━━━━━━━━━━━━━━━━━━━\n`;
-    message += `🛍️ *ITENS DO PEDIDO:*\n`;
+    message += `*ITENS DO PEDIDO:*\n`;
     message += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
     items.forEach((item, index) => {
@@ -183,10 +183,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
 
     message += `━━━━━━━━━━━━━━━━━━━━━\n`;
-    message += `💰 *TOTAL ESTIMADO:* R$ ${subtotalAmount.toFixed(2).replace('.', ',')}\n`;
+    message += `*TOTAL ESTIMADO:* R$ ${subtotalAmount.toFixed(2).replace('.', ',')}\n`;
     message += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
-    message += `📋 *DADOS PARA COMBINAR A ENTREGA:*\n`;
+    message += `*DADOS PARA COMBINAR A ENTREGA:*\n`;
     message += `• *Cliente:* ${orderData.customerName}\n`;
     if (orderData.customerPhone) {
       message += `• *Contato:* ${orderData.customerPhone}\n`;
@@ -202,7 +202,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       message += `• *Observações adicionais:* ${orderData.generalNotes}\n`;
     }
 
-    message += `\nFico no aguardo para confirmar a data de produção e os detalhes da arte! ✨ Obrigada!`;
+    message += `\nFico no aguardo para confirmar a data de produção e os detalhes da arte! Obrigada!`;
 
     const encoded = encodeURIComponent(message);
     return `https://wa.me/${STORE_CONFIG.whatsappNumber}?text=${encoded}`;

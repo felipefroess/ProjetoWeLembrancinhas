@@ -52,7 +52,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-[#D8CDC4] hover:text-white transition"
                 >
-                  <span>💬 WhatsApp para Encomendas</span>
+                  <span>WhatsApp para Encomendas</span>
                 </a>
               </li>
             </ul>

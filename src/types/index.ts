@@ -7,17 +7,12 @@
 
 export type CategoryId = 
   | 'todos'
-  | 'topo-de-bolo'
-  | 'aniversario'
-  | 'batizado-maternidade'
-  | 'agendas'
-  | 'datas-especiais'
-  | 'kits-luxo';
+  | 'natal';
 
 export interface Category {
   id: CategoryId;
   name: string;
-  icon: string;
+  icon?: string;
   description: string;
 }
 
@@ -37,6 +32,7 @@ export interface Product {
   price: number;
   minQuantity: number;
   image: string;
+  images?: string[];
   leadTimeDays: number; // Prazo de produção em dias úteis
   popular?: boolean;
   featured?: boolean;

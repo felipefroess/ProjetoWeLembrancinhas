@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ShoppingBag, Sparkles, MapPin, Search } from 'lucide-react';
+import { ShoppingBag, Sparkles, MapPin, Search, X } from 'lucide-react';
 import { InstagramIcon } from '@/components/InstagramIcon';
 import { useCart } from '@/context/CartContext';
 import { STORE_CONFIG } from '@/data/products';
@@ -31,7 +31,6 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
               <span className="font-serif italic font-bold text-[#6D4C3D] text-lg select-none">
                 Wê
               </span>
-              <span className="absolute -bottom-1 -right-1 text-xs">🌿</span>
             </div>
             <div>
               <a href="#" className="flex flex-col">
@@ -61,7 +60,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
                   onClick={() => setSearchQuery('')}
                   className="absolute right-3 top-2.5 text-xs text-[#9E9084] hover:text-[#3E2E25]"
                 >
-                  ✕
+                  <X size={14} />
                 </button>
               )}
             </div>
@@ -115,7 +114,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
                 onClick={() => setSearchQuery('')}
                 className="absolute right-3 top-2.5 text-xs text-[#9E9084] hover:text-[#3E2E25]"
               >
-                ✕
+                <X size={14} />
               </button>
             )}
           </div>

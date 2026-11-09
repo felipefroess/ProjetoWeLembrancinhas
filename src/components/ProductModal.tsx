@@ -18,6 +18,7 @@ export function ProductModal() {
   const [ageOrDate, setAgeOrDate] = useState('');
   const [ribbonColor, setRibbonColor] = useState('');
   const [notes, setNotes] = useState('');
+  const [selectedImage, setSelectedImage] = useState<string>('');
 
   // Reseta os campos ao abrir o modal para um novo produto
   useEffect(() => {
@@ -28,6 +29,7 @@ export function ProductModal() {
       setAgeOrDate('');
       setRibbonColor(product.availableRibbonColors?.[0] || '');
       setNotes('');
+      setSelectedImage(product.image);
     }
   }, [product]);
 
@@ -75,22 +77,43 @@ export function ProductModal() {
         <div className="overflow-y-auto p-4 sm:p-6 space-y-6">
           
           {/* Resumo do Produto Selecionado */}
-          <div className="flex gap-4 p-3.5 bg-[#FAF7F2] rounded-2xl border border-[#E8DFD5]">
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border border-[#DACFBF] shrink-0"
-            />
+          <div className="flex flex-col sm:flex-row gap-4 p-3.5 bg-[#FAF7F2] rounded-2xl border border-[#E8DFD5]">
+            <div className="flex flex-col gap-2 shrink-0">
+              <img
+                src={selectedImage || product.image}
+                alt={product.name}
+                className="w-full sm:w-28 sm:h-28 h-48 object-cover rounded-xl border border-[#DACFBF]"
+              />
+              {product.images && product.images.length > 1 && (
+                <div className="flex gap-2">
+                  {product.images.map((img, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedImage(img)}
+                      className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition ${
+                        (selectedImage || product.image) === img
+                          ? 'border-[#6D4C3D] scale-105'
+                          : 'border-[#DACFBF] opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      <img src={img} alt="Foto adicional" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="flex flex-col justify-between">
               <div>
                 <h4 className="font-serif font-bold text-base text-[#2D231E]">
                   {product.name}
                 </h4>
-                <p className="text-xs text-[#7C6E64] line-clamp-2 mt-0.5">
+                <p className="text-xs text-[#7C6E64] mt-1 leading-relaxed">
                   {product.description}
                 </p>
               </div>
-              <div className="flex items-center gap-3 mt-2 text-xs">
+              <div className="flex items-center gap-3 mt-3 text-xs">
                 <span className="font-bold text-[#6D4C3D] text-sm">
                   {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / {product.unit}
                 </span>
@@ -107,7 +130,7 @@ export function ProductModal() {
             <div className="p-3 bg-[#FFF9F2] border border-[#F0D5BE] rounded-xl flex items-start gap-2.5 text-xs text-[#7A4B29]">
               <AlertCircle size={16} className="shrink-0 text-[#C89B6D] mt-0.5" />
               <span>
-                A Wenilze prepara cada detalhe exclusivamente para o seu evento. Preencha os campos abaixo para elaboração da arte.
+                A Wenilze prepara cada detalhe exclusivamente para a sua comemoração. Preencha os campos abaixo para elaboração da arte.
               </span>
             </div>
 
@@ -115,12 +138,12 @@ export function ProductModal() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-[#4A3B32] mb-1.5">
-                  Tema da Festa / Evento <span className="text-[#C89B6D]">*</span>
+                  Tema / Arte da Lata <span className="text-[#C89B6D]">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Bosque Encantado, Safari, Ursinho..."
+                  placeholder="Ex: Papai Noel Vintage, Frase Noite Feliz..."
                   value={theme}
                   onChange={(e) => setTheme(e.target.value)}
                   className="w-full bg-[#FAF7F2] border border-[#DACFBF] rounded-xl px-3.5 py-2.5 text-sm text-[#2D231E] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C89B6D]"
@@ -134,7 +157,7 @@ export function ProductModal() {
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Lorena, Theo, Helena & Arthur..."
+                  placeholder="Ex: Luís, Família Silva, Professora Ana..."
                   value={childName}
                   onChange={(e) => setChildName(e.target.value)}
                   className="w-full bg-[#FAF7F2] border border-[#DACFBF] rounded-xl px-3.5 py-2.5 text-sm text-[#2D231E] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C89B6D]"
@@ -146,11 +169,11 @@ export function ProductModal() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-[#4A3B32] mb-1.5">
-                  Idade ou Data Comemorativa
+                  Ano ou Mensagem Curta
                 </label>
                 <input
                   type="text"
-                  placeholder="Ex: 1 aninho, 15 anos, 12/10/2026..."
+                  placeholder="Ex: Natal 2026, Boas Festas..."
                   value={ageOrDate}
                   onChange={(e) => setAgeOrDate(e.target.value)}
                   className="w-full bg-[#FAF7F2] border border-[#DACFBF] rounded-xl px-3.5 py-2.5 text-sm text-[#2D231E] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C89B6D]"

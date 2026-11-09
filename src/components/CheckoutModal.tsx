@@ -269,7 +269,7 @@ export function CheckoutModal() {
                 <span>Enviar Pedido pelo WhatsApp</span>
               </button>
               <p className="text-center text-[11px] text-[#8C7A6B] mt-2">
-                🔒 Nenhum dado de pagamento é cobrado agora. Você e a Wenilze combinam a arte e a forma de pagamento no chat.
+                Nenhum dado de pagamento é cobrado agora. Você e a Wenilze combinam a arte e a forma de pagamento no chat.
               </p>
             </div>
           </form>

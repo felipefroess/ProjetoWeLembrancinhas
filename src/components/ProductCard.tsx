@@ -24,9 +24,21 @@ export function ProductCard({ product }: ProductCardProps) {
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className={`w-full h-full object-cover transition-all duration-500 ${
+            product.images && product.images.length > 1
+              ? 'group-hover:opacity-0'
+              : 'group-hover:scale-105'
+          }`}
           loading="lazy"
         />
+        {product.images && product.images.length > 1 && (
+          <img
+            src={product.images[1]}
+            alt={`${product.name} verso`}
+            className="w-full h-full object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            loading="lazy"
+          />
+        )}
 
         {/* Badges superiores */}
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">

@@ -17,18 +17,12 @@ export function HeroBanner() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-3xl mx-auto">
-          {/* Badge de boas-vindas */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#EFE6DC] border border-[#DACFBF] text-[#6D4C3D] text-xs sm:text-sm font-medium mb-5 shadow-xs">
-            <Heart size={14} className="text-[#D97762] fill-[#D97762]" />
-            <span>Papelaria Afetiva & Lembrancinhas com Amor</span>
-          </div>
-
           <h1 className="font-serif text-3xl sm:text-5xl font-bold text-[#2D231E] leading-tight sm:leading-tight mb-4">
             Transformando momentos únicos em memórias inesquecíveis.
           </h1>
 
           <p className="text-sm sm:text-base text-[#6B5E55] leading-relaxed mb-8 max-w-2xl mx-auto">
-            Topos de bolo 3D, caixas cenário de luxo, kits festa e papelaria personalizada com o nome e tema do seu evento. Feito à mão com afeto por <strong>{STORE_CONFIG.artisanName}</strong>.
+            Lembrancinhas, Topos de bolo 3D, e papelaria personalizada com o nome e tema do seu evento. 
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-10">
@@ -36,7 +30,7 @@ export function HeroBanner() {
               onClick={scrollToCatalog}
               className="px-6 py-3 rounded-full bg-[#6D4C3D] hover:bg-[#5A3E31] text-white text-sm font-semibold tracking-wide shadow-md hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0"
             >
-              🌸 Ver Catálogo & Montar Pedido
+              Ver Catálogo & Montar Pedido
             </button>
             <a
               href={`https://wa.me/${STORE_CONFIG.whatsappNumber}?text=${encodeURIComponent('Olá, Wenilze! Gostaria de tirar uma dúvida sobre lembrancinhas personalizadas.')}`}
@@ -44,7 +38,7 @@ export function HeroBanner() {
               rel="noopener noreferrer"
               className="px-6 py-3 rounded-full bg-white hover:bg-[#F5EDE4] text-[#6D4C3D] border border-[#DACFBF] text-sm font-semibold tracking-wide transition shadow-xs"
             >
-              💬 Falar no WhatsApp
+              Falar no WhatsApp
             </a>
           </div>
 
