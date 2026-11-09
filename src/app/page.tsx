@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { HeroBanner } from '@/components/HeroBanner';
 import { CategoryFilter } from '@/components/CategoryFilter';
@@ -11,17 +11,41 @@ import { CheckoutModal } from '@/components/CheckoutModal';
 import { WhatsappButton } from '@/components/WhatsappButton';
 import { Footer } from '@/components/Footer';
 import { PRODUCTS } from '@/data/products';
-import { CategoryId } from '@/types';
+import { CATEGORIES } from '@/data/categories';
+import { Category, CategoryId, Product } from '@/types';
 import { PackageSearch } from 'lucide-react';
 import styles from './Home.module.css';
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>('todos');
   const [searchQuery, setSearchQuery] = useState('');
+  const [productsList, setProductsList] = useState<Product[]>(PRODUCTS);
+  const [categoriesList, setCategoriesList] = useState<Category[]>(CATEGORIES);
+
+  useEffect(() => {
+    async function fetchDynamicData() {
+      try {
+        const res = await fetch('/api/products');
+        const data = await res.json();
+        if (data.success) {
+          if (data.products && data.products.length > 0) {
+            setProductsList(data.products);
+          }
+          if (data.categories && data.categories.length > 0) {
+            setCategoriesList(data.categories);
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao buscar dados dinâmicos:', err);
+      }
+    }
+
+    fetchDynamicData();
+  }, []);
 
   // Filtro performático combinando categoria e busca
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter((product) => {
+    return productsList.filter((product) => {
       const matchesCategory =
         selectedCategory === 'todos' || product.category === selectedCategory;
 
@@ -33,7 +57,7 @@ export default function HomePage() {
 
       return matchesCategory && matchesSearch;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [productsList, selectedCategory, searchQuery]);
 
   // Escolhe a classe de grid de acordo com o número de itens
   const gridClass =
@@ -56,6 +80,7 @@ export default function HomePage() {
         <CategoryFilter
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
+          categories={categoriesList}
         />
       </div>
 

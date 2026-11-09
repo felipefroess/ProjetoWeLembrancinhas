@@ -29,6 +29,7 @@ export function ProductModal() {
   const [notes, setNotes] = useState('');
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null);
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
 
   // Estados e referências para controle de Zoom interativo
   const [scale, setScale] = useState(1);
@@ -43,8 +44,10 @@ export function ProductModal() {
     if (product) {
       setQuantity(product.minQuantity || 1);
       setChildName('');
-      setRibbonColor(product.availableRibbonColors?.[0] || '');
+      const defaultRibbon = product.customizationSettings?.ribbonColors?.[0] || product.availableRibbonColors?.[0] || '';
+      setRibbonColor(defaultRibbon);
       setNotes('');
+      setCustomFieldValues({});
       const initialVariation = product.variations?.[0] || null;
       setSelectedVariation(initialVariation);
       const initialImg = initialVariation?.images?.[0] || initialVariation?.image || product.image;
@@ -220,6 +223,7 @@ export function ProductModal() {
       childName: childName.trim() || undefined,
       ribbonColor: ribbonColor || undefined,
       notes: notes.trim() || undefined,
+      customFieldValues: Object.keys(customFieldValues).length > 0 ? customFieldValues : undefined,
     });
   };
 
@@ -456,56 +460,98 @@ export function ProductModal() {
                   </div>
                 )}
 
-                {/* Campos de Personalização */}
+                {/* Campos de Personalização com base nas configurações do produto */}
                 <div className={styles.fieldsContainer}>
-                  {/* Nome na Lembrancinha */}
-                  <div>
-                    <label className={styles.formLabel}>
-                      Nome na Lembrancinha <span className={styles.reqStar}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Ex: Professora Leandra, Luís..."
-                      value={childName}
-                      onChange={(e) => setChildName(e.target.value)}
-                      className={styles.formInput}
-                    />
-                  </div>
-
-                  {/* Cor do Laço (se aplicável ao produto) */}
-                  {product.availableRibbonColors && product.availableRibbonColors.length > 0 && (
+                  {/* Nome na Lembrancinha (exibido se allowChildName !== false) */}
+                  {(product.customizationSettings?.allowChildName !== false) && (
                     <div>
                       <label className={styles.formLabel}>
-                        Cor dos Laços / Fitas
+                        {product.customizationSettings?.childNameLabel || 'Nome na Lembrancinha'}{' '}
+                        <span className={styles.reqStar}>*</span>
                       </label>
-                      <select
-                        value={ribbonColor}
-                        onChange={(e) => setRibbonColor(e.target.value)}
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ex: Professora Leandra, Luís..."
+                        value={childName}
+                        onChange={(e) => setChildName(e.target.value)}
                         className={styles.formInput}
-                      >
-                        {product.availableRibbonColors.map((color) => (
-                          <option key={color} value={color}>
-                            {color}
-                          </option>
-                        ))}
-                      </select>
+                      />
                     </div>
                   )}
 
+                  {/* Cor do Laço/Fita (se ativado nas configurações do produto) */}
+                  {(() => {
+                    const ribbonList = product.customizationSettings?.ribbonColors && product.customizationSettings.ribbonColors.length > 0
+                      ? product.customizationSettings.ribbonColors
+                      : product.availableRibbonColors;
+                    const shouldShow = product.customizationSettings?.allowRibbonColors ?? Boolean(ribbonList && ribbonList.length > 0);
+
+                    if (!shouldShow || !ribbonList || ribbonList.length === 0) return null;
+
+                    return (
+                      <div>
+                        <label className={styles.formLabel}>
+                          Cor dos Laços / Fitas
+                        </label>
+                        <select
+                          value={ribbonColor}
+                          onChange={(e) => setRibbonColor(e.target.value)}
+                          className={styles.formInput}
+                        >
+                          {ribbonList.map((color) => (
+                            <option key={color} value={color}>
+                              {color}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Campos Extras Dinâmicos cadastrados no painel administrativo */}
+                  {product.customizationSettings?.customFields && product.customizationSettings.customFields.map((field) => (
+                    <div key={field.id}>
+                      <label className={styles.formLabel}>
+                        {field.label} {field.required && <span className={styles.reqStar}>*</span>}
+                      </label>
+                      {field.type === 'textarea' ? (
+                        <textarea
+                          rows={2}
+                          required={field.required}
+                          placeholder={field.placeholder || `Preencha ${field.label.toLowerCase()}`}
+                          value={customFieldValues[field.id] || ''}
+                          onChange={(e) => setCustomFieldValues((prev) => ({ ...prev, [field.id]: e.target.value }))}
+                          className={styles.formTextarea}
+                        />
+                      ) : (
+                        <input
+                          type="text"
+                          required={field.required}
+                          placeholder={field.placeholder || `Preencha ${field.label.toLowerCase()}`}
+                          value={customFieldValues[field.id] || ''}
+                          onChange={(e) => setCustomFieldValues((prev) => ({ ...prev, [field.id]: e.target.value }))}
+                          className={styles.formInput}
+                        />
+                      )}
+                    </div>
+                  ))}
+
                   {/* Observações livres */}
-                  <div>
-                    <label className={styles.formLabel}>
-                      Observações Especiais (opcional)
-                    </label>
-                    <textarea
-                      rows={2}
-                      placeholder="Ex: Tons pastéis, glitter prateado, frase específica..."
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      className={styles.formTextarea}
-                    />
-                  </div>
+                  {(product.customizationSettings?.allowNotes !== false) && (
+                    <div>
+                      <label className={styles.formLabel}>
+                        Observações Especiais (opcional)
+                      </label>
+                      <textarea
+                        rows={2}
+                        placeholder="Ex: Tons pastéis, glitter prateado, frase específica..."
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        className={styles.formTextarea}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Controle de Quantidade */}

@@ -1,15 +1,13 @@
 /**
  * Modelagem de Domínio da Wê Lembrancinhas
- * 
- * Em Engenharia de Software, modelar o domínio antes de codificar telas
- * evita retrabalho e garante consistência entre regras de negócio e interface.
  */
 
 export type CategoryId = 
   | 'todos'
   | 'natal'
   | 'dia-dos-professores'
-  | 'cadernos';
+  | 'cadernos'
+  | (string & {}); // Permite novas categorias dinâmicas criadas no painel admin
 
 export interface Category {
   id: CategoryId;
@@ -26,13 +24,32 @@ export interface ProductVariation {
   description?: string;
 }
 
+export interface CustomFieldDefinition {
+  id: string;
+  label: string;
+  type: 'text' | 'textarea' | 'select';
+  required?: boolean;
+  placeholder?: string;
+  options?: string[]; // Opções quando o tipo for 'select'
+}
+
+export interface CustomizationSettings {
+  allowChildName?: boolean;      // Solicita nome na lembrancinha (padrão: true)
+  childNameLabel?: string;       // Rótulo customizável (ex: "Nome da Criança", "Nome do Casal")
+  allowRibbonColors?: boolean;   // Oferece opções de laços/fitas
+  ribbonColors?: string[];       // Cores disponíveis
+  allowNotes?: boolean;          // Campo de observações especiais (padrão: true)
+  customFields?: CustomFieldDefinition[]; // Campos extras flexíveis
+}
+
 export interface CustomizationOptions {
-  theme?: string;          // Ex: "Bosque Encantado", "Safari", "Jardim das Borboletas"
-  childName?: string;      // Ex: "Maria Clara", "Professora Leandra"
-  ageOrDate?: string;      // Ex: "1 aninho" ou "15/10/2026"
-  ribbonColor?: string;    // Ex: "Dourado", "Rosa Chá", "Verde Oliva"
-  variation?: string;      // Ex: "Chocolate Talento" ou "Sonho de Valsa"
-  notes?: string;          // Observações adicionais do cliente
+  theme?: string;
+  childName?: string;
+  ageOrDate?: string;
+  ribbonColor?: string;
+  variation?: string;
+  notes?: string;
+  customFieldValues?: Record<string, string>; // Respostas dos campos extras
 }
 
 export interface Product {
@@ -50,10 +67,12 @@ export interface Product {
   featured?: boolean;
   unit: string; // "unidade", "kit", "cento"
   availableRibbonColors?: string[];
+  customizationSettings?: CustomizationSettings;
 }
 
 export interface CartItem {
   cartItemId: string; // Identificador único (id do produto + hash das customizações)
+  id?: string;
   product: Product;
   quantity: number;
   customization: CustomizationOptions;

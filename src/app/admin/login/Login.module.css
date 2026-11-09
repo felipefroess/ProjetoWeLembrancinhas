@@ -1,0 +1,146 @@
+.loginContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FAF7F2;
+  padding: 1rem;
+}
+
+.loginCard {
+  width: 100%;
+  max-width: 26rem;
+  background-color: #ffffff;
+  border: 1px solid #DACFBF;
+  border-radius: 1.5rem;
+  padding: 2.25rem 2rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.logoArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.logoBadge {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 9999px;
+  background-color: #6D4C3D;
+  color: #FAF7F2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(109, 76, 61, 0.25);
+}
+
+.title {
+  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: 1.625rem;
+  font-weight: 700;
+  color: #2D231E;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.8125rem;
+  color: #7C6E64;
+  margin: 0;
+}
+
+.errorBox {
+  padding: 0.75rem 1rem;
+  background-color: #FFF1F0;
+  border: 1px solid #FFCCC7;
+  border-radius: 0.75rem;
+  color: #CF1322;
+  font-size: 0.8125rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #4A3B32;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #DACFBF;
+  background-color: #FAF7F2;
+  color: #2D231E;
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  background-color: #ffffff;
+  border-color: #C89B6D;
+  box-shadow: 0 0 0 2px rgba(200, 155, 109, 0.25);
+}
+
+.submitBtn {
+  margin-top: 0.5rem;
+  padding: 0.875rem;
+  border-radius: 9999px;
+  background-color: #6D4C3D;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(109, 76, 61, 0.2);
+  transition: all 0.2s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background-color: #5A3E31;
+  transform: translateY(-1px);
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.backLink {
+  text-align: center;
+  font-size: 0.8125rem;
+  color: #7C6E64;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.backLink:hover {
+  color: #6D4C3D;
+  text-decoration: underline;
+}

@@ -19,7 +19,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
     <header className={styles.headerSticky}>
       {/* Barra de Notificação Superior */}
       <div className={styles.topBanner}>
-        <span>Produção artesanal e afetiva em <strong>Pouso Alegre & Paraisópolis - MG</strong> • Envio para todo o Brasil</span>
+        <span>Produção artesanal feito <strong>com carinho</strong> • Envio para todo o Brasil</span>
       </div>
 
       <div className={styles.headerContainer}>

@@ -137,3 +137,23 @@
 .bottomRow p {
   margin: 0;
 }
+
+/* Link discreto para painel administrativo */
+.discreetAdminLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.6875rem;
+  color: rgba(232, 223, 213, 0.4);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.discreetAdminLink:hover {
+  color: rgba(232, 223, 213, 0.85);
+}
+
+.adminIcon {
+  opacity: 0.6;
+}

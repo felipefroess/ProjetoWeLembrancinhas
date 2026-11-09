@@ -2,15 +2,20 @@
 
 import React from 'react';
 import { CATEGORIES } from '@/data/categories';
-import { CategoryId } from '@/types';
+import { Category, CategoryId } from '@/types';
 import styles from './CategoryFilter.module.css';
 
 interface CategoryFilterProps {
   selectedCategory: CategoryId;
   onSelectCategory: (categoryId: CategoryId) => void;
+  categories?: Category[];
 }
 
-export function CategoryFilter({ selectedCategory, onSelectCategory }: CategoryFilterProps) {
+export function CategoryFilter({ 
+  selectedCategory, 
+  onSelectCategory,
+  categories = CATEGORIES 
+}: CategoryFilterProps) {
   return (
     <div className={styles.filterSection}>
       <div className={styles.container}>
@@ -21,13 +26,13 @@ export function CategoryFilter({ selectedCategory, onSelectCategory }: CategoryF
             Categorias em Destaque
           </h2>
           <span className={styles.sectionCount}>
-            {CATEGORIES.length} coleções
+            {categories.length} coleções
           </span>
         </div>
 
         {/* Lista com scroll horizontal */}
         <div className={styles.categoriesList}>
-          {CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const isSelected = selectedCategory === cat.id;
 
             return (

@@ -65,7 +65,7 @@ export function HeroBanner() {
               <Truck size={18} className={styles.propIcon} />
               <div>
                 <p className={styles.propTitle}>Retirada ou Envio</p>
-                <p className={styles.propSubtitle}>Pouso Alegre, Paraisópolis e BR</p>
+                <p className={styles.propSubtitle}>Pouso Alegre e para todo o Brasil</p>
               </div>
             </div>
           </div>

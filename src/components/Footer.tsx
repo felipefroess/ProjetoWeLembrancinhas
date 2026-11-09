@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, Lock } from 'lucide-react';
 import { InstagramIcon } from '@/components/InstagramIcon';
 import { STORE_CONFIG } from '@/data/products';
 import styles from './Footer.module.css';
@@ -20,7 +20,7 @@ export function Footer() {
               </span>
             </div>
             <p className={styles.aboutDescription}>
-              Lembrancinhas personalizadas e papelaria afetiva criadas à mão com amor e precisão por <strong>{STORE_CONFIG.artisanName}</strong>. Cada detalhe é planejado para tornar a sua celebração inesquecível.
+              Lembrancinhas personalizadas criadas à mão com amor e precisão por <strong>{STORE_CONFIG.artisanName}</strong>. Cada detalhe é planejado para tornar a sua celebração inesquecível.
             </p>
             <div className={styles.locationNote}>
               <MapPin size={14} className={styles.pinIcon} />
@@ -53,6 +53,16 @@ export function Footer() {
                   className={styles.footerLink}
                 >
                   <span>WhatsApp para Encomendas</span>
+                </a>
+              </li>
+              <li style={{ marginTop: '0.625rem' }}>
+                <a
+                  href="/admin"
+                  className={styles.discreetAdminLink}
+                  title="Acesso Administrativo"
+                >
+                  <Lock size={11} className={styles.adminIcon} />
+                  <span>Acesso Administrativo</span>
                 </a>
               </li>
             </ul>
