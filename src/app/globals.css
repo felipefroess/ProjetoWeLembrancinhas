@@ -1,8 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
 :root {
   --background: #FAF7F2;
   --foreground: #2D231E;
   --font-serif: var(--font-serif), Georgia, serif;
-  --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-sans), 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-roboto: 'Roboto', sans-serif;
+  --font-jakarta: 'Plus Jakarta Sans', sans-serif;
   --color-brand-primary: #6D4C3D;
   --color-brand-accent: #C89B6D;
   --color-brand-gold: #D4AF37;
