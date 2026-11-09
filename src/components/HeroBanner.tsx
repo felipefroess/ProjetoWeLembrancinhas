@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Heart, Sparkles, Clock, Truck, ShieldCheck } from 'lucide-react';
+import { Heart, Clock, Truck, Gift } from 'lucide-react';
 import { STORE_CONFIG } from '@/data/products';
 
 export function HeroBanner() {
@@ -43,9 +43,9 @@ export function HeroBanner() {
           </div>
 
           {/* Destaques de confiança (Value Props) */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-6 border-t border-[#E8DFD5]/80 text-left">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t border-[#E8DFD5]/80 text-left">
             <div className="flex items-center gap-2.5 p-2 rounded-lg bg-white/60">
-              <Sparkles size={18} className="text-[#C89B6D] shrink-0" />
+              <Gift size={18} className="text-[#C89B6D] shrink-0" />
               <div>
                 <p className="text-xs font-bold text-[#2D231E]">100% Personalizado</p>
                 <p className="text-[11px] text-[#7C6E64]">Com o tema e nome</p>
@@ -65,14 +65,6 @@ export function HeroBanner() {
               <div>
                 <p className="text-xs font-bold text-[#2D231E]">Retirada ou Envio</p>
                 <p className="text-[11px] text-[#7C6E64]">Pouso Alegre, Paraisópolis e BR</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2.5 p-2 rounded-lg bg-white/60">
-              <ShieldCheck size={18} className="text-[#C89B6D] shrink-0" />
-              <div>
-                <p className="text-xs font-bold text-[#2D231E]">Acabamento Luxo</p>
-                <p className="text-[11px] text-[#7C6E64]">Papéis 230g e laços nobres</p>
               </div>
             </div>
           </div>

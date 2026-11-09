@@ -3,7 +3,7 @@
 import React from 'react';
 import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
-import { Sparkles, Clock, Heart } from 'lucide-react';
+import { Clock, Heart } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -43,8 +43,8 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Badges superiores */}
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
           {product.popular && (
-            <span className="inline-flex items-center gap-1 bg-[#D4AF37] text-[#2D231E] text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 rounded-full shadow-sm">
-              <Sparkles size={11} /> Mais Pedido
+            <span className="inline-flex items-center bg-[#D4AF37] text-[#2D231E] text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 rounded-full shadow-sm">
+              Mais Pedido
             </span>
           )}
           {product.minQuantity > 1 && (

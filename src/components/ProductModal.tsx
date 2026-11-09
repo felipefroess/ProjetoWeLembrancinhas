@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
-import { X, Sparkles, Check, Heart, Clock, AlertCircle } from 'lucide-react';
+import { X, Check, Clock, AlertCircle } from 'lucide-react';
 
 export function ProductModal() {
   const {
@@ -58,12 +58,9 @@ export function ProductModal() {
       >
         {/* Cabeçalho do Modal */}
         <div className="p-4 sm:p-5 border-b border-[#E8DFD5] bg-[#FAF7F2] flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="text-[#D4AF37]" size={20} />
-            <h3 className="font-serif font-bold text-lg sm:text-xl text-[#2D231E]">
-              Personalize seu Pedido
-            </h3>
-          </div>
+          <h3 className="font-serif font-bold text-lg sm:text-xl text-[#2D231E]">
+            Personalize seu Pedido
+          </h3>
           <button
             onClick={closeCustomizationModal}
             className="w-8 h-8 rounded-full bg-white border border-[#DACFBF] text-[#7C6E64] hover:text-[#2D231E] flex items-center justify-center transition hover:bg-[#F5EDE4]"

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useCart } from '@/context/CartContext';
-import { X, Trash2, ShoppingBag, ArrowRight, Sparkles } from 'lucide-react';
+import { X, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 
 export function CartDrawer() {
   const {
@@ -159,9 +159,8 @@ export function CartDrawer() {
               </span>
             </div>
 
-            <p className="text-[11px] text-[#7C6E64] flex items-center gap-1.5 bg-white p-2 rounded-lg border border-[#DACFBF]">
-              <Sparkles size={13} className="text-[#D4AF37] shrink-0" />
-              <span>O pedido será enviado diretamente para a Wenilze no WhatsApp com todos os detalhes prontos!</span>
+            <p className="text-[11px] text-[#7C6E64] bg-white p-2 rounded-lg border border-[#DACFBF]">
+              O pedido será enviado diretamente para a Wenilze no WhatsApp com todos os detalhes prontos!
             </p>
 
             <button

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useCart } from '@/context/CartContext';
-import { X, Send, MapPin, Calendar, User, Phone, CheckCircle2, Sparkles } from 'lucide-react';
+import { X, Send, MapPin, Calendar, User, Phone, CheckCircle2 } from 'lucide-react';
 import { DeliveryMethod } from '@/types';
 import confetti from 'canvas-confetti';
 
@@ -70,12 +70,9 @@ export function CheckoutModal() {
       >
         {/* Cabeçalho */}
         <div className="p-4 sm:p-5 border-b border-[#E8DFD5] bg-[#FAF7F2] flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="text-[#D4AF37]" size={20} />
-            <h3 className="font-serif font-bold text-lg sm:text-xl text-[#2D231E]">
-              Finalizar Pedido via WhatsApp
-            </h3>
-          </div>
+          <h3 className="font-serif font-bold text-lg sm:text-xl text-[#2D231E]">
+            Finalizar Pedido via WhatsApp
+          </h3>
           <button
             onClick={closeCheckout}
             className="w-8 h-8 rounded-full bg-white border border-[#DACFBF] text-[#7C6E64] hover:text-[#2D231E] flex items-center justify-center transition"

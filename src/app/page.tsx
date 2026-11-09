@@ -12,7 +12,7 @@ import { WhatsappButton } from '@/components/WhatsappButton';
 import { Footer } from '@/components/Footer';
 import { PRODUCTS } from '@/data/products';
 import { CategoryId } from '@/types';
-import { Sparkles, PackageSearch } from 'lucide-react';
+import { PackageSearch } from 'lucide-react';
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId>('natal');
@@ -55,8 +55,7 @@ export default function HomePage() {
         {/* Cabeçalho da Seção de Produtos */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-8">
           <div>
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#2D231E] flex items-center gap-2">
-              <Sparkles size={20} className="text-[#D4AF37]" />
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#2D231E]">
               {searchQuery ? `Resultados para "${searchQuery}"` : 'Catálogo Especial de Natal'}
             </h2>
             <p className="text-xs sm:text-sm text-[#7C6E64] mt-1">

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ShoppingBag, Sparkles, MapPin, Search, X } from 'lucide-react';
+import { ShoppingBag, Search, X } from 'lucide-react';
 import { InstagramIcon } from '@/components/InstagramIcon';
 import { useCart } from '@/context/CartContext';
 import { STORE_CONFIG } from '@/data/products';
@@ -18,7 +18,6 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
     <header className="sticky top-0 z-40 bg-[#FAF7F2]/90 backdrop-blur-md border-b border-[#E8DFD5] transition-all">
       {/* Barra de Notificação Superior */}
       <div className="bg-[#4A3B32] text-[#F5EDE4] text-xs py-1.5 px-4 text-center font-medium flex items-center justify-center gap-2">
-        <Sparkles size={13} className="text-[#D4AF37]" />
         <span>Produção artesanal e afetiva em <strong>Pouso Alegre & Paraisópolis - MG</strong> • Envio para todo o Brasil</span>
       </div>
 
@@ -36,9 +35,6 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
               <a href="#" className="flex flex-col">
                 <span className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-[#3E2E25]">
                   Wê Lembrancinhas
-                </span>
-                <span className="text-[11px] uppercase tracking-widest text-[#8C7A6B] font-semibold flex items-center gap-1">
-                  <MapPin size={11} className="text-[#C89B6D]" /> Por Wenilze Fróes
                 </span>
               </a>
             </div>
