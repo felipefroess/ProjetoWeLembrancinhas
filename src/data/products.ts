@@ -1,0 +1,160 @@
+import { Product } from '@/types';
+
+export const STORE_CONFIG = {
+  storeName: 'Wê Lembrancinhas',
+  artisanName: 'Wenilze Fróes',
+  instagram: 'welembrancinhas',
+  instagramUrl: 'https://instagram.com/welembrancinhas',
+  // Número oficial de WhatsApp (DDD de Minas 35 - Pouso Alegre / Paraisópolis)
+  whatsappNumber: '5535999999999', 
+  locations: ['Pouso Alegre - MG', 'Paraisópolis - MG'],
+  tagline: 'Lembrancinhas personalizadas e papelaria afetiva para qualquer ocasião especial',
+  defaultLeadTimeDays: 7,
+};
+
+export const PRODUCTS: Product[] = [
+  {
+    id: 'topo-luxo-camadas',
+    name: 'Topo de Bolo 3D em Camadas Luxo',
+    category: 'topo-de-bolo',
+    description: 'Topo personalizado com nome, idade e elementos em relevo 3D de papel fotográfico fosco 230g e detalhes em lamicote dourado.',
+    price: 38.00,
+    minQuantity: 1,
+    unit: 'unidade',
+    leadTimeDays: 5,
+    popular: true,
+    featured: true,
+    image: 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?auto=format&fit=crop&w=800&q=80',
+    availableRibbonColors: ['Dourado', 'Prata', 'Rose Gold', 'Azul Bebê', 'Rosa Chá']
+  },
+  {
+    id: 'topo-shaker-glitter',
+    name: 'Topo de Bolo Shaker com Glitter & Miçangas',
+    category: 'topo-de-bolo',
+    description: 'Efeito shaker interativo com glitter flutuante e visor em acetato transparente. Um espetáculo no topo do bolo!',
+    price: 45.00,
+    minQuantity: 1,
+    unit: 'unidade',
+    leadTimeDays: 6,
+    popular: true,
+    image: 'https://images.unsplash.com/photo-1558301211-0d8c8ddee6ec?auto=format&fit=crop&w=800&q=80',
+    availableRibbonColors: ['Holográfico', 'Dourado', 'Lilás Candy', 'Rosa']
+  },
+  {
+    id: 'caixa-milk-luxo',
+    name: 'Caixa Milk Luxo com Laço de Cetim & Pedraria',
+    category: 'aniversario',
+    description: 'A clássica caixa milk em versão luxo: laço duplo de cetim n°9, chaton de strass e aplique 3D na frente. Perfeita para a mesa de doces.',
+    price: 6.90,
+    minQuantity: 10,
+    unit: 'unidade',
+    leadTimeDays: 7,
+    popular: true,
+    featured: true,
+    image: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80',
+    availableRibbonColors: ['Rosa Seco', 'Azul Marinho', 'Verde Oliva', 'Terracota', 'Branco']
+  },
+  {
+    id: 'caixa-piramide-cone',
+    name: 'Caixa Pirâmide (Cone) Temática com Shaker',
+    category: 'aniversario',
+    description: 'Caixa cone com apliques em relevo e topo decorativo. Ideal para balas de goma, chocolates e marshmallows.',
+    price: 6.50,
+    minQuantity: 10,
+    unit: 'unidade',
+    leadTimeDays: 7,
+    image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=800&q=80',
+    availableRibbonColors: ['Dourado', 'Lilás', 'Azul Serenity', 'Amarelo Candy']
+  },
+  {
+    id: 'kit-festa-pegue-monte',
+    name: 'Kit Papelaria Afetiva Completo (30 peças)',
+    category: 'aniversario',
+    description: 'Combo com 10 Caixas Milk, 10 Caixas Pirâmide e 10 Porta-Bis duplo. Tudo personalizado com a identidade visual da festa.',
+    price: 165.00,
+    minQuantity: 1,
+    unit: 'kit (30 peças)',
+    leadTimeDays: 8,
+    popular: true,
+    featured: true,
+    image: 'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=800&q=80',
+    availableRibbonColors: ['Rosa Chá', 'Azul Bebê', 'Verde Eucalipto', 'Off-White']
+  },
+  {
+    id: 'lembrancinha-batizado-aromatizador',
+    name: 'Mini Aromatizador de Ambiente com Terço Delicado',
+    category: 'batizado-maternidade',
+    description: 'Frasco de 30ml com essência suave (Mamãe Bebê ou Lavanda), mini tercinho em pérolas brancas e tag personalizada com laço.',
+    price: 9.80,
+    minQuantity: 10,
+    unit: 'unidade',
+    leadTimeDays: 7,
+    popular: true,
+    featured: true,
+    image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80',
+    availableRibbonColors: ['Branco & Prata', 'Branco & Dourado', 'Rosa Pastel', 'Azul Bebê']
+  },
+  {
+    id: 'caixa-convite-padrinhos',
+    name: 'Caixa Convite Batizado Cartonada para Padrinhos',
+    category: 'batizado-maternidade',
+    description: 'Caixa rígida com fechamento em fita de gorgurão, mensagem personalizada na tampa interna e berço para caneca ou toalha bordada.',
+    price: 49.00,
+    minQuantity: 2,
+    unit: 'unidade',
+    leadTimeDays: 10,
+    image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80',
+    availableRibbonColors: ['Dourado Suave', 'Verde Sálvia', 'Fendi', 'Branco Puro']
+  },
+  {
+    id: 'agenda-permanente-personalizada',
+    name: 'Agenda & Planner Anual com Capa Dura Personalizada',
+    category: 'agendas',
+    description: 'Capa dura laminada fosca ou com efeito holográfico, encadernação wire-o metálico, elástico com passante e nome personalizado na capa.',
+    price: 68.00,
+    minQuantity: 1,
+    unit: 'unidade',
+    leadTimeDays: 5,
+    popular: true,
+    image: 'https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=800&q=80',
+    availableRibbonColors: ['Elástico Rose', 'Elástico Dourado', 'Elástico Preto']
+  },
+  {
+    id: 'bloquinho-cartonado-lembranca',
+    name: 'Mini Bloquinho de Anotações com Caneta Luxo',
+    category: 'agendas',
+    description: 'Bloquinho espiral com capa dura decorada e caneta combinando. Ótimo para lembrancinhas de maternidade e corporativas.',
+    price: 12.50,
+    minQuantity: 10,
+    unit: 'unidade',
+    leadTimeDays: 6,
+    image: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80',
+    availableRibbonColors: ['Rose Gold', 'Dourado', 'Verde Menta']
+  },
+  {
+    id: 'kit-dia-das-maes-caneca-caixa',
+    name: 'Caixa Presente Afetivo Especial Dia das Mães',
+    category: 'datas-especiais',
+    description: 'Caixa decorada com flores secas, mini buquê e espaço para fotos ou chocolates finos. Um carinho inesquecível.',
+    price: 55.00,
+    minQuantity: 1,
+    unit: 'kit presente',
+    leadTimeDays: 4,
+    popular: true,
+    image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80',
+    availableRibbonColors: ['Vinho', 'Rosa Floral', 'Dourado']
+  },
+  {
+    id: 'caixa-cenario-luxo-acrilico',
+    name: 'Caixa Cenário Luxo com Esfera Acrílica e Iluminação LED',
+    category: 'kits-luxo',
+    description: 'A peça mais impactante para a mesa principal: caixa forrada em corino matelassê, cúpula acrílica com biscuit ou personagem temático e luz de LED.',
+    price: 32.00,
+    minQuantity: 4,
+    unit: 'unidade',
+    leadTimeDays: 10,
+    popular: true,
+    image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=800&q=80',
+    availableRibbonColors: ['Dourado Imperial', 'Azul Marinho', 'Rosa Seco']
+  }
+];
