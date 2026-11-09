@@ -15,9 +15,7 @@ export function ProductModal() {
   } = useCart();
 
   const [quantity, setQuantity] = useState(1);
-  const [theme, setTheme] = useState('');
   const [childName, setChildName] = useState('');
-  const [ageOrDate, setAgeOrDate] = useState('');
   const [ribbonColor, setRibbonColor] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedImage, setSelectedImage] = useState<string>('');
@@ -27,9 +25,7 @@ export function ProductModal() {
   useEffect(() => {
     if (product) {
       setQuantity(product.minQuantity || 1);
-      setTheme('');
       setChildName('');
-      setAgeOrDate('');
       setRibbonColor(product.availableRibbonColors?.[0] || '');
       setNotes('');
       const initialVariation = product.variations?.[0] || null;
@@ -49,9 +45,7 @@ export function ProductModal() {
     e.preventDefault();
     addToCart(product, quantity, {
       variation: selectedVariation ? selectedVariation.name : undefined,
-      theme: theme.trim() || undefined,
       childName: childName.trim() || undefined,
-      ageOrDate: ageOrDate.trim() || undefined,
       ribbonColor: ribbonColor || undefined,
       notes: notes.trim() || undefined,
     });
@@ -98,7 +92,7 @@ export function ProductModal() {
                 {/* 
                   Miniaturas de fotos adicionais:
                   APENAS para produtos de modelo único que possuem múltiplos ângulos/fotos.
-                  Para produtos com múltiplos modelos, não exibe miniaturas aqui (a escolha é feita nos Modelos).
+                  Para produtos com múltiplos modelos, não exibe miniaturas aqui.
                 */}
                 {!hasVariations && product.images && product.images.length > 1 && (
                   <div className={styles.thumbnailsRow}>
@@ -213,71 +207,40 @@ export function ProductModal() {
 
                 {/* Campos de Personalização */}
                 <div className={styles.fieldsContainer}>
-                  {/* Linha 1: Tema e Nome */}
-                  <div className={styles.twoColsGrid}>
-                    <div>
-                      <label className={styles.formLabel}>
-                        Tema / Detalhes da Arte <span className={styles.reqStar}>*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Ex: Corujinha, Papai Noel..."
-                        value={theme}
-                        onChange={(e) => setTheme(e.target.value)}
-                        className={styles.formInput}
-                      />
-                    </div>
-
-                    <div>
-                      <label className={styles.formLabel}>
-                        Nome na Lembrancinha <span className={styles.reqStar}>*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Ex: Profe Leandra, Luís..."
-                        value={childName}
-                        onChange={(e) => setChildName(e.target.value)}
-                        className={styles.formInput}
-                      />
-                    </div>
+                  {/* Nome na Lembrancinha */}
+                  <div>
+                    <label className={styles.formLabel}>
+                      Nome na Lembrancinha <span className={styles.reqStar}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ex: Professora Leandra, Luís..."
+                      value={childName}
+                      onChange={(e) => setChildName(e.target.value)}
+                      className={styles.formInput}
+                    />
                   </div>
 
-                  {/* Linha 2: Ano/Mensagem e Cor do Laço */}
-                  <div className={styles.twoColsGrid}>
+                  {/* Cor do Laço (se aplicável ao produto) */}
+                  {product.availableRibbonColors && product.availableRibbonColors.length > 0 && (
                     <div>
                       <label className={styles.formLabel}>
-                        Ano ou Mensagem Curta
+                        Cor dos Laços / Fitas
                       </label>
-                      <input
-                        type="text"
-                        placeholder="Ex: Natal 2026, Boas Festas..."
-                        value={ageOrDate}
-                        onChange={(e) => setAgeOrDate(e.target.value)}
+                      <select
+                        value={ribbonColor}
+                        onChange={(e) => setRibbonColor(e.target.value)}
                         className={styles.formInput}
-                      />
+                      >
+                        {product.availableRibbonColors.map((color) => (
+                          <option key={color} value={color}>
+                            {color}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-
-                    {product.availableRibbonColors && product.availableRibbonColors.length > 0 && (
-                      <div>
-                        <label className={styles.formLabel}>
-                          Cor dos Laços / Fitas
-                        </label>
-                        <select
-                          value={ribbonColor}
-                          onChange={(e) => setRibbonColor(e.target.value)}
-                          className={styles.formInput}
-                        >
-                          {product.availableRibbonColors.map((color) => (
-                            <option key={color} value={color}>
-                              {color}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                  </div>
+                  )}
 
                   {/* Observações livres */}
                   <div>
