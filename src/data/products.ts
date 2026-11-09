@@ -15,7 +15,7 @@ export const STORE_CONFIG = {
 export const PRODUCTS: Product[] = [
   {
     id: 'mini-lata-natal-luxo',
-    name: 'Mini Lata Natalina Personalizada com Laço Luxo & Tag',
+    name: 'Mini Lata Natalina Personalizada com Laço e Tag',
     category: 'natal',
     description: 'Lembrancinha natalina em lata com acabamento artesanal de luxo. Acompanha rótulo temático personalizado com o nome, laço de cetim com pompom de neve e tag de Boas Festas com cordão dourado. Ideal para rechear com biscoitos caseiros, bombons, pães de mel ou doces.',
     price: 15.00,
@@ -37,9 +37,9 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 'lembrancinha-porta-chocolate-professores',
-    name: 'Lembrancinha Porta-Chocolate Dia dos Professores',
+    name: 'Porta-Chocolate Dia dos Professores',
     category: 'dia-dos-professores',
-    description: 'Lembrancinha afetiva personalizada para o Dia dos Professores. Cartão especial em papel de alta gramatura com corujinha e mensagens afetuosas, embalado individualmente em saquinho com laço de cetim e tag temática. Escolha entre o modelo com mini chocolate Talento ou bombom Sonho de Valsa.',
+    description: 'Lembrancinha personalizada para o Dia dos Professores. Cartão especial em papel de alta gramatura com corujinha e mensagens afetuosas, embalado individualmente em saquinho com laço de cetim e tag temática. Escolha entre o modelo com mini chocolate Talento ou bombom Sonho de Valsa.',
     price: 9.90,
     minQuantity: 1,
     unit: 'unidade',
@@ -69,6 +69,63 @@ export const PRODUCTS: Product[] = [
       'Laço Rosa com Tag',
       'Laço Verde com Tag',
       'Laço Dourado com Tag'
+    ]
+  },
+  {
+    id: 'caderno-personalizado-luxo',
+    name: 'Caderno Personalizado Luxo com Wire-o & Elástico',
+    category: 'cadernos',
+    description: 'Caderno e caderneta artesanal personalizada com o seu nome na capa dura laminada. Encadernação wire-o metálica dupla, elástico coordenado para fechamento seguro e miolo pautado especial com cabeçalho de dias da semana (STQQSSD). Perfeito para anotações, estudos, presentes afetivos ou caderneta de vacinação.',
+    price: 35.00,
+    minQuantity: 1,
+    unit: 'unidade',
+    leadTimeDays: 5,
+    popular: true,
+    featured: true,
+    image: '/images/cadernos/caderno-azul-fechado.jpg',
+    images: [
+      '/images/cadernos/caderno-azul-fechado.jpg',
+      '/images/cadernos/caderno-azul-aberto.jpg',
+      '/images/cadernos/caderno-verde-fechado.jpg',
+      '/images/cadernos/caderno-verde-aberto.jpg',
+      '/images/cadernos/caderneta-floral-lilas.jpg'
+    ],
+    variations: [
+      {
+        id: 'geometrico-azul',
+        name: 'Geométrico Azul',
+        image: '/images/cadernos/caderno-azul-fechado.jpg',
+        images: [
+          '/images/cadernos/caderno-azul-fechado.jpg',
+          '/images/cadernos/caderno-azul-aberto.jpg'
+        ],
+        description: 'Modelo geométrico moderno em azul marinho com elástico coordenado e miolo pautado.'
+      },
+      {
+        id: 'geometrico-verde',
+        name: 'Geométrico Verde',
+        image: '/images/cadernos/caderno-verde-fechado.jpg',
+        images: [
+          '/images/cadernos/caderno-verde-fechado.jpg',
+          '/images/cadernos/caderno-verde-aberto.jpg'
+        ],
+        description: 'Modelo geométrico em verde oliva e bege com elástico coordenado e miolo pautado.'
+      },
+      {
+        id: 'floral-lilas',
+        name: 'Floral Lilás (Vacinação)',
+        image: '/images/cadernos/caderneta-floral-lilas.jpg',
+        images: [
+          '/images/cadernos/caderneta-floral-lilas.jpg'
+        ],
+        description: 'Caderneta com acabamento holográfico, flores campestres, tassel de seda roxo e passante de borboleta dourada.'
+      }
+    ],
+    availableRibbonColors: [
+      'Elástico Coordenado com a Capa',
+      'Elástico com Passante Dourado',
+      'Elástico Branco',
+      'Elástico Preto'
     ]
   }
 ];

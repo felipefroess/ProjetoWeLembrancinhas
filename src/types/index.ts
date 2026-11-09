@@ -8,7 +8,8 @@
 export type CategoryId = 
   | 'todos'
   | 'natal'
-  | 'dia-dos-professores';
+  | 'dia-dos-professores'
+  | 'cadernos';
 
 export interface Category {
   id: CategoryId;
@@ -21,6 +22,7 @@ export interface ProductVariation {
   id: string;
   name: string;
   image: string;
+  images?: string[];
   description?: string;
 }
 

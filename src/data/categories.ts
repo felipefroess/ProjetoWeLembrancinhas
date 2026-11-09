@@ -15,5 +15,10 @@ export const CATEGORIES: Category[] = [
     id: 'dia-dos-professores',
     name: 'Dia dos Professores',
     description: 'Lembrancinhas afetivas para homenagear os professores com carinho'
+  },
+  {
+    id: 'cadernos',
+    name: 'Cadernos',
+    description: 'Cadernos, cadernetas e planners personalizados com wire-o e acabamento luxo'
   }
 ];

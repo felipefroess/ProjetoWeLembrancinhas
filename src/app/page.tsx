@@ -71,6 +71,8 @@ export default function HomePage() {
                 ? 'Catálogo Especial de Natal'
                 : selectedCategory === 'dia-dos-professores'
                 ? 'Catálogo Dia dos Professores'
+                : selectedCategory === 'cadernos'
+                ? 'Cadernos & Cadernetas Personalizadas'
                 : 'Catálogo de Lembrancinhas'}
             </h2>
             <p className={styles.catalogSubtitle}>

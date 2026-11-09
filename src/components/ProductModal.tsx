@@ -47,7 +47,8 @@ export function ProductModal() {
       setNotes('');
       const initialVariation = product.variations?.[0] || null;
       setSelectedVariation(initialVariation);
-      setSelectedImage(initialVariation ? initialVariation.image : product.image);
+      const initialImg = initialVariation?.images?.[0] || initialVariation?.image || product.image;
+      setSelectedImage(initialImg);
       setScale(1);
       setPosition({ x: 0, y: 0 });
     }
@@ -91,8 +92,11 @@ export function ProductModal() {
   const hasVariations = Boolean(product.variations && product.variations.length > 1);
   const subtotal = product.price * quantity;
 
-  // Lista de imagens para navegação por setas
-  const imagesList = product.images && product.images.length > 0 ? product.images : [product.image];
+  // Lista de imagens para navegação por setas:
+  // Se a variação selecionada tiver suas próprias fotos (ex: modelo com foto fechado e aberto), usa elas!
+  const imagesList = (selectedVariation?.images && selectedVariation.images.length > 0)
+    ? selectedVariation.images
+    : (product.images && product.images.length > 0 ? product.images : [product.image]);
   const currentImageIndex = imagesList.indexOf(selectedImage || product.image);
   const validIndex = currentImageIndex >= 0 ? currentImageIndex : 0;
 
@@ -102,10 +106,6 @@ export function ProductModal() {
     const newIndex = validIndex <= 0 ? imagesList.length - 1 : validIndex - 1;
     const targetImage = imagesList[newIndex];
     setSelectedImage(targetImage);
-    if (product.variations) {
-      const matched = product.variations.find((v) => v.image === targetImage);
-      if (matched) setSelectedVariation(matched);
-    }
     setScale(1);
     setPosition({ x: 0, y: 0 });
   };
@@ -116,10 +116,6 @@ export function ProductModal() {
     const newIndex = validIndex >= imagesList.length - 1 ? 0 : validIndex + 1;
     const targetImage = imagesList[newIndex];
     setSelectedImage(targetImage);
-    if (product.variations) {
-      const matched = product.variations.find((v) => v.image === targetImage);
-      if (matched) setSelectedVariation(matched);
-    }
     setScale(1);
     setPosition({ x: 0, y: 0 });
   };
@@ -425,7 +421,8 @@ export function ProductModal() {
                             type="button"
                             onClick={() => {
                               setSelectedVariation(v);
-                              setSelectedImage(v.image);
+                              const defaultImg = (v.images && v.images.length > 0) ? v.images[0] : v.image;
+                              setSelectedImage(defaultImg);
                               setScale(1);
                               setPosition({ x: 0, y: 0 });
                             }}
