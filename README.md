@@ -1,9 +1,6 @@
 # 🌸 Wê Lembrancinhas — E-Commerce & Papelaria Afetiva
 
 > Sistema web desenvolvido para modernizar o funil de atendimento e vendas da **Wê Lembrancinhas** (Instagram [@welembrancinhas](https://instagram.com/welembrancinhas)), negócio artesanal de lembrancinhas personalizadas liderado por **Wenilze Fróes** em **Pouso Alegre - MG** e **Paraisópolis - MG**.
-
-Projeto concebido e desenvolvido por **Felipe Fróes**, estudante de **Engenharia de Software** no **Inatel** (Instituto Nacional de Telecomunicações).
-
 ---
 
 ## 🎯 1. O Problema de Negócio & Engenharia de Requisitos
@@ -20,38 +17,6 @@ No modelo anterior, as vendas eram realizadas 100% pelo Instagram Direct e Whats
 - ✅ **Checkout Conversacional Estruturado para WhatsApp:** Monta o pedido detalhado em Markdown nativo e abre a conversa oficial com um único clique.
 
 ---
-
-## 🏗️ 2. Arquitetura do Software & Stack Tecnológica
-
-O sistema foi arquitetado com base em princípios de **Clean Code**, **Domain-Driven Design (DDD simplificado)** e **Component-Driven Development**:
-
-```mermaid
-graph TD
-    Client["📱 Cliente / Navegador"]
-    
-    subgraph Frontend["Camada de Apresentação (Next.js 16 + React 19)"]
-        UI["Componentes Modulares (Header, HeroBanner, ProductCard, Modals)"]
-        State["CartContext (Estado Global Reativo)"]
-        Storage["Web Storage API (localStorage)"]
-    end
-
-    subgraph Domain["Camada de Domínio & Tipagem"]
-        Types["Domain Interfaces (Product, Category, CartItem, OrderData)"]
-        Data["Catalog Data & Store Config"]
-    end
-
-    subgraph Integration["Integrações Externas"]
-        Wpp["WhatsApp API (Checkout Conversacional)"]
-        Insta["Instagram API / Profile Link"]
-    end
-
-    Client --> UI
-    UI --> State
-    State <--> Storage
-    State --> Domain
-    UI --> Integration
-```
-
 ### Tecnologias Utilizadas
 
 | Tecnologia | Finalidade | Decisão de Arquitetura (Trade-off) |
@@ -135,5 +100,4 @@ Para hospedar o site de forma 100% gratuita, com certificado SSL e domínio pró
 ## 🎓 6. Autor
 
 - **Desenvolvedor:** Felipe Fróes
-- **Curso:** Engenharia de Software — **Inatel** (Instituto Nacional de Telecomunicações)
 - **Cliente / Artesã:** Wenilze Fróes — **Wê Lembrancinhas** (Pouso Alegre - MG / Paraisópolis - MG)
