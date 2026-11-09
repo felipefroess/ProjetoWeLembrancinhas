@@ -76,237 +76,257 @@ export function ProductModal() {
           </button>
         </div>
 
-        {/* Corpo com scroll */}
+        {/* Corpo com scroll em layout de 2 colunas */}
         <div className={styles.modalBody}>
-          
-          {/* Resumo do Produto Selecionado */}
-          <div className={styles.productSummary}>
-            <div className={styles.productImagesWrapper}>
-              <img
-                src={selectedImage || product.image}
-                alt={product.name}
-                className={styles.productMainImg}
-              />
-              {product.images && product.images.length > 1 && (
-                <div className={styles.thumbnailsRow}>
-                  {product.images.map((img, idx) => {
-                    const isCurrent = (selectedImage || product.image) === img;
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setSelectedImage(img)}
-                        className={isCurrent ? styles.thumbnailButtonActive : styles.thumbnailButton}
-                      >
-                        <img src={img} alt="Foto adicional" />
-                      </button>
-                    );
-                  })}
+          <div className={styles.modalGrid}>
+            
+            {/* ========================================================
+                COLUNA DA ESQUERDA: Foto maior, Título e Descrição
+               ======================================================== */}
+            <div className={styles.leftColumn}>
+              {/* Foto Principal Maior */}
+              <div className={styles.imageGalleryWrapper}>
+                <div className={styles.mainImageContainer}>
+                  <img
+                    src={selectedImage || product.image}
+                    alt={product.name}
+                    className={styles.productMainImg}
+                  />
                 </div>
-              )}
-            </div>
 
-            <div className={styles.productDetails}>
-              <div>
-                <h4 className={styles.summaryTitle}>
+                {/* Miniaturas da Galeria (se houver mais de uma foto) */}
+                {product.images && product.images.length > 1 && (
+                  <div className={styles.thumbnailsRow}>
+                    {product.images.map((img, idx) => {
+                      const isCurrent = (selectedImage || product.image) === img;
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setSelectedImage(img)}
+                          className={isCurrent ? styles.thumbnailButtonActive : styles.thumbnailButton}
+                          title="Clique para ampliar"
+                        >
+                          <img src={img} alt="Foto adicional" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Informações: Título, Descrição, Preço e Prazo */}
+              <div className={styles.productInfoBlock}>
+                <h4 className={styles.productTitle}>
                   {product.name}
                 </h4>
-                <p className={styles.summaryDescription}>
+
+                <p className={styles.productDescription}>
                   {product.description}
                 </p>
-              </div>
-              <div className={styles.summaryMeta}>
-                <span className={styles.summaryPrice}>
-                  {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / {product.unit}
-                </span>
-                <span className={styles.summaryLeadTime}>
-                  <Clock size={12} /> Produção: {product.leadTimeDays} dias úteis
-                </span>
-              </div>
-            </div>
-          </div>
 
-          <form onSubmit={handleConfirm} id="customization-form" className={styles.formSpace}>
-            
-            {/* Aviso sobre personalização artesanal */}
-            <div className={styles.craftAlert}>
-              <AlertCircle size={16} className={styles.alertIcon} />
-              <span>
-                A Wenilze prepara cada detalhe exclusivamente para a sua comemoração. Preencha os campos abaixo para elaboração da arte.
-              </span>
-            </div>
-
-            {/* Seletor de Variações com Imagem (Estilo Mercado Livre) */}
-            {product.variations && product.variations.length > 0 && (
-              <div className={styles.variationsCard}>
-                <div className={styles.variationsHeader}>
-                  <label className={styles.variationsTitle}>
-                    Escolha o Modelo:
-                  </label>
-                  {selectedVariation && (
-                    <span className={styles.selectedVariationPill}>
-                      {selectedVariation.name}
-                    </span>
-                  )}
-                </div>
-
-                <div className={styles.variationsGrid}>
-                  {product.variations.map((v) => {
-                    const isSelected = selectedVariation?.id === v.id;
-
-                    return (
-                      <button
-                        key={v.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedVariation(v);
-                          setSelectedImage(v.image);
-                        }}
-                        className={isSelected ? styles.variationItemSelected : styles.variationItem}
-                        title={v.name}
-                      >
-                        <div className={styles.variationImageWrap}>
-                          <img
-                            src={v.image}
-                            alt={v.name}
-                          />
-                        </div>
-                        <span className={styles.variationName}>
-                          {v.name}
-                        </span>
-                        {isSelected && (
-                          <span className={styles.variationCheck}>
-                            <Check size={12} className="stroke-[3]" />
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {selectedVariation?.description && (
-                  <p className={styles.variationDescNote}>
-                    {selectedVariation.description}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Linha 1: Tema e Nome */}
-            <div className={styles.twoColsGrid}>
-              <div>
-                <label className={styles.formLabel}>
-                  Tema / Detalhes da Arte <span className={styles.reqStar}>*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: Corujinha, Frase Especial, Papai Noel..."
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value)}
-                  className={styles.formInput}
-                />
-              </div>
-
-              <div>
-                <label className={styles.formLabel}>
-                  Nome na Lembrancinha <span className={styles.reqStar}>*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: Professora Leandra, Tia Amanda, Luís..."
-                  value={childName}
-                  onChange={(e) => setChildName(e.target.value)}
-                  className={styles.formInput}
-                />
-              </div>
-            </div>
-
-            {/* Linha 2: Idade/Data e Cor de Laço */}
-            <div className={styles.twoColsGrid}>
-              <div>
-                <label className={styles.formLabel}>
-                  Ano ou Mensagem Curta
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ex: Natal 2026, Boas Festas..."
-                  value={ageOrDate}
-                  onChange={(e) => setAgeOrDate(e.target.value)}
-                  className={styles.formInput}
-                />
-              </div>
-
-              {product.availableRibbonColors && product.availableRibbonColors.length > 0 && (
-                <div>
-                  <label className={styles.formLabel}>
-                    Cor dos Laços / Fitas
-                  </label>
-                  <select
-                    value={ribbonColor}
-                    onChange={(e) => setRibbonColor(e.target.value)}
-                    className={styles.formInput}
-                  >
-                    {product.availableRibbonColors.map((color) => (
-                      <option key={color} value={color}>
-                        {color}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </div>
-
-            {/* Observações livres */}
-            <div>
-              <label className={styles.formLabel}>
-                Observações Especiais (opcional)
-              </label>
-              <textarea
-                rows={2}
-                placeholder="Ex: Gostaria de tons pastéis, glitter prateado, frase bíblica específica..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className={styles.formTextarea}
-              />
-            </div>
-
-            {/* Controle de Quantidade */}
-            <div className={styles.qtySection}>
-              <div>
-                <span className={styles.qtyLabel}>
-                  Quantidade ({product.unit})
-                </span>
-                {product.minQuantity > 1 && (
-                  <span className={styles.minQtyNote}>
-                    Pedido mínimo: {product.minQuantity} unidades
+                <div className={styles.metaRow}>
+                  <span className={styles.productPrice}>
+                    {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / {product.unit}
                   </span>
-                )}
-              </div>
+                  <span className={styles.productLeadTime}>
+                    <Clock size={13} /> Produção: {product.leadTimeDays} dias úteis
+                  </span>
+                </div>
 
-              <div className={styles.qtyControl}>
-                <button
-                  type="button"
-                  onClick={() => setQuantity((q) => Math.max(product.minQuantity, q - 1))}
-                  disabled={quantity <= product.minQuantity}
-                  className={styles.qtyBtn}
-                >
-                  -
-                </button>
-                <span className={styles.qtyValue}>
-                  {quantity}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setQuantity((q) => q + 1)}
-                  className={styles.qtyBtn}
-                >
-                  +
-                </button>
+                {/* Aviso afetivo */}
+                <div className={styles.craftAlert}>
+                  <AlertCircle size={16} className={styles.alertIcon} />
+                  <span>
+                    A Wenilze prepara cada detalhe exclusivamente para a sua comemoração.
+                  </span>
+                </div>
               </div>
             </div>
-          </form>
+
+            {/* ========================================================
+                COLUNA DA DIREITA: Modelo, Personalização e Quantidade
+               ======================================================== */}
+            <div className={styles.rightColumn}>
+              <form onSubmit={handleConfirm} id="customization-form" className={styles.formSpace}>
+                
+                {/* Seletor de Modelo com Imagem (Estilo Mercado Livre) */}
+                {product.variations && product.variations.length > 0 && (
+                  <div className={styles.variationsCard}>
+                    <div className={styles.variationsHeader}>
+                      <label className={styles.variationsTitle}>
+                        Escolha o Modelo:
+                      </label>
+                      {selectedVariation && (
+                        <span className={styles.selectedVariationPill}>
+                          {selectedVariation.name}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className={styles.variationsGrid}>
+                      {product.variations.map((v) => {
+                        const isSelected = selectedVariation?.id === v.id;
+
+                        return (
+                          <button
+                            key={v.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedVariation(v);
+                              setSelectedImage(v.image);
+                            }}
+                            className={isSelected ? styles.variationItemSelected : styles.variationItem}
+                            title={v.name}
+                          >
+                            <div className={styles.variationImageWrap}>
+                              <img
+                                src={v.image}
+                                alt={v.name}
+                              />
+                            </div>
+                            <span className={styles.variationName}>
+                              {v.name}
+                            </span>
+                            {isSelected && (
+                              <span className={styles.variationCheck}>
+                                <Check size={12} className="stroke-[3]" />
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {selectedVariation?.description && (
+                      <p className={styles.variationDescNote}>
+                        {selectedVariation.description}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Campos de Personalização */}
+                <div className={styles.fieldsContainer}>
+                  {/* Linha 1: Tema e Nome */}
+                  <div className={styles.twoColsGrid}>
+                    <div>
+                      <label className={styles.formLabel}>
+                        Tema / Detalhes da Arte <span className={styles.reqStar}>*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ex: Corujinha, Papai Noel..."
+                        value={theme}
+                        onChange={(e) => setTheme(e.target.value)}
+                        className={styles.formInput}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={styles.formLabel}>
+                        Nome na Lembrancinha <span className={styles.reqStar}>*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ex: Profe Leandra, Luís..."
+                        value={childName}
+                        onChange={(e) => setChildName(e.target.value)}
+                        className={styles.formInput}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Linha 2: Ano/Mensagem e Cor do Laço */}
+                  <div className={styles.twoColsGrid}>
+                    <div>
+                      <label className={styles.formLabel}>
+                        Ano ou Mensagem Curta
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ex: Natal 2026, Boas Festas..."
+                        value={ageOrDate}
+                        onChange={(e) => setAgeOrDate(e.target.value)}
+                        className={styles.formInput}
+                      />
+                    </div>
+
+                    {product.availableRibbonColors && product.availableRibbonColors.length > 0 && (
+                      <div>
+                        <label className={styles.formLabel}>
+                          Cor dos Laços / Fitas
+                        </label>
+                        <select
+                          value={ribbonColor}
+                          onChange={(e) => setRibbonColor(e.target.value)}
+                          className={styles.formInput}
+                        >
+                          {product.availableRibbonColors.map((color) => (
+                            <option key={color} value={color}>
+                              {color}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Observações livres */}
+                  <div>
+                    <label className={styles.formLabel}>
+                      Observações Especiais (opcional)
+                    </label>
+                    <textarea
+                      rows={2}
+                      placeholder="Ex: Tons pastéis, glitter prateado, frase específica..."
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      className={styles.formTextarea}
+                    />
+                  </div>
+                </div>
+
+                {/* Controle de Quantidade */}
+                <div className={styles.qtySection}>
+                  <div>
+                    <span className={styles.qtyLabel}>
+                      Quantidade ({product.unit})
+                    </span>
+                    {product.minQuantity > 1 && (
+                      <span className={styles.minQtyNote}>
+                        Pedido mínimo: {product.minQuantity} unidades
+                      </span>
+                    )}
+                  </div>
+
+                  <div className={styles.qtyControl}>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.max(product.minQuantity, q - 1))}
+                      disabled={quantity <= product.minQuantity}
+                      className={styles.qtyBtn}
+                    >
+                      -
+                    </button>
+                    <span className={styles.qtyValue}>
+                      {quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => q + 1)}
+                      className={styles.qtyBtn}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+          </div>
         </div>
 
         {/* Rodapé com Subtotal e Ação de Adicionar */}
