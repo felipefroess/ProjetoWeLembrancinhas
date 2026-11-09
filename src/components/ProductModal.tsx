@@ -1,9 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '@/context/CartContext';
 import { ProductVariation } from '@/types';
-import { X, Check, Clock, AlertCircle } from 'lucide-react';
+import { 
+  X, 
+  Check, 
+  Clock, 
+  AlertCircle, 
+  ChevronLeft, 
+  ChevronRight, 
+  ZoomIn, 
+  RotateCcw 
+} from 'lucide-react';
 import styles from './ProductModal.module.css';
 
 export function ProductModal() {
@@ -21,6 +30,14 @@ export function ProductModal() {
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null);
 
+  // Estados e referências para controle de Zoom interativo
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<{ dist: number; scale: number; x: number; y: number; posX: number; posY: number } | null>(null);
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef<{ x: number; y: number; posX: number; posY: number }>({ x: 0, y: 0, posX: 0, posY: 0 });
+
   // Reseta os campos ao abrir o modal para um novo produto
   useEffect(() => {
     if (product) {
@@ -31,8 +48,41 @@ export function ProductModal() {
       const initialVariation = product.variations?.[0] || null;
       setSelectedVariation(initialVariation);
       setSelectedImage(initialVariation ? initialVariation.image : product.image);
+      setScale(1);
+      setPosition({ x: 0, y: 0 });
     }
   }, [product]);
+
+  // Reseta o zoom sempre que a imagem selecionada mudar
+  useEffect(() => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  }, [selectedImage]);
+
+  // Zoom pelo scroll do mouse (com passive: false para prevenir scroll do modal)
+  useEffect(() => {
+    const container = imageContainerRef.current;
+    if (!container || !isCustomizingModalOpen) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const zoomStep = 0.25;
+      setScale((prevScale) => {
+        const nextScale = e.deltaY < 0 
+          ? Math.min(3.5, prevScale + zoomStep) 
+          : Math.max(1, prevScale - zoomStep);
+        if (nextScale === 1) {
+          setPosition({ x: 0, y: 0 });
+        }
+        return Number(nextScale.toFixed(2));
+      });
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, [isCustomizingModalOpen]);
 
   if (!isCustomizingModalOpen || !product) {
     return null;
@@ -40,6 +90,132 @@ export function ProductModal() {
 
   const hasVariations = Boolean(product.variations && product.variations.length > 1);
   const subtotal = product.price * quantity;
+
+  // Lista de imagens para navegação por setas
+  const imagesList = product.images && product.images.length > 0 ? product.images : [product.image];
+  const currentImageIndex = imagesList.indexOf(selectedImage || product.image);
+  const validIndex = currentImageIndex >= 0 ? currentImageIndex : 0;
+
+  // Navegação: Foto anterior
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newIndex = validIndex <= 0 ? imagesList.length - 1 : validIndex - 1;
+    const targetImage = imagesList[newIndex];
+    setSelectedImage(targetImage);
+    if (product.variations) {
+      const matched = product.variations.find((v) => v.image === targetImage);
+      if (matched) setSelectedVariation(matched);
+    }
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  // Navegação: Próxima foto
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newIndex = validIndex >= imagesList.length - 1 ? 0 : validIndex + 1;
+    const targetImage = imagesList[newIndex];
+    setSelectedImage(targetImage);
+    if (product.variations) {
+      const matched = product.variations.find((v) => v.image === targetImage);
+      if (matched) setSelectedVariation(matched);
+    }
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  // Zoom no mobile via pinça de 2 dedos (Pinch-to-zoom) e arrasto com 1 dedo
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      touchStartRef.current = {
+        dist,
+        scale,
+        x: 0,
+        y: 0,
+        posX: position.x,
+        posY: position.y,
+      };
+    } else if (e.touches.length === 1 && scale > 1) {
+      touchStartRef.current = {
+        dist: 0,
+        scale,
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        posX: position.x,
+        posY: position.y,
+      };
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+
+    if (e.touches.length === 2) {
+      if (e.cancelable) e.preventDefault();
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const ratio = dist / touchStartRef.current.dist;
+      const nextScale = Math.min(3.5, Math.max(1, touchStartRef.current.scale * ratio));
+      setScale(Number(nextScale.toFixed(2)));
+      if (nextScale === 1) setPosition({ x: 0, y: 0 });
+    } else if (e.touches.length === 1 && scale > 1) {
+      if (e.cancelable) e.preventDefault();
+      const dx = e.touches[0].clientX - touchStartRef.current.x;
+      const dy = e.touches[0].clientY - touchStartRef.current.y;
+      setPosition({
+        x: touchStartRef.current.posX + dx,
+        y: touchStartRef.current.posY + dy,
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    touchStartRef.current = null;
+  };
+
+  // Arrasto no Desktop quando a imagem está com zoom
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (scale > 1) {
+      isDraggingRef.current = true;
+      dragStartRef.current = {
+        x: e.clientX,
+        y: e.clientY,
+        posX: position.x,
+        posY: position.y,
+      };
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDraggingRef.current && scale > 1) {
+      const dx = e.clientX - dragStartRef.current.x;
+      const dy = e.clientY - dragStartRef.current.y;
+      setPosition({
+        x: dragStartRef.current.posX + dx,
+        y: dragStartRef.current.posY + dy,
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    isDraggingRef.current = false;
+  };
+
+  // Duplo clique alterna entre zoom 2.2x e 1x
+  const handleDoubleClick = () => {
+    if (scale > 1) {
+      setScale(1);
+      setPosition({ x: 0, y: 0 });
+    } else {
+      setScale(2.2);
+    }
+  };
 
   const handleConfirm = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,17 +252,89 @@ export function ProductModal() {
           <div className={styles.modalGrid}>
             
             {/* ========================================================
-                COLUNA DA ESQUERDA: Foto Inteira, Título e Descrição
+                COLUNA DA ESQUERDA: Foto Inteira com Zoom e Setas
                ======================================================== */}
             <div className={styles.leftColumn}>
-              {/* Foto Principal (Exibida por inteiro, sem cortes) */}
               <div className={styles.imageGalleryWrapper}>
-                <div className={styles.mainImageContainer}>
+                
+                {/* Container Principal com Suporte a Zoom (Scroll e Pinça) */}
+                <div 
+                  ref={imageContainerRef}
+                  className={styles.mainImageContainer}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  onDoubleClick={handleDoubleClick}
+                  style={{
+                    cursor: scale > 1 ? (isDraggingRef.current ? 'grabbing' : 'grab') : 'zoom-in'
+                  }}
+                >
                   <img
                     src={selectedImage || product.image}
                     alt={product.name}
                     className={styles.productMainImg}
+                    style={{
+                      transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+                      transition: scale === 1 ? 'transform 0.25s ease' : 'none',
+                    }}
+                    draggable={false}
                   />
+
+                  {/* Setas de Navegação (Exibidas quando há mais de 1 foto) */}
+                  {imagesList.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handlePrevImage}
+                        className={styles.navArrowLeft}
+                        aria-label="Foto anterior"
+                        title="Foto anterior"
+                      >
+                        <ChevronLeft size={22} />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleNextImage}
+                        className={styles.navArrowRight}
+                        aria-label="Próxima foto"
+                        title="Próxima foto"
+                      >
+                        <ChevronRight size={22} />
+                      </button>
+
+                      {/* Contador de Fotos */}
+                      <div className={styles.imageCounterBadge}>
+                        <span>{validIndex + 1} / {imagesList.length}</span>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Indicador de Zoom ou Botão para Redefinir */}
+                  {scale > 1 ? (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setScale(1);
+                        setPosition({ x: 0, y: 0 });
+                      }}
+                      className={styles.zoomResetButton}
+                      title="Clique para voltar ao tamanho original"
+                    >
+                      <RotateCcw size={12} />
+                      <span>{Math.round(scale * 100)}% • Redefinir</span>
+                    </button>
+                  ) : (
+                    <div className={styles.zoomHintPill}>
+                      <ZoomIn size={12} />
+                      <span>Scroll ou pinça para zoom</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* 
@@ -102,7 +350,11 @@ export function ProductModal() {
                         <button
                           key={idx}
                           type="button"
-                          onClick={() => setSelectedImage(img)}
+                          onClick={() => {
+                            setSelectedImage(img);
+                            setScale(1);
+                            setPosition({ x: 0, y: 0 });
+                          }}
                           className={isCurrent ? styles.thumbnailButtonActive : styles.thumbnailButton}
                           title="Ver outra foto do produto"
                         >
@@ -174,6 +426,8 @@ export function ProductModal() {
                             onClick={() => {
                               setSelectedVariation(v);
                               setSelectedImage(v.image);
+                              setScale(1);
+                              setPosition({ x: 0, y: 0 });
                             }}
                             className={isSelected ? styles.variationItemSelected : styles.variationItem}
                             title={`Modelo: ${v.name}`}

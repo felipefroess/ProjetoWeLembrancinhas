@@ -50,7 +50,7 @@
 }
 
 .modalTitle {
-  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-family: var(--font-serif, Georgia, serif);
   font-weight: 700;
   font-size: 1.125rem;
   color: #2D231E;
@@ -132,8 +132,9 @@
   gap: 0.625rem;
 }
 
-/* Container da Foto Principal (Sem cortes) */
+/* Container da Foto Principal (Sem cortes, com Zoom e Setas) */
 .mainImageContainer {
+  position: relative;
   width: 100%;
   height: 280px;
   border-radius: 1rem;
@@ -145,6 +146,8 @@
   align-items: center;
   justify-content: center;
   padding: 0.5rem;
+  user-select: none;
+  touch-action: none;
 }
 
 @media (min-width: 640px) {
@@ -152,6 +155,109 @@
     height: 360px;
     padding: 0.75rem;
   }
+}
+
+/* Setas de navegação de foto */
+.navArrowLeft,
+.navArrowRight {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  border: 1px solid #DACFBF;
+  color: #4A3B32;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 20;
+  transition: all 0.2s ease;
+}
+
+.navArrowLeft {
+  left: 0.625rem;
+}
+
+.navArrowRight {
+  right: 0.625rem;
+}
+
+.navArrowLeft:hover,
+.navArrowRight:hover {
+  background-color: #6D4C3D;
+  color: #ffffff;
+  border-color: #6D4C3D;
+  transform: translateY(-50%) scale(1.08);
+}
+
+/* Indicador de fotos (ex: 1 / 2) */
+.imageCounterBadge {
+  position: absolute;
+  bottom: 0.625rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(45, 35, 30, 0.75);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  padding: 0.2rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* Dica de Zoom */
+.zoomHintPill {
+  position: absolute;
+  top: 0.625rem;
+  right: 0.625rem;
+  background-color: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(4px);
+  color: #7C6E64;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid rgba(218, 207, 191, 0.7);
+  pointer-events: none;
+  z-index: 20;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* Botão para redefinir o Zoom */
+.zoomResetButton {
+  position: absolute;
+  top: 0.625rem;
+  right: 0.625rem;
+  background-color: #6D4C3D;
+  color: #ffffff;
+  padding: 0.3rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 20;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.zoomResetButton:hover {
+  transform: scale(1.05);
+  background-color: #5A3E31;
 }
 
 /* Foto com object-fit: contain para mostrar 100% da imagem sem cortar nada */
@@ -223,9 +329,9 @@
 }
 
 .productTitle {
-  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
-  font-weight: 700;
-  font-size: 1.25rem;
+  font-family: var(--font-roboto);
+  font-weight: 600;
+  font-size: 1rem;
   color: #2D231E;
   margin: 0;
   line-height: 1.3;
