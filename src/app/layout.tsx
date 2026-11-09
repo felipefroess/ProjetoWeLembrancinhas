@@ -44,8 +44,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${cormorant.variable} ${jakarta.variable} scroll-smooth`}>
-      <body className="font-sans bg-[#FAF7F2] text-[#2D231E] antialiased selection:bg-[#C89B6D] selection:text-white">
+    <html lang="pt-BR" className={`${cormorant.variable} ${jakarta.variable}`}>
+      <body>
         <CartProvider>
           {children}
         </CartProvider>
