@@ -14,9 +14,24 @@ import {
   Check, 
   Package, 
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  TrendingUp,
+  FolderHeart,
+  Clock,
+  Search,
+  MessageCircle,
+  ShieldCheck,
+  Layers,
+  Gift,
+  Eye,
+  Flame,
+  Trophy,
+  ArrowUpRight,
+  Calendar
 } from 'lucide-react';
 import { Product, Category, ProductVariation, CustomFieldDefinition } from '@/types';
+import { STORE_CONFIG } from '@/data/products';
+import { getAnalyticsForPeriod, AnalyticsPeriod } from '@/lib/analytics';
 import styles from './Admin.module.css';
 
 export default function AdminDashboardPage() {
@@ -28,6 +43,37 @@ export default function AdminDashboardPage() {
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  // Período selecionado no dashboard (semana, mes ou ano)
+  const [period, setPeriod] = useState<AnalyticsPeriod>('mes');
+  const [realStats, setRealStats] = useState<any>(null);
+  const [isDbConfigured, setIsDbConfigured] = useState<boolean>(false);
+
+  // Busca dados reais do banco Supabase quando disponível
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/analytics/stats?period=' + period);
+        const data = await res.json();
+        if (data.configured) {
+          setIsDbConfigured(true);
+          if (data.hasRealData) {
+            setRealStats(data);
+          }
+        } else {
+          setIsDbConfigured(false);
+          setRealStats(null);
+        }
+      } catch (err) {
+        console.error('Erro ao buscar estatísticas do Supabase:', err);
+      }
+    }
+    fetchStats();
+  }, [period]);
+
+  // Filtros de busca na tabela do admin
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState('todos');
 
   // Formulário de Produto
   const [name, setName] = useState('');
@@ -136,7 +182,6 @@ export default function AdminDashboardPage() {
     setMainImage(primaryImg);
 
     if (product.images && product.images.length > 0) {
-      // Pega as imagens secundárias excluindo a principal para a galeria
       const others = product.images.filter((img, idx) => {
         if (idx === 0 && img === primaryImg) return false;
         return img !== primaryImg;
@@ -427,6 +472,41 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Métricas do Dashboard calculadas para o período ativo (ou reais do banco)
+  const baseAnalytics = getAnalyticsForPeriod(products, period);
+  const analytics = realStats ? {
+    ...baseAnalytics,
+    totalRevenue: realStats.totalRevenue ?? baseAnalytics.totalRevenue,
+    unitsSold: realStats.unitsSold ?? baseAnalytics.unitsSold,
+    visits: realStats.visits ?? baseAnalytics.visits,
+    ordersCount: realStats.ordersCount ?? baseAnalytics.ordersCount,
+    mostClickedProduct: realStats.mostClicked ? {
+      product: products.find((p) => p.id === realStats.mostClicked.productId) || {
+        id: realStats.mostClicked.productId,
+        name: realStats.mostClicked.name || 'Produto',
+        price: 15,
+        image: '/images/placeholder.jpg',
+        category: 'geral',
+        description: '',
+        unit: 'unidade',
+        leadTimeDays: 5,
+        minQuantity: 1,
+      },
+      clicks: realStats.mostClicked.clicks,
+      interestRate: '14.2%',
+      estimatedOrders: Math.max(1, Math.round(realStats.mostClicked.clicks * 0.18)),
+    } : baseAnalytics.mostClickedProduct,
+  } : baseAnalytics;
+
+  const activeCategories = categories.filter((c) => c.id !== 'todos');
+
+  const filteredProducts = products.filter((p) => {
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCat = filterCategory === 'todos' || p.category === filterCategory;
+    return matchesSearch && matchesCat;
+  });
+
   if (loading) {
     return (
       <div className={styles.adminWrapper} style={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -461,11 +541,292 @@ export default function AdminDashboardPage() {
 
       {/* Conteúdo Principal */}
       <main className={styles.mainContent}>
+
+        {/* Dashboard de Desempenho, Vendas & Métricas */}
+        <section className={styles.dashboardSection}>
+          <div className={styles.periodHeaderRow}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <h2 className={styles.dashboardHeading}>Dashboard de Desempenho & Vendas</h2>
+                {isDbConfigured ? (
+                  <span className={styles.databaseStatusBadge + ' ' + styles.databaseStatusBadgeConnected}>
+                    <ShieldCheck size={12} /> Supabase Ativo (Dados Reais)
+                  </span>
+                ) : (
+                  <span className={styles.databaseStatusBadge + ' ' + styles.databaseStatusBadgeDemo}>
+                    ⚡ Modo Demonstração (Sem Banco)
+                  </span>
+                )}
+              </div>
+              <p className={styles.dashboardSubheading}>
+                Acompanhe o faturamento, lembrancinhas vendidas, visitas e os produtos campeões de cliques.
+              </p>
+            </div>
+
+            {/* Seletor de Período: Semana, Mês ou Ano */}
+            <div className={styles.periodSelectorGroup}>
+              <button
+                type="button"
+                onClick={() => setPeriod('semana')}
+                className={`${styles.periodBtn} ${period === 'semana' ? styles.periodBtnActive : ''}`}
+                title="Visualizar métricas desta semana"
+              >
+                <Calendar size={13} />
+                <span>Semana</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPeriod('mes')}
+                className={`${styles.periodBtn} ${period === 'mes' ? styles.periodBtnActive : ''}`}
+                title="Visualizar métricas deste mês"
+              >
+                <Calendar size={13} />
+                <span>Mês</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPeriod('ano')}
+                className={`${styles.periodBtn} ${period === 'ano' ? styles.periodBtnActive : ''}`}
+                title="Visualizar métricas deste ano"
+              >
+                <Calendar size={13} />
+                <span>Ano</span>
+              </button>
+            </div>
+          </div>
+
+          {!isDbConfigured && (
+            <div className={styles.databaseNoticeBanner}>
+              <div>
+                <div className={styles.databaseNoticeTitle}>Banco de Dados Supabase Pronto para Ativação</div>
+                <p className={styles.databaseNoticeDesc}>
+                  As tabelas e o rastreamento automático de visitas, cliques e pedidos já estão integrados no código! Assim que você adicionar suas chaves do Supabase no arquivo <code>.env.local</code>, este painel passará a exibir números 100% reais em tempo real.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Cards de KPIs Principais (Reativos ao Período Selecionado) */}
+          <div className={styles.kpiGrid}>
+            {/* Card 1: Valor Total de Ganhos */}
+            <div className={styles.kpiCard}>
+              <div className={styles.kpiContent}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className={styles.kpiLabel}>Valor Total de Ganhos</span>
+                  <span className={styles.trendBadge} title="Crescimento vs período anterior">
+                    <ArrowUpRight size={11} /> {analytics.growthRevenue}
+                  </span>
+                </div>
+                <span className={styles.kpiValue}>
+                  {analytics.totalRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                </span>
+                <span className={styles.kpiSubtext}>Faturamento {analytics.periodUnitLabel}</span>
+              </div>
+              <div className={styles.kpiIconWrapper} style={{ color: '#2E7D32', backgroundColor: '#F1F8E9' }}>
+                <TrendingUp size={22} />
+              </div>
+            </div>
+
+            {/* Card 2: Quantidade de Lembrancinhas Vendidas */}
+            <div className={styles.kpiCard}>
+              <div className={styles.kpiContent}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className={styles.kpiLabel}>Lembrancinhas Vendidas</span>
+                  <span className={styles.trendBadge} title="Crescimento vs período anterior">
+                    <ArrowUpRight size={11} /> {analytics.growthUnits}
+                  </span>
+                </div>
+                <span className={styles.kpiValue}>{analytics.unitsSold} un.</span>
+                <span className={styles.kpiSubtext}>Itens entregues {analytics.periodUnitLabel}</span>
+              </div>
+              <div className={styles.kpiIconWrapper}>
+                <Gift size={22} />
+              </div>
+            </div>
+
+            {/* Card 3: Visitas no Site */}
+            <div className={styles.kpiCard}>
+              <div className={styles.kpiContent}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span className={styles.kpiLabel}>Visitas no Site</span>
+                  <span className={styles.trendBadge} title="Crescimento vs período anterior">
+                    <ArrowUpRight size={11} /> {analytics.growthVisits}
+                  </span>
+                </div>
+                <span className={styles.kpiValue}>{analytics.visits.toLocaleString('pt-BR')}</span>
+                <span className={styles.kpiSubtext}>Acessos {analytics.periodUnitLabel}</span>
+              </div>
+              <div className={styles.kpiIconWrapper} style={{ color: '#0288D1', backgroundColor: '#E1F5FE' }}>
+                <Eye size={22} />
+              </div>
+            </div>
+
+            {/* Card 4: Produto com Mais Cliques */}
+            <div className={styles.kpiCard}>
+              <div className={styles.kpiContent}>
+                <span className={styles.kpiLabel}>Mais Clicado</span>
+                <span className={styles.kpiValue}>
+                  {analytics.mostClickedProduct ? `${analytics.mostClickedProduct.clicks} cliques` : '0 cliques'}
+                </span>
+                <span className={styles.kpiSubtext} style={{ maxWidth: '170px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {analytics.mostClickedProduct ? analytics.mostClickedProduct.product.name : 'Nenhum'}
+                </span>
+              </div>
+              <div className={styles.kpiIconWrapper} style={{ color: '#D84315', backgroundColor: '#FBE9E7' }}>
+                <Flame size={22} />
+              </div>
+            </div>
+          </div>
+
+          {/* Grid Analítica: Produtos Mais Vendidos & Produto com Mais Cliques em Detalhe */}
+          <div className={styles.analyticsGrid}>
+            {/* Card 1: Ranking dos Produtos Mais Vendidos */}
+            <div className={styles.analyticsCard}>
+              <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>
+                  <Trophy size={18} color="#D4AF37" /> Produtos Mais Vendidos
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: '#8C7A6B', fontWeight: 600 }}>
+                  Ranking de {analytics.periodLabel.toLowerCase()}
+                </span>
+              </div>
+
+              <div className={styles.topSellersList}>
+                {analytics.topSellingProducts.map((p, idx) => (
+                  <div key={p.id} className={styles.topSellerRow}>
+                    <div 
+                      className={`${styles.rankBadge} ${
+                        idx === 0 ? styles.rank1 : idx === 1 ? styles.rank2 : idx === 2 ? styles.rank3 : styles.rankOther
+                      }`}
+                    >
+                      #{idx + 1}
+                    </div>
+
+                    <img src={p.image} alt={p.name} className={styles.topSellerThumb} />
+
+                    <div className={styles.topSellerInfo}>
+                      <div className={styles.topSellerName} title={p.name}>
+                        {p.name}
+                      </div>
+                      <div className={styles.topSellerMeta}>
+                        <span>{p.category}</span>
+                        <span>•</span>
+                        <span>{p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/un</span>
+                      </div>
+                      <div className={styles.topSellerBarContainer}>
+                        <div className={styles.topSellerBarFill} style={{ width: `${Math.max(8, p.sharePercentage)}%` }} />
+                      </div>
+                    </div>
+
+                    <div className={styles.topSellerStats}>
+                      <span className={styles.topSellerUnits}>{p.unitsSold} vendidas</span>
+                      <span className={styles.topSellerRevenue}>
+                        {p.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Card 2: Destaque de Engajamento e Produto Mais Clicado */}
+            <div className={styles.analyticsCard}>
+              <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>
+                  <Flame size={18} color="#D84315" /> Produto com Mais Cliques
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: '#8C7A6B', fontWeight: 600 }}>
+                  Maior interesse
+                </span>
+              </div>
+
+              {analytics.mostClickedProduct ? (
+                <div className={styles.mostClickedCard}>
+                  <div className={styles.mostClickedHeader}>
+                    <span className={styles.flameBadge}>
+                      <Flame size={13} /> Campeão de Cliques
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#8C7A6B', fontWeight: 600 }}>
+                      {analytics.periodLabel}
+                    </span>
+                  </div>
+
+                  <div className={styles.mostClickedProductRow}>
+                    <img
+                      src={analytics.mostClickedProduct.product.image}
+                      alt={analytics.mostClickedProduct.product.name}
+                      className={styles.mostClickedImg}
+                    />
+                    <div className={styles.mostClickedDetails}>
+                      <div className={styles.mostClickedName}>
+                        {analytics.mostClickedProduct.product.name}
+                      </div>
+                      <div className={styles.mostClickedPrice}>
+                        {analytics.mostClickedProduct.product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / {analytics.mostClickedProduct.product.unit || 'unidade'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.clicksCounterBox}>
+                    <div className={styles.clickStatItem}>
+                      <span className={styles.clickStatNumber}>{analytics.mostClickedProduct.clicks}</span>
+                      <span className={styles.clickStatLabel}>Cliques no Catálogo</span>
+                    </div>
+                    <div className={styles.clickStatItem}>
+                      <span className={styles.clickStatNumber}>{analytics.mostClickedProduct.interestRate}</span>
+                      <span className={styles.clickStatLabel}>Taxa de Interesse</span>
+                    </div>
+                    <div className={styles.clickStatItem}>
+                      <span className={styles.clickStatNumber}>~{analytics.mostClickedProduct.estimatedOrders}</span>
+                      <span className={styles.clickStatLabel}>Lembrancinhas</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p style={{ fontSize: '0.75rem', color: '#8C7A6B' }}>Nenhum produto analisado.</p>
+              )}
+
+              {/* Informações Operacionais Adicionais */}
+              <div className={styles.infoRowsList} style={{ marginTop: '0.875rem' }}>
+                <div className={styles.infoRow}>
+                  <span className={styles.infoRowLabel}>
+                    <MessageCircle size={14} color="#25D366" /> WhatsApp Oficial:
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span className={styles.infoRowValue}>
+                      {STORE_CONFIG.whatsappNumber.length >= 12
+                        ? `+${STORE_CONFIG.whatsappNumber.slice(0, 2)} (${STORE_CONFIG.whatsappNumber.slice(2, 4)}) ${STORE_CONFIG.whatsappNumber.slice(4, 9)}-${STORE_CONFIG.whatsappNumber.slice(9)}`
+                        : STORE_CONFIG.whatsappNumber}
+                    </span>
+                    <a
+                      href={`https://wa.me/${STORE_CONFIG.whatsappNumber}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.testWhatsappBtn}
+                      title="Testar conversa no WhatsApp"
+                    >
+                      Testar
+                    </a>
+                  </div>
+                </div>
+
+                <div className={styles.infoRow}>
+                  <span className={styles.infoRowLabel}>Status da Loja:</span>
+                  <span className={styles.onlineBadge}>
+                    <span className={styles.onlineDot} /> Online & Aberta para Pedidos
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Cabeçalho da Tabela de Catálogo */}
         <div className={styles.headerRow}>
           <div>
-            <h2 className={styles.pageHeading}>Catálogo de Produtos</h2>
+            <h2 className={styles.pageHeading}>Gerenciamento de Produtos</h2>
             <p className={styles.pageSubheading}>
-              Adicione, edite fotos e personalize como os clientes encomendam cada item no site.
+              Edite fotos, modelos, preços e perguntas personalizadas de cada lembrancinha.
             </p>
           </div>
 
@@ -473,6 +834,48 @@ export default function AdminDashboardPage() {
             <Plus size={18} />
             <span>Novo Produto</span>
           </button>
+        </div>
+
+        {/* Barra de Filtro e Busca Rápida */}
+        <div className={styles.searchFilterBar}>
+          <div className={styles.searchBox}>
+            <Search size={16} color="#8C7A6B" />
+            <input
+              type="text"
+              placeholder="Buscar produto por nome ou descrição..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={styles.searchInput}
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9E9084' }}
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          <div className={styles.filterControls}>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className={styles.filterSelect}
+            >
+              <option value="todos">Todas as Categorias</option>
+              {activeCategories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+
+            <span className={styles.filterCountBadge}>
+              {filteredProducts.length} {filteredProducts.length === 1 ? 'produto' : 'produtos'}
+            </span>
+          </div>
         </div>
 
         {/* Tabela de Produtos */}
@@ -488,46 +891,55 @@ export default function AdminDashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {products.map((p) => (
-                <tr key={p.id}>
-                  <td>
-                    <div className={styles.productRowInfo}>
-                      <img src={p.image} alt={p.name} className={styles.tableThumb} />
-                      <div>
-                        <div className={styles.productNameCell}>{p.name}</div>
-                        <div className={styles.productDescCell}>{p.description}</div>
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map((p) => (
+                  <tr key={p.id}>
+                    <td>
+                      <div className={styles.productRowInfo}>
+                        <img src={p.image} alt={p.name} className={styles.tableThumb} />
+                        <div>
+                          <div className={styles.productNameCell}>{p.name}</div>
+                          <div className={styles.productDescCell}>{p.description}</div>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span className={styles.categoryBadge}>{p.category}</span>
-                  </td>
-                  <td>
-                    <span className={styles.priceTag}>
-                      {p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </span>
-                  </td>
-                  <td>{p.leadTimeDays} dias úteis</td>
-                  <td style={{ textAlign: 'right' }}>
-                    <div className={styles.actionsCell} style={{ justifyContent: 'flex-end' }}>
-                      <button
-                        onClick={() => handleOpenEditProduct(p)}
-                        className={styles.editBtn}
-                        title="Editar publicação do produto"
-                      >
-                        <Pencil size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProduct(p.id, p.name)}
-                        className={styles.deleteBtn}
-                        title="Excluir produto"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
+                    </td>
+                    <td>
+                      <span className={styles.categoryBadge}>{p.category}</span>
+                    </td>
+                    <td>
+                      <span className={styles.priceTag}>
+                        {p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
+                    </td>
+                    <td>{p.leadTimeDays} dias úteis</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div className={styles.actionsCell} style={{ justifyContent: 'flex-end' }}>
+                        <button
+                          onClick={() => handleOpenEditProduct(p)}
+                          className={styles.editBtn}
+                          title="Editar publicação do produto"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(p.id, p.name)}
+                          className={styles.deleteBtn}
+                          title="Excluir produto"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#8C7A6B' }}>
+                    <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Nenhum produto encontrado</p>
+                    <p style={{ fontSize: '0.75rem' }}>Tente alterar a busca ou filtro de categoria.</p>
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

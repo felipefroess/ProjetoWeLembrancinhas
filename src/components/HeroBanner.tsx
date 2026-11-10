@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { STORE_CONFIG } from '@/data/products';
 import styles from './HeroBanner.module.css';
 
 export function HeroBanner() {
@@ -36,14 +35,6 @@ export function HeroBanner() {
             >
               Ver Catálogo & Montar Pedido
             </button>
-            <a
-              href={`https://wa.me/${STORE_CONFIG.whatsappNumber}?text=${encodeURIComponent('Olá, Wenilze! Gostaria de tirar uma dúvida sobre lembrancinhas personalizadas.')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.whatsappButton}
-            >
-              Falar no WhatsApp
-            </a>
           </div>
         </div>
       </div>

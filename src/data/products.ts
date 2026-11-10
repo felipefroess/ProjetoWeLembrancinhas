@@ -6,7 +6,7 @@ export const STORE_CONFIG = {
   instagram: 'welembrancinhas',
   instagramUrl: 'https://instagram.com/welembrancinhas',
   // Número oficial de WhatsApp (DDD de Minas 35 - Pouso Alegre / Paraisópolis)
-  whatsappNumber: '5535999999999', 
+  whatsappNumber: '5535984026382', 
   locations: ['Pouso Alegre - MG', 'Paraisópolis - MG'],
   tagline: 'Lembrancinhas personalizadas e papelaria afetiva para qualquer ocasião especial',
   defaultLeadTimeDays: 5,

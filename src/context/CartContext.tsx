@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, CartItem, CustomizationOptions, CustomerOrderData } from '@/types';
 import { STORE_CONFIG } from '@/data/products';
+import { trackProductClick } from '@/lib/tracking';
 
 interface CartContextType {
   items: CartItem[];
@@ -66,6 +67,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const openCustomizationModal = (product: Product) => {
     setSelectedProductForCustomization(product);
     setIsCustomizingModalOpen(true);
+    trackProductClick(product);
   };
 
   const closeCustomizationModal = () => {

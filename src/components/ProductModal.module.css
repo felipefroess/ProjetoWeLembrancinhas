@@ -363,6 +363,7 @@
 }
 
 .productPrice {
+  font-family: var(--font-jakarta, var(--font-sans, 'Plus Jakarta Sans', sans-serif));
   font-weight: 700;
   color: #6D4C3D;
   font-size: 0.9375rem;
@@ -716,7 +717,7 @@
 }
 
 .subtotalValue {
-  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-family: var(--font-jakarta, var(--font-sans, 'Plus Jakarta Sans', sans-serif));
   font-weight: 700;
   font-size: 1.25rem;
   color: #6D4C3D;

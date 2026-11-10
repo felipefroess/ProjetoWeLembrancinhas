@@ -4,7 +4,7 @@
     "name": "Lata Maternidade – Ursinho Clássico",
     "category": "maternidade",
     "description": "Uma lembrancinha delicada e encantadora para celebrar a chegada do seu bebê. Perfeita para colocar docinhos, suspiros, amêndoas ou pequenos mimos.",
-    "price": 15,
+    "price": 14.9,
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
@@ -27,7 +27,7 @@
     "name": "Bloco de Notas com Caixa Estojo e Caneta",
     "category": "dia-dos-professores",
     "description": "Um presente sofisticado e carinhoso para homenagear e agradecer a dedicação dos professores. Caixa rígida tipo estojo com fecho em fita, bloco de notas encadernado em wire-o e caneta decorada.",
-    "price": 15,
+    "price": 59.9,
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
@@ -37,12 +37,12 @@
     ],
     "variations": [
       {
-        "id": "var_1794274961814_0",
+        "id": "var_1794317865699_0",
         "name": "Modelo 1",
         "image": "/uploads/1794274822116-saveclip.app_561757077_18177293875347767_1852012969418825078_n.jpg"
       },
       {
-        "id": "var_1794274961814_1",
+        "id": "var_1794317865699_1",
         "name": "Modelo 2",
         "image": "/uploads/1794274832811-saveclip.app_559554486_18177293884347767_1237520079746612932_n.jpg"
       }
@@ -74,13 +74,13 @@
     ],
     "variations": [
       {
-        "id": "var_1794274984046_0",
+        "id": "var_1794317922443_0",
         "name": "Chocolate Talento",
         "image": "/images/professores/lembrancinha-talento.jpg",
         "description": "Com mini Talento Avelãs (\"Para você que tem muito Talento\")"
       },
       {
-        "id": "var_1794274984046_1",
+        "id": "var_1794317922443_1",
         "name": "Sonho de Valsa",
         "image": "/images/professores/lembrancinha-sonho-de-valsa.jpg",
         "description": "Com bombom Sonho de Valsa (\"Onde histórias começam e Sonhos se tornam possíveis\")"
@@ -108,7 +108,7 @@
     "name": "Mini Lata Natalina Personalizada",
     "category": "natal",
     "description": "Lembrancinha natalina em lata com acabamento artesanal de luxo. Acompanha rótulo temático personalizado com o nome, laço de cetim com pompom de neve e tag de Boas Festas com cordão dourado. Ideal para rechear com biscoitos caseiros, bombons, pães de mel ou doces.",
-    "price": 15,
+    "price": 14.9,
     "minQuantity": 1,
     "unit": "unidade",
     "leadTimeDays": 5,
@@ -141,7 +141,7 @@
     "name": "Caderno Personalizado com Elástico",
     "category": "cadernos",
     "description": "Caderno e caderneta artesanal personalizada com o seu nome na capa dura laminada. Encadernação wire-o metálica dupla, elástico coordenado para fechamento seguro e miolo pautado especial com cabeçalho de dias da semana (STQQSSD). Perfeito para anotações, estudos, presentes afetivos ou caderneta de vacinação.",
-    "price": 35,
+    "price": 79.9,
     "minQuantity": 1,
     "unit": "unidade",
     "leadTimeDays": 5,
@@ -157,19 +157,19 @@
     ],
     "variations": [
       {
-        "id": "var_1794275730300_0",
+        "id": "var_1794317987922_0",
         "name": "Geométrico Azul",
         "image": "/images/cadernos/caderno-azul-fechado.jpg",
         "description": "Modelo geométrico moderno em azul marinho com elástico coordenado e miolo pautado."
       },
       {
-        "id": "var_1794275730300_1",
+        "id": "var_1794317987922_1",
         "name": "Geométrico Verde",
         "image": "/images/cadernos/caderno-verde-fechado.jpg",
         "description": "Modelo geométrico em verde oliva e bege com elástico coordenado e miolo pautado."
       },
       {
-        "id": "var_1794275730300_2",
+        "id": "var_1794317987922_2",
         "name": "Floral Lilás (Vacinação)",
         "image": "/images/cadernos/caderneta-floral-lilas.jpg",
         "description": "Caderneta com acabamento holográfico, flores campestres, tassel de seda roxo e passante de borboleta dourada."
@@ -193,5 +193,68 @@
       ],
       "allowNotes": true
     }
+  },
+  {
+    "id": "bola-de-natal-em-acrilico-4461",
+    "name": "Bola de natal em Acrílico",
+    "category": "natal",
+    "description": "Enfeite de Natal delicado e cheio de significado para iluminar a sua árvore de Natal",
+    "price": 9.9,
+    "unit": "unidade",
+    "leadTimeDays": 5,
+    "minQuantity": 1,
+    "image": "/uploads/1794318618845-saveclip.app_588720354_18183661219347767_9060147958946855120_n.jpg",
+    "images": [
+      "/uploads/1794318618845-saveclip.app_588720354_18183661219347767_9060147958946855120_n.jpg"
+    ],
+    "variations": [
+      {
+        "id": "var_1794318704451_0",
+        "name": "Modelo 1",
+        "image": "/uploads/1794318633288-saveclip.app_588720354_18183661219347767_9060147958946855120_n.jpg"
+      }
+    ],
+    "availableRibbonColors": [
+      "Laço Dourado",
+      "Laço Vermelho",
+      "Laço Verde",
+      "Laço Rosa"
+    ],
+    "customizationSettings": {
+      "allowChildName": true,
+      "childNameLabel": "Nome na Lembrancinha",
+      "allowRibbonColors": true,
+      "ribbonColors": [
+        "Laço Dourado",
+        "Laço Vermelho",
+        "Laço Verde",
+        "Laço Rosa"
+      ],
+      "allowNotes": true
+    },
+    "popular": true
+  },
+  {
+    "id": "kit-tacas-de-champanhe-acrilicas-3787",
+    "name": "Kit Taças de Champanhe Acrílicas",
+    "category": "dia-dos-namorados",
+    "description": "Kit Dia dos Namorados com Suporte Alça e 2 Taças – \"Um Brinde ao Nosso Amor\"",
+    "price": 15,
+    "unit": "unidade",
+    "leadTimeDays": 5,
+    "minQuantity": 1,
+    "image": "/uploads/1794319780757-saveclip.app_502950022_18164158618347767_3604424657868561051_n.jpg",
+    "images": [
+      "/uploads/1794319780757-saveclip.app_502950022_18164158618347767_3604424657868561051_n.jpg",
+      "/uploads/1794319788254-saveclip.app_502405449_18164158609347767_4785126441019407278_n.jpg"
+    ],
+    "customizationSettings": {
+      "allowChildName": true,
+      "childNameLabel": "Nome na Lembrancinha",
+      "allowRibbonColors": false,
+      "ribbonColors": [],
+      "allowNotes": true
+    },
+    "popular": true
   }
 ]

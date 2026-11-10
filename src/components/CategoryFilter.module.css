@@ -53,7 +53,10 @@
   align-items: center;
   gap: 0.75rem;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
+  margin-top: -0.5rem;
+  margin-left: -0.5rem;
+  margin-right: -0.5rem;
+  padding: 0.5rem 0.5rem 0.75rem 0.5rem;
   scroll-snap-type: x mandatory;
   -ms-overflow-style: none; /* Internet Explorer e Edge */
   scrollbar-width: none; /* Firefox */

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-serif",
@@ -47,6 +48,7 @@ export default function RootLayout({
     <html lang="pt-BR" className={`${cormorant.variable} ${jakarta.variable}`}>
       <body>
         <CartProvider>
+          <AnalyticsTracker />
           {children}
         </CartProvider>
       </body>

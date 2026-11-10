@@ -19,7 +19,7 @@ export function WhatsappButton() {
       >
         <MessageCircle size={22} className={styles.whatsappIcon} />
         <span className={styles.buttonText}>
-          Dúvidas? Fale Conosco
+          Fale Conosco
         </span>
       </a>
     </aside>

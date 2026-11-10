@@ -6,6 +6,7 @@ import { X, Send, MapPin, Calendar, User, Phone, CheckCircle2 } from 'lucide-rea
 import { DeliveryMethod } from '@/types';
 import confetti from 'canvas-confetti';
 import styles from './CheckoutModal.module.css';
+import { trackOrderToDatabase } from '@/lib/tracking';
 
 export function CheckoutModal() {
   const {
@@ -55,6 +56,20 @@ export function CheckoutModal() {
 
     // Abre o WhatsApp na nova aba
     window.open(url, '_blank');
+
+    // Registra o pedido no banco de dados Supabase de forma assíncrona
+    const totalUnits = items.reduce((acc, it) => acc + (it.quantity || 1), 0);
+    trackOrderToDatabase({
+      customerName,
+      customerPhone,
+      eventDate,
+      deliveryMethod,
+      deliveryAddress: deliveryAddress.trim() || undefined,
+      generalNotes: generalNotes.trim() || undefined,
+      totalUnits,
+      totalAmount: subtotalAmount,
+      items,
+    });
   };
 
   const handleFinish = () => {

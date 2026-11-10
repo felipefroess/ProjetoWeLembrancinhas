@@ -184,8 +184,9 @@
 }
 
 .itemSubtotal {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-family: var(--font-jakarta, var(--font-sans, 'Plus Jakarta Sans', sans-serif));
+  font-size: 0.8125rem;
+  font-weight: 700;
   color: #6D4C3D;
   margin: 0.125rem 0;
 }
@@ -310,10 +311,11 @@
 }
 
 .totalAmount {
-  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-family: var(--font-jakarta, var(--font-sans, 'Plus Jakarta Sans', sans-serif));
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   color: #6D4C3D;
+  letter-spacing: -0.01em;
 }
 
 .whatsappHint {

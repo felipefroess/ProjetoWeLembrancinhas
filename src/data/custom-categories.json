@@ -3,5 +3,10 @@
     "id": "maternidade",
     "name": "Maternidade",
     "description": "Produtos da categoria Maternidade"
+  },
+  {
+    "id": "dia-dos-namorados",
+    "name": "Dia dos Namorados",
+    "description": "Produtos da categoria Dia dos Namorados"
   }
 ]
