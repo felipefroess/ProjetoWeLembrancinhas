@@ -48,7 +48,7 @@ export function HeroBanner() {
             <div className={styles.valuePropCard}>
               <Gift size={18} className={styles.propIcon} />
               <div>
-                <p className={styles.propTitle}>100% Personalizado</p>
+                <p className={styles.propInfos}>100% Personalizado</p>
                 <p className={styles.propSubtitle}>Com o tema e nome</p>
               </div>
             </div>
@@ -56,7 +56,7 @@ export function HeroBanner() {
             <div className={styles.valuePropCard}>
               <Clock size={18} className={styles.propIcon} />
               <div>
-                <p className={styles.propTitle}>Produção Rápida</p>
+                <p className={styles.propInfos}>Produção Rápida</p>
                 <p className={styles.propSubtitle}>A partir de 5 dias úteis</p>
               </div>
             </div>
@@ -64,7 +64,7 @@ export function HeroBanner() {
             <div className={styles.valuePropCard}>
               <Truck size={18} className={styles.propIcon} />
               <div>
-                <p className={styles.propTitle}>Retirada ou Envio</p>
+                <p className={styles.propInfos}>Retirada ou Envio</p>
                 <p className={styles.propSubtitle}>Pouso Alegre e para todo o Brasil</p>
               </div>
             </div>

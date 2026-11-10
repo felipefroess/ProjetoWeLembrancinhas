@@ -208,3 +208,8 @@
   color: #7C6E64;
   margin: 0;
 }
+.propInfos{
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 0.9em;
+}

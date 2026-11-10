@@ -1,1 +1,7 @@
-[]
+[
+  {
+    "id": "maternidade",
+    "name": "Maternidade",
+    "description": "Produtos da categoria Maternidade"
+  }
+]

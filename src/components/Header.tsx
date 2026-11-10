@@ -48,7 +48,7 @@ export function Header({ searchQuery, setSearchQuery }: HeaderProps) {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar topo de bolo, caixa milk, batizado..."
+                placeholder="O que você procura?"
                 className={styles.searchInput}
               />
               <Search className={styles.searchIcon} size={16} />

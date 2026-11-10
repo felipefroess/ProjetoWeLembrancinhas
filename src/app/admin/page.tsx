@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
   Plus, 
+  Pencil,
   Trash2, 
   ExternalLink, 
   LogOut, 
@@ -24,10 +25,11 @@ export default function AdminDashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // Formulário de Novo Produto
+  // Formulário de Produto
   const [name, setName] = useState('');
   const [categoryId, setCategoryId] = useState('natal');
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -37,8 +39,11 @@ export default function AdminDashboardPage() {
   const [unit, setUnit] = useState('unidade');
   const [leadTimeDays, setLeadTimeDays] = useState('5');
   const [minQuantity, setMinQuantity] = useState('1');
+
+  // Gerenciamento de Fotos
   const [mainImage, setMainImage] = useState('');
   const [additionalImages, setAdditionalImages] = useState<string[]>([]);
+  const [newAdditionalUrl, setNewAdditionalUrl] = useState('');
   
   // Modelos / Variações
   const [hasVariations, setHasVariations] = useState(false);
@@ -53,6 +58,7 @@ export default function AdminDashboardPage() {
   const [customFields, setCustomFields] = useState<CustomFieldDefinition[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const additionalFileInputRef = useRef<HTMLInputElement>(null);
 
   // Verifica autenticação e carrega dados
   useEffect(() => {
@@ -85,6 +91,96 @@ export default function AdminDashboardPage() {
     await fetch('/api/admin/logout', { method: 'POST' });
     router.push('/admin/login');
     router.refresh();
+  };
+
+  const handleOpenCreateModal = () => {
+    setEditingProductId(null);
+    setName('');
+    const firstCat = categories.find((c) => c.id !== 'todos')?.id || 'natal';
+    setCategoryId(firstCat);
+    setIsCreatingNewCategory(false);
+    setNewCategoryName('');
+    setDescription('');
+    setPrice('15.00');
+    setUnit('unidade');
+    setLeadTimeDays('5');
+    setMinQuantity('1');
+    setMainImage('');
+    setAdditionalImages([]);
+    setNewAdditionalUrl('');
+    setHasVariations(false);
+    setVariations([]);
+    setAllowChildName(true);
+    setChildNameLabel('Nome na Lembrancinha');
+    setAllowRibbonColors(false);
+    setRibbonColorsText('Laço Dourado, Laço Rosa, Laço Verde');
+    setAllowNotes(true);
+    setCustomFields([]);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditProduct = (product: Product) => {
+    setEditingProductId(product.id);
+    setName(product.name || '');
+    setCategoryId(product.category || 'natal');
+    setIsCreatingNewCategory(false);
+    setNewCategoryName('');
+    setDescription(product.description || '');
+    setPrice(product.price !== undefined ? product.price.toString() : '0');
+    setUnit(product.unit || 'unidade');
+    setLeadTimeDays(product.leadTimeDays ? product.leadTimeDays.toString() : '5');
+    setMinQuantity(product.minQuantity ? product.minQuantity.toString() : '1');
+
+    // Carrega fotos da publicação
+    const primaryImg = product.image || (product.images && product.images[0]) || '';
+    setMainImage(primaryImg);
+
+    if (product.images && product.images.length > 0) {
+      // Pega as imagens secundárias excluindo a principal para a galeria
+      const others = product.images.filter((img, idx) => {
+        if (idx === 0 && img === primaryImg) return false;
+        return img !== primaryImg;
+      });
+      setAdditionalImages(others);
+    } else {
+      setAdditionalImages([]);
+    }
+    setNewAdditionalUrl('');
+
+    // Variações / Modelos
+    if (product.variations && product.variations.length > 0) {
+      setHasVariations(true);
+      setVariations(
+        product.variations.map((v) => ({
+          name: v.name,
+          image: v.image || '',
+          description: v.description || '',
+        }))
+      );
+    } else {
+      setHasVariations(false);
+      setVariations([]);
+    }
+
+    // Configurações de personalização
+    const cs = product.customizationSettings;
+    setAllowChildName(cs?.allowChildName ?? true);
+    setChildNameLabel(cs?.childNameLabel || 'Nome na Lembrancinha');
+    const hasRibbonColors = cs?.allowRibbonColors ?? (product.availableRibbonColors && product.availableRibbonColors.length > 0 ? true : false);
+    setAllowRibbonColors(hasRibbonColors);
+    setRibbonColorsText(
+      product.availableRibbonColors?.join(', ') ||
+      cs?.ribbonColors?.join(', ') ||
+      'Laço Dourado, Laço Rosa, Laço Verde'
+    );
+    setAllowNotes(cs?.allowNotes ?? true);
+    setCustomFields(cs?.customFields ? cs.customFields.map((f) => ({ ...f })) : []);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingProductId(null);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'main' | number) => {
@@ -120,6 +216,58 @@ export default function AdminDashboardPage() {
       setUploadingImage(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  // Upload de múltiplas fotos para a galeria
+  const handleAdditionalImagesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingImage(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/admin/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.success && data.url) {
+          setAdditionalImages((prev) => [...prev, data.url]);
+        }
+      }
+    } catch {
+      alert('Erro ao enviar fotos adicionais.');
+    } finally {
+      setUploadingImage(false);
+      if (additionalFileInputRef.current) additionalFileInputRef.current.value = '';
+    }
+  };
+
+  const handleAddAdditionalUrl = () => {
+    if (!newAdditionalUrl.trim()) return;
+    setAdditionalImages((prev) => [...prev, newAdditionalUrl.trim()]);
+    setNewAdditionalUrl('');
+  };
+
+  const handleRemoveAdditionalImage = (index: number) => {
+    setAdditionalImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handlePromoteToMain = (index: number) => {
+    const promoted = additionalImages[index];
+    if (!promoted) return;
+    const oldMain = mainImage;
+    setMainImage(promoted);
+    setAdditionalImages((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      if (oldMain && oldMain !== promoted) {
+        next.unshift(oldMain);
+      }
+      return next;
+    });
   };
 
   const handleAddVariation = () => {
@@ -187,19 +335,39 @@ export default function AdminDashboardPage() {
         ? variations.map((v, idx) => ({
             id: `var_${Date.now()}_${idx}`,
             name: v.name,
-            image: v.image || mainImage,
+            image: v.image || mainImage || '/images/placeholder.jpg',
             description: v.description || undefined,
           }))
         : [];
 
-      const slugId = name
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)+/g, '') + `-${Date.now().toString().slice(-4)}`;
+      // Monta lista consolidada de fotos respeitando remoções
+      const allImages: string[] = [];
+      if (mainImage.trim()) {
+        allImages.push(mainImage.trim());
+      }
+      additionalImages.forEach((img) => {
+        const trimmed = img.trim();
+        if (trimmed && !allImages.includes(trimmed)) {
+          allImages.push(trimmed);
+        }
+      });
 
-      const newProduct: Product = {
+      const finalMainImage = mainImage.trim() || (allImages.length > 0 ? allImages[0] : '/images/placeholder.jpg');
+      const finalImagesList = allImages.length > 0 ? allImages : [finalMainImage];
+
+      const existingProduct = editingProductId ? products.find((p) => p.id === editingProductId) : null;
+
+      const slugId = editingProductId
+        ? editingProductId
+        : name
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)+/g, '') + `-${Date.now().toString().slice(-4)}`;
+
+      const savedProductData: Product = {
+        ...existingProduct,
         id: slugId,
         name: name.trim(),
         category: finalCategory,
@@ -208,8 +376,8 @@ export default function AdminDashboardPage() {
         unit: unit.trim() || 'unidade',
         leadTimeDays: parsedLeadTime,
         minQuantity: parsedMinQty,
-        image: mainImage.trim() || '/images/placeholder.jpg',
-        images: [mainImage.trim() || '/images/placeholder.jpg', ...additionalImages],
+        image: finalMainImage,
+        images: finalImagesList,
         variations: variationsFormatted.length > 0 ? variationsFormatted : undefined,
         availableRibbonColors: ribbonColorsList.length > 0 ? ribbonColorsList : undefined,
         customizationSettings: {
@@ -220,31 +388,37 @@ export default function AdminDashboardPage() {
           allowNotes,
           customFields: customFields.length > 0 ? customFields : undefined,
         },
-        popular: true,
+        popular: existingProduct?.popular ?? true,
       };
 
       const res = await fetch('/api/admin/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          product: newProduct,
+          product: savedProductData,
           newCategoryName: isCreatingNewCategory ? newCategoryName : undefined,
         }),
       });
 
       const data = await res.json();
       if (data.success) {
-        setProducts((prev) => [...prev, data.product]);
-        setIsModalOpen(false);
+        if (editingProductId) {
+          setProducts((prev) => prev.map((p) => (p.id === editingProductId ? data.product : p)));
+        } else {
+          setProducts((prev) => [...prev, data.product]);
+        }
+        handleCloseModal();
         // Reseta campos
         setName('');
         setDescription('');
         setMainImage('');
+        setAdditionalImages([]);
+        setNewAdditionalUrl('');
         setVariations([]);
         setHasVariations(false);
         setCustomFields([]);
       } else {
-        alert(data.error || 'Erro ao cadastrar produto.');
+        alert(data.error || 'Erro ao salvar produto.');
       }
     } catch {
       alert('Falha ao conectar com o servidor.');
@@ -291,11 +465,11 @@ export default function AdminDashboardPage() {
           <div>
             <h2 className={styles.pageHeading}>Catálogo de Produtos</h2>
             <p className={styles.pageSubheading}>
-              Adicione, edite e personalize como os clientes encomendam cada item no site.
+              Adicione, edite fotos e personalize como os clientes encomendam cada item no site.
             </p>
           </div>
 
-          <button onClick={() => setIsModalOpen(true)} className={styles.newProductBtn}>
+          <button onClick={handleOpenCreateModal} className={styles.newProductBtn}>
             <Plus size={18} />
             <span>Novo Produto</span>
           </button>
@@ -337,6 +511,13 @@ export default function AdminDashboardPage() {
                   <td style={{ textAlign: 'right' }}>
                     <div className={styles.actionsCell} style={{ justifyContent: 'flex-end' }}>
                       <button
+                        onClick={() => handleOpenEditProduct(p)}
+                        className={styles.editBtn}
+                        title="Editar publicação do produto"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
                         onClick={() => handleDeleteProduct(p.id, p.name)}
                         className={styles.deleteBtn}
                         title="Excluir produto"
@@ -352,13 +533,15 @@ export default function AdminDashboardPage() {
         </div>
       </main>
 
-      {/* Modal de Criação de Produto */}
+      {/* Modal de Criação / Edição de Produto */}
       {isModalOpen && (
-        <div className={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
+        <div className={styles.modalOverlay} onClick={handleCloseModal}>
           <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>Cadastrar Novo Produto</h3>
-              <button onClick={() => setIsModalOpen(false)} className={styles.closeBtn}>
+              <h3 className={styles.modalTitle}>
+                {editingProductId ? 'Editar Publicação do Produto' : 'Cadastrar Novo Produto'}
+              </h3>
+              <button onClick={handleCloseModal} className={styles.closeBtn}>
                 <X size={16} />
               </button>
             </div>
@@ -475,41 +658,160 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Seção 2: Fotos */}
+              {/* Seção 2: Fotos com Remoção e Gerenciamento */}
               <div className={styles.sectionBox}>
                 <h4 className={styles.sectionTitle}>
-                  <Upload size={16} /> Fotos do Produto
+                  <Upload size={16} /> Fotos da Publicação
                 </h4>
+                <p style={{ fontSize: '0.75rem', color: '#7C6E64', margin: '0 0 0.75rem 0' }}>
+                  Gerencie a foto de capa e as fotos secundárias do produto. Você pode adicionar ou remover qualquer foto a qualquer momento.
+                </p>
 
-                <div className={styles.formField}>
-                  <label className={styles.label}>Foto Principal <span className={styles.reqStar}>*</span></label>
-                  <div className={styles.uploadWrapper}>
-                    <label className={styles.uploadBtn}>
-                      <Upload size={14} />
-                      <span>{uploadingImage ? 'Enviando...' : 'Enviar Foto do Computador'}</span>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        style={{ display: 'none' }}
-                        onChange={(e) => handleImageUpload(e, 'main')}
-                      />
-                    </label>
-                    <span>ou</span>
-                    <input
-                      type="text"
-                      placeholder="Cole a URL ou caminho da foto (ex: /images/...)"
-                      value={mainImage}
-                      onChange={(e) => setMainImage(e.target.value)}
-                      className={styles.input}
-                      style={{ flex: 1 }}
-                    />
-                  </div>
-                  {mainImage && (
-                    <div style={{ marginTop: '0.5rem' }}>
-                      <img src={mainImage} alt="Prévia" className={styles.previewImg} />
+                {/* 2.1 Foto Principal / Capa */}
+                <div className={styles.photoBlock}>
+                  <span className={styles.photoBlockTitle}>
+                    Foto Principal (Capa) <span className={styles.reqStar}>*</span>
+                  </span>
+
+                  {mainImage ? (
+                    <div className={styles.mainPhotoCard}>
+                      <img src={mainImage} alt="Foto Principal" className={styles.mainPhotoImg} />
+                      <div className={styles.mainPhotoInfo}>
+                        <div className={styles.badgeCover}>Capa Principal</div>
+                        <span className={styles.photoUrlText}>{mainImage}</span>
+                        <div className={styles.photoActionsRow}>
+                          <label className={styles.changePhotoBtn}>
+                            <Upload size={13} />
+                            <span>Trocar Foto</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              style={{ display: 'none' }}
+                              onChange={(e) => handleImageUpload(e, 'main')}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setMainImage('')}
+                            className={styles.deletePhotoBtn}
+                            title="Remover foto principal"
+                          >
+                            <Trash2 size={13} />
+                            <span>Remover Foto</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={styles.emptyPhotoBox}>
+                      <p style={{ fontSize: '0.8125rem', color: '#8C7A6B', marginBottom: '0.5rem' }}>
+                        Nenhuma foto de capa definida. Envie uma foto ou cole a URL abaixo:
+                      </p>
+                      <div className={styles.uploadWrapper}>
+                        <label className={styles.uploadBtn}>
+                          <Upload size={14} />
+                          <span>{uploadingImage ? 'Enviando...' : 'Enviar Foto do Computador'}</span>
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={(e) => handleImageUpload(e, 'main')}
+                          />
+                        </label>
+                        <span>ou</span>
+                        <input
+                          type="text"
+                          placeholder="Cole o caminho ou URL (ex: /images/...)"
+                          value={mainImage}
+                          onChange={(e) => setMainImage(e.target.value)}
+                          className={styles.input}
+                          style={{ flex: 1 }}
+                        />
+                      </div>
                     </div>
                   )}
+                </div>
+
+                {/* 2.2 Galeria de Fotos Adicionais */}
+                <div className={styles.photoBlock} style={{ marginTop: '1.25rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span className={styles.photoBlockTitle}>
+                      Fotos Adicionais / Galeria ({additionalImages.length})
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: '#9E9084' }}>
+                      Aparecem na rolagem de fotos e no verso
+                    </span>
+                  </div>
+
+                  {additionalImages.length > 0 ? (
+                    <div className={styles.galleryGrid}>
+                      {additionalImages.map((imgUrl, idx) => (
+                        <div key={idx} className={styles.galleryCard}>
+                          <div className={styles.galleryImgWrapper}>
+                            <img src={imgUrl} alt={`Foto ${idx + 2}`} className={styles.galleryImg} />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveAdditionalImage(idx)}
+                              className={styles.galleryRemoveBtn}
+                              title="Remover esta foto da publicação"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                          <div className={styles.galleryCardFooter}>
+                            <span className={styles.galleryPhotoIndex}>Foto #{idx + 2}</span>
+                            <button
+                              type="button"
+                              onClick={() => handlePromoteToMain(idx)}
+                              className={styles.promoteBtn}
+                              title="Definir esta foto como a capa principal"
+                            >
+                              Tornar Capa
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className={styles.emptyGalleryNote}>
+                      Nenhuma foto adicional no momento. Você pode adicionar mais fotos abaixo:
+                    </div>
+                  )}
+
+                  {/* Adicionar Foto à Galeria */}
+                  <div className={styles.addGalleryRow}>
+                    <label className={styles.uploadBtn}>
+                      <Upload size={14} />
+                      <span>{uploadingImage ? 'Enviando...' : 'Adicionar Foto do Computador'}</span>
+                      <input
+                        ref={additionalFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        style={{ display: 'none' }}
+                        onChange={handleAdditionalImagesUpload}
+                      />
+                    </label>
+                    <div className={styles.urlAddWrapper}>
+                      <input
+                        type="text"
+                        placeholder="Ou cole a URL da foto..."
+                        value={newAdditionalUrl}
+                        onChange={(e) => setNewAdditionalUrl(e.target.value)}
+                        className={styles.input}
+                        style={{ flex: 1 }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddAdditionalUrl}
+                        className={styles.addUrlBtn}
+                        disabled={!newAdditionalUrl.trim()}
+                      >
+                        <Plus size={14} /> Adicionar
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -548,7 +850,7 @@ export default function AdminDashboardPage() {
                             onClick={() => handleRemoveVariation(idx)}
                             className={styles.removeModelBtn}
                           >
-                            <Trash2 size={12} /> Remover
+                            <Trash2 size={12} /> Remover Modelo
                           </button>
                         </div>
 
@@ -571,17 +873,47 @@ export default function AdminDashboardPage() {
 
                           <div className={styles.formField}>
                             <label className={styles.label}>Foto do Modelo</label>
-                            <input
-                              type="text"
-                              placeholder="URL ou envie a foto"
-                              value={v.image}
-                              onChange={(e) => {
-                                const next = [...variations];
-                                next[idx].image = e.target.value;
-                                setVariations(next);
-                              }}
-                              className={styles.input}
-                            />
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <label className={styles.uploadBtn} style={{ padding: '0.4rem 0.65rem', fontSize: '0.75rem' }}>
+                                <Upload size={12} />
+                                <span>Upload</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  style={{ display: 'none' }}
+                                  onChange={(e) => handleImageUpload(e, idx)}
+                                />
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="URL ou envie a foto"
+                                value={v.image}
+                                onChange={(e) => {
+                                  const next = [...variations];
+                                  next[idx].image = e.target.value;
+                                  setVariations(next);
+                                }}
+                                className={styles.input}
+                                style={{ flex: 1 }}
+                              />
+                            </div>
+                            {v.image && (
+                              <div className={styles.modelPhotoPreviewRow}>
+                                <img src={v.image} alt={v.name} className={styles.modelPhotoThumb} />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const next = [...variations];
+                                    next[idx].image = '';
+                                    setVariations(next);
+                                  }}
+                                  className={styles.removeModelPhotoBtn}
+                                  title="Remover foto deste modelo"
+                                >
+                                  <Trash2 size={11} /> Remover Foto
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -720,7 +1052,7 @@ export default function AdminDashboardPage() {
               <div className={styles.modalFooter}>
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={handleCloseModal}
                   className={styles.cancelBtn}
                 >
                   Cancelar
@@ -731,7 +1063,11 @@ export default function AdminDashboardPage() {
                   className={styles.saveBtn}
                 >
                   <Check size={16} />
-                  <span>{saving ? 'Publicando...' : 'Salvar e Publicar no Site'}</span>
+                  <span>
+                    {saving 
+                      ? (editingProductId ? 'Salvando Alterações...' : 'Publicando...') 
+                      : (editingProductId ? 'Salvar Alterações' : 'Salvar e Publicar no Site')}
+                  </span>
                 </button>
               </div>
             </form>
