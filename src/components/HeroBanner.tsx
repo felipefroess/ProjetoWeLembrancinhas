@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Clock, Truck, Gift } from 'lucide-react';
 import { STORE_CONFIG } from '@/data/products';
 import styles from './HeroBanner.module.css';
 
@@ -23,7 +22,11 @@ export function HeroBanner() {
           </h1>
 
           <p className={styles.heroSubtitle}>
-            Lembrancinhas, Topos de bolo 3D, e papelaria personalizada com o nome e tema do seu evento.
+            <span>+7 anos de empresa</span>
+            <span className={styles.bulletDot} aria-hidden="true" />
+            <span>Produção 100% artesanal</span>
+            <span className={styles.bulletDot} aria-hidden="true" />
+            <span>Envio seguro para todo o Brasil.</span>
           </p>
 
           <div className={styles.buttonGroup}>
@@ -41,33 +44,6 @@ export function HeroBanner() {
             >
               Falar no WhatsApp
             </a>
-          </div>
-
-          {/* Destaques de confiança (Value Props) */}
-          <div className={styles.valuePropsGrid}>
-            <div className={styles.valuePropCard}>
-              <Gift size={18} className={styles.propIcon} />
-              <div>
-                <p className={styles.propInfos}>100% Personalizado</p>
-                <p className={styles.propSubtitle}>Com o tema e nome</p>
-              </div>
-            </div>
-
-            <div className={styles.valuePropCard}>
-              <Clock size={18} className={styles.propIcon} />
-              <div>
-                <p className={styles.propInfos}>Produção Rápida</p>
-                <p className={styles.propSubtitle}>A partir de 5 dias úteis</p>
-              </div>
-            </div>
-
-            <div className={styles.valuePropCard}>
-              <Truck size={18} className={styles.propIcon} />
-              <div>
-                <p className={styles.propInfos}>Retirada ou Envio</p>
-                <p className={styles.propSubtitle}>Pouso Alegre e para todo o Brasil</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 [
   {
     "id": "lata-personalizada-maternidade-ursinho-classico-2764",
-    "name": "Lata Personalizada Maternidade – Ursinho Clássico",
+    "name": "Lata Maternidade – Ursinho Clássico",
     "category": "maternidade",
     "description": "Uma lembrancinha delicada e encantadora para celebrar a chegada do seu bebê. Perfeita para colocar docinhos, suspiros, amêndoas ou pequenos mimos.",
     "price": 15,
@@ -132,6 +132,64 @@
         "Laço Verde com Pompom Branco",
         "Laço Vermelho com Pompom Branco",
         "Dourado com Pompom Branco"
+      ],
+      "allowNotes": true
+    }
+  },
+  {
+    "id": "caderno-personalizado-luxo",
+    "name": "Caderno Personalizado com Elástico",
+    "category": "cadernos",
+    "description": "Caderno e caderneta artesanal personalizada com o seu nome na capa dura laminada. Encadernação wire-o metálica dupla, elástico coordenado para fechamento seguro e miolo pautado especial com cabeçalho de dias da semana (STQQSSD). Perfeito para anotações, estudos, presentes afetivos ou caderneta de vacinação.",
+    "price": 35,
+    "minQuantity": 1,
+    "unit": "unidade",
+    "leadTimeDays": 5,
+    "popular": true,
+    "featured": true,
+    "image": "/images/cadernos/caderno-azul-fechado.jpg",
+    "images": [
+      "/images/cadernos/caderno-azul-fechado.jpg",
+      "/images/cadernos/caderno-azul-aberto.jpg",
+      "/images/cadernos/caderno-verde-fechado.jpg",
+      "/images/cadernos/caderno-verde-aberto.jpg",
+      "/images/cadernos/caderneta-floral-lilas.jpg"
+    ],
+    "variations": [
+      {
+        "id": "var_1794275730300_0",
+        "name": "Geométrico Azul",
+        "image": "/images/cadernos/caderno-azul-fechado.jpg",
+        "description": "Modelo geométrico moderno em azul marinho com elástico coordenado e miolo pautado."
+      },
+      {
+        "id": "var_1794275730300_1",
+        "name": "Geométrico Verde",
+        "image": "/images/cadernos/caderno-verde-fechado.jpg",
+        "description": "Modelo geométrico em verde oliva e bege com elástico coordenado e miolo pautado."
+      },
+      {
+        "id": "var_1794275730300_2",
+        "name": "Floral Lilás (Vacinação)",
+        "image": "/images/cadernos/caderneta-floral-lilas.jpg",
+        "description": "Caderneta com acabamento holográfico, flores campestres, tassel de seda roxo e passante de borboleta dourada."
+      }
+    ],
+    "availableRibbonColors": [
+      "Elástico Coordenado com a Capa",
+      "Elástico com Passante Dourado",
+      "Elástico Branco",
+      "Elástico Preto"
+    ],
+    "customizationSettings": {
+      "allowChildName": true,
+      "childNameLabel": "Nome na Lembrancinha",
+      "allowRibbonColors": true,
+      "ribbonColors": [
+        "Elástico Coordenado com a Capa",
+        "Elástico com Passante Dourado",
+        "Elástico Branco",
+        "Elástico Preto"
       ],
       "allowNotes": true
     }
