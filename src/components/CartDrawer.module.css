@@ -50,7 +50,7 @@
 }
 
 .headerTitle {
-  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-family: var(--font-sans);
   font-weight: 700;
   font-size: 1.125rem;
   color: #2D231E;
@@ -112,7 +112,7 @@
 }
 
 .emptyTitle {
-  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-family: var(--font-sans);
   font-weight: 700;
   font-size: 1rem;
   color: #2D231E;
@@ -173,7 +173,7 @@
 }
 
 .itemTitle {
-  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-family: var(--font-sans);
   font-weight: 700;
   font-size: 0.875rem;
   color: #2D231E;

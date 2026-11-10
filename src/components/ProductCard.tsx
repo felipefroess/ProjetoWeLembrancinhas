@@ -13,31 +13,41 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const { openCustomizationModal } = useCart();
 
-  const formattedPrice = product.price.toLocaleString('pt-BR', {
+  const variationPrices = (product.variations || [])
+    .map((v) => v.price)
+    .filter((p): p is number => typeof p === 'number' && p > 0);
+  
+  const minPrice = variationPrices.length > 0 ? Math.min(product.price, ...variationPrices) : product.price;
+  const hasVaryingPrices = variationPrices.length > 0 && (Math.min(...variationPrices) !== Math.max(...variationPrices, product.price));
+
+  const formattedPrice = minPrice.toLocaleString('pt-BR', {
     style: 'currency',
     currency: 'BRL',
   });
 
-  const hasMultipleImages = product.images && product.images.length > 1;
 
   return (
     <div className={styles.productCard}>
-      {/* Container da Imagem com Tag */}
-      <div className={styles.imageContainer}>
+      {/* Container da Imagem com Tag - Clicável para abrir personalização */}
+      <div 
+        className={styles.imageContainer}
+        onClick={() => openCustomizationModal(product)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openCustomizationModal(product);
+          }
+        }}
+        title={`Clique para personalizar ${product.name}`}
+      >
         <img
           src={product.image}
           alt={product.name}
-          className={`${styles.mainImage} ${hasMultipleImages ? styles.mainImageFade : styles.mainImageScale}`}
+          className={styles.mainImage}
           loading="lazy"
         />
-        {hasMultipleImages && (
-          <img
-            src={product.images![1]}
-            alt={`${product.name} verso`}
-            className={styles.hoverImage}
-            loading="lazy"
-          />
-        )}
 
         {/* Badges superiores */}
         <div className={styles.badgesWrapper}>
@@ -93,7 +103,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className={styles.cardFooter}>
           <div>
             <span className={styles.unitLabel}>
-              Valor por {product.unit}
+              {hasVaryingPrices ? `A partir de / ${product.unit}` : `Valor por ${product.unit}`}
             </span>
             <span className={styles.priceValue}>
               {formattedPrice}

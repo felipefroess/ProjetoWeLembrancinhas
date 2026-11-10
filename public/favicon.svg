@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="goldRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5C158"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#B8860B"/>
+    </linearGradient>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#2D231E" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <!-- Fundo circular com borda dourada -->
+  <circle cx="50" cy="50" r="45" fill="#EFE6DC" stroke="url(#goldRing)" stroke-width="4" filter="url(#softShadow)" />
+  <!-- Tipografia Wê estilizada em vetor -->
+  <g transform="translate(24.67, 62.0) scale(0.03024, -0.03024)" fill="#6D4C3D">
+    <path d="M173 0 77 745H220L288 110H245L506 745H641L722 110H674L927 745H1075L772 0H615L537 618H581L329 0Z" />
+    <g transform="translate(1020, 0)">
+      <path d="M304 -12Q224 -12 164.5 23.0Q105 58 72.5 118.5Q40 179 40 254Q40 316 61.5 370.5Q83 425 122.5 467.0Q162 509 214.0 532.5Q266 556 328 556Q408 556 464.0 523.0Q520 490 549.0 434.5Q578 379 578 310Q578 292 575.0 273.0Q572 254 567 235H147L154 335H499L434 290Q447 335 436.5 370.5Q426 406 397.5 427.0Q369 448 327 448Q272 448 238.5 421.0Q205 394 189.5 347.5Q174 301 174 244Q174 200 190.5 168.0Q207 136 237.0 119.5Q267 103 307 103Q352 103 386.0 123.0Q420 143 440 174L544 120Q525 81 489.5 51.0Q454 21 406.5 4.5Q359 -12 304 -12ZM139 640 279 805H434L529 640H406L354 730L277 640Z" />
+    </g>
+  </g>
+</svg>

@@ -24,7 +24,7 @@ export function Footer() {
             </p>
             <div className={styles.locationNote}>
               <MapPin size={14} className={styles.pinIcon} />
-              <span>Atendimento em Pouso Alegre - MG & Paraisópolis - MG</span>
+              <span>Rua João Ferreira de Paula, 20 - Pouso Alegre - MG</span>
             </div>
           </div>
 

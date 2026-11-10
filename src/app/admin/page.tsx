@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
+  LayoutDashboard,
   Plus, 
   Pencil,
   Trash2, 
@@ -43,6 +44,9 @@ export default function AdminDashboardPage() {
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  // Aba Principal do Admin (Dashboard ou Produtos)
+  const [mainTab, setMainTab] = useState<'dashboard' | 'produtos'>('dashboard');
 
   // Período selecionado no dashboard (semana, mes ou ano)
   const [period, setPeriod] = useState<AnalyticsPeriod>('mes');
@@ -93,7 +97,8 @@ export default function AdminDashboardPage() {
   
   // Modelos / Variações
   const [hasVariations, setHasVariations] = useState(false);
-  const [variations, setVariations] = useState<Array<{ name: string; image: string; description: string }>>([]);
+  const [modalTab, setModalTab] = useState<'basico' | 'fotos' | 'modelos' | 'personalizacao'>('basico');
+  const [variations, setVariations] = useState<Array<{ name: string; image: string; image2: string; description: string; price: string }>>([]);
 
   // Opções de Personalização
   const [allowChildName, setAllowChildName] = useState(true);
@@ -141,6 +146,7 @@ export default function AdminDashboardPage() {
 
   const handleOpenCreateModal = () => {
     setEditingProductId(null);
+    setModalTab('basico');
     setName('');
     const firstCat = categories.find((c) => c.id !== 'todos')?.id || 'natal';
     setCategoryId(firstCat);
@@ -193,13 +199,16 @@ export default function AdminDashboardPage() {
     setNewAdditionalUrl('');
 
     // Variações / Modelos
+    setModalTab('basico');
     if (product.variations && product.variations.length > 0) {
       setHasVariations(true);
       setVariations(
         product.variations.map((v) => ({
           name: v.name,
-          image: v.image || '',
+          image: v.images?.[0] || v.image || '',
+          image2: v.images?.[1] || '',
           description: v.description || '',
+          price: v.price !== undefined && v.price > 0 ? String(v.price) : '',
         }))
       );
     } else {
@@ -228,7 +237,10 @@ export default function AdminDashboardPage() {
     setEditingProductId(null);
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'main' | number) => {
+  const handleImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    target: 'main' | { index: number; slot: 1 | 2 }
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -245,10 +257,14 @@ export default function AdminDashboardPage() {
       if (data.success && data.url) {
         if (target === 'main') {
           setMainImage(data.url);
-        } else if (typeof target === 'number') {
+        } else if (typeof target === 'object' && target !== null) {
           setVariations((prev) => {
             const next = [...prev];
-            next[target].image = data.url;
+            if (target.slot === 1) {
+              next[target.index].image = data.url;
+            } else {
+              next[target.index].image2 = data.url;
+            }
             return next;
           });
         }
@@ -318,7 +334,7 @@ export default function AdminDashboardPage() {
   const handleAddVariation = () => {
     setVariations((prev) => [
       ...prev,
-      { name: `Modelo ${prev.length + 1}`, image: '', description: '' },
+      { name: `Modelo ${prev.length + 1}`, image: '', image2: '', description: '', price: '' },
     ]);
   };
 
@@ -377,12 +393,25 @@ export default function AdminDashboardPage() {
         : [];
 
       const variationsFormatted: ProductVariation[] = hasVariations
-        ? variations.map((v, idx) => ({
-            id: `var_${Date.now()}_${idx}`,
-            name: v.name,
-            image: v.image || mainImage || '/images/placeholder.jpg',
-            description: v.description || undefined,
-          }))
+        ? variations.map((v, idx) => {
+            const vImages: string[] = [];
+            if (v.image && v.image.trim()) vImages.push(v.image.trim());
+            if (v.image2 && v.image2.trim()) vImages.push(v.image2.trim());
+            const primaryImg = vImages[0] || mainImage || '/images/placeholder.jpg';
+
+            const parsedVarPrice = v.price && !isNaN(parseFloat(v.price.replace(',', '.')))
+              ? parseFloat(v.price.replace(',', '.'))
+              : undefined;
+
+            return {
+              id: `var_${Date.now()}_${idx}`,
+              name: v.name.trim(),
+              image: primaryImg,
+              images: vImages.length > 0 ? vImages : [primaryImg],
+              description: v.description?.trim() || undefined,
+              price: parsedVarPrice,
+            };
+          })
         : [];
 
       // Monta lista consolidada de fotos respeitando remoções
@@ -517,33 +546,105 @@ export default function AdminDashboardPage() {
 
   return (
     <div className={styles.adminWrapper}>
-      {/* Barra de Navegação Superior */}
-      <header className={styles.topBar}>
-        <div className={styles.brandGroup}>
+      {/* Barra Lateral de Navegação (Sidebar) */}
+      <aside className={styles.sidebar}>
+        <div className={styles.sidebarBrand}>
           <div className={styles.brandBadge}>Wê</div>
-          <div>
-            <h1 className={styles.brandTitle}>Wê Lembrancinhas</h1>
-            <span className={styles.adminTag}>Painel Administrativo</span>
+          <div className={styles.sidebarBrandText}>
+            <span className={styles.sidebarBrandTitle}>Wê Lembrancinhas</span>
+            <span className={styles.adminTag}>Painel Admin</span>
           </div>
         </div>
 
-        <div className={styles.topActions}>
-          <Link href="/" target="_blank" className={styles.storeLink}>
+        <div className={styles.sidebarSectionLabel}>Menu Principal</div>
+        <nav className={styles.sidebarNav}>
+          <button
+            type="button"
+            onClick={() => setMainTab('dashboard')}
+            className={`${styles.sidebarNavItem} ${mainTab === 'dashboard' ? styles.sidebarNavItemActive : ''}`}
+          >
+            <LayoutDashboard size={18} />
+            <span>Dashboard</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMainTab('produtos')}
+            className={`${styles.sidebarNavItem} ${mainTab === 'produtos' ? styles.sidebarNavItemActive : ''}`}
+          >
+            <Package size={18} />
+            <span>Gerenciamento de Produtos</span>
+            <span className={styles.counterPill}>{products.length}</span>
+          </button>
+        </nav>
+
+        <div className={styles.sidebarFooter}>
+          <div className={styles.sidebarStatusBox}>
+            <span style={{ fontSize: '0.6875rem', color: '#8C7A6B', fontWeight: 600 }}>STATUS DA LOJA</span>
+            <span className={styles.onlineBadge}>
+              <span className={styles.onlineDot} /> Online para Pedidos
+            </span>
+          </div>
+
+          <Link href="/" target="_blank" className={styles.sidebarLink}>
             <ExternalLink size={14} />
-            <span>Ver Loja</span>
+            <span>Ver Loja Virtual</span>
           </Link>
-          <button onClick={handleLogout} className={styles.logoutBtn} title="Encerrar sessão">
+
+          <button onClick={handleLogout} className={styles.sidebarLogoutBtn} title="Encerrar sessão">
             <LogOut size={14} />
-            <span>Sair</span>
+            <span>Sair do Painel</span>
           </button>
         </div>
-      </header>
+      </aside>
 
-      {/* Conteúdo Principal */}
-      <main className={styles.mainContent}>
+      {/* Área de Conteúdo à Direita */}
+      <div className={styles.mainContainer}>
+        {/* Barra de Navegação Superior */}
+        <header className={styles.topBar}>
+          <div className={styles.brandGroup}>
+            <div className={styles.mobileNavTabs}>
+              <button
+                type="button"
+                onClick={() => setMainTab('dashboard')}
+                className={`${styles.mobileTabBtn} ${mainTab === 'dashboard' ? styles.mobileTabBtnActive : ''}`}
+              >
+                <LayoutDashboard size={14} />
+                <span>Dashboard</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMainTab('produtos')}
+                className={`${styles.mobileTabBtn} ${mainTab === 'produtos' ? styles.mobileTabBtnActive : ''}`}
+              >
+                <Package size={14} />
+                <span>Produtos ({products.length})</span>
+              </button>
+            </div>
+            <div className={styles.desktopTabTitle}>
+              <h2 className={styles.topBarHeading}>
+                {mainTab === 'dashboard' ? 'Dashboard & Métricas' : 'Gerenciamento de Produtos'}
+              </h2>
+            </div>
+          </div>
 
-        {/* Dashboard de Desempenho, Vendas & Métricas */}
-        <section className={styles.dashboardSection}>
+          <div className={styles.topActions}>
+            <Link href="/" target="_blank" className={styles.storeLink}>
+              <ExternalLink size={14} />
+              <span>Ver Loja</span>
+            </Link>
+            <button onClick={handleLogout} className={styles.logoutBtn} title="Encerrar sessão">
+              <LogOut size={14} />
+              <span>Sair</span>
+            </button>
+          </div>
+        </header>
+
+        {/* Conteúdo Principal */}
+        <main className={styles.mainContent}>
+          {/* Aba 1: Dashboard de Métricas */}
+          {mainTab === 'dashboard' && (
+            <section className={styles.dashboardSection}>
           <div className={styles.periodHeaderRow}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -820,8 +921,12 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         </section>
+          )}
 
-        {/* Cabeçalho da Tabela de Catálogo */}
+          {/* Aba 2: Gerenciamento de Produtos */}
+          {mainTab === 'produtos' && (
+            <section className={styles.productsSection}>
+              {/* Cabeçalho da Tabela de Catálogo */}
         <div className={styles.headerRow}>
           <div>
             <h2 className={styles.pageHeading}>Gerenciamento de Produtos</h2>
@@ -943,7 +1048,10 @@ export default function AdminDashboardPage() {
             </tbody>
           </table>
         </div>
-      </main>
+            </section>
+          )}
+        </main>
+      </div>
 
       {/* Modal de Criação / Edição de Produto */}
       {isModalOpen && (
@@ -955,6 +1063,42 @@ export default function AdminDashboardPage() {
               </h3>
               <button onClick={handleCloseModal} className={styles.closeBtn}>
                 <X size={16} />
+              </button>
+            </div>
+
+            {/* Barra de Abas do Modal */}
+            <div className={styles.modalTabsBar}>
+              <button
+                type="button"
+                onClick={() => setModalTab('basico')}
+                className={`${styles.modalTabBtn} ${modalTab === 'basico' ? styles.modalTabBtnActive : ''}`}
+              >
+                <Package size={14} />
+                <span>Dados Principais</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setModalTab('fotos')}
+                className={`${styles.modalTabBtn} ${modalTab === 'fotos' ? styles.modalTabBtnActive : ''}`}
+              >
+                <Upload size={14} />
+                <span>Fotos ({1 + additionalImages.length})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setModalTab('modelos')}
+                className={`${styles.modalTabBtn} ${modalTab === 'modelos' ? styles.modalTabBtnActive : ''}`}
+              >
+                <Layers size={14} />
+                <span>Modelos & Preços {hasVariations ? `(${variations.length})` : ''}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setModalTab('personalizacao')}
+                className={`${styles.modalTabBtn} ${modalTab === 'personalizacao' ? styles.modalTabBtnActive : ''}`}
+              >
+                <AlertCircle size={14} />
+                <span>Personalização</span>
               </button>
             </div>
 
@@ -1284,7 +1428,55 @@ export default function AdminDashboardPage() {
                           </div>
 
                           <div className={styles.formField}>
-                            <label className={styles.label}>Foto do Modelo</label>
+                            <label className={styles.label}>Breve Descrição do Modelo (Opcional)</label>
+                            <input
+                              type="text"
+                              placeholder="Ex: Com mini chocolate Talento e frase especial"
+                              value={v.description}
+                              onChange={(e) => {
+                                const next = [...variations];
+                                next[idx].description = e.target.value;
+                                setVariations(next);
+                              }}
+                              className={styles.input}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Campo de Preço Específico do Modelo */}
+                        <div className={styles.modelPriceHighlight}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                            <label className={styles.label} style={{ margin: 0, fontWeight: 700, color: '#4A3326' }}>
+                              💰 Preço Específico deste Modelo (R$)
+                            </label>
+                            {v.price && !isNaN(parseFloat(v.price.replace(',', '.'))) ? (
+                              <span className={styles.modelPriceBadge}>
+                                R$ {parseFloat(v.price.replace(',', '.')).toFixed(2).replace('.', ',')}
+                              </span>
+                            ) : (
+                              <span style={{ fontSize: '0.6875rem', color: '#8C7A6B' }}>
+                                Herda preço base (R$ {price || '0,00'})
+                              </span>
+                            )}
+                          </div>
+                          <input
+                            type="text"
+                            placeholder={`Ex: 79.90 (ou deixe em branco para herdar R$ ${price || '0,00'})`}
+                            value={v.price || ''}
+                            onChange={(e) => {
+                              const next = [...variations];
+                              next[idx].price = e.target.value;
+                              setVariations(next);
+                            }}
+                            className={styles.input}
+                          />
+                        </div>
+
+                        {/* Fotos do Modelo (Até 2 Fotos: Principal e 2ª Foto) */}
+                        <div className={styles.grid2} style={{ marginTop: '0.5rem' }}>
+                          {/* 1ª Foto do Modelo */}
+                          <div className={styles.formField}>
+                            <label className={styles.label}>1ª Foto do Modelo (Principal)</label>
                             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                               <label className={styles.uploadBtn} style={{ padding: '0.4rem 0.65rem', fontSize: '0.75rem' }}>
                                 <Upload size={12} />
@@ -1293,12 +1485,12 @@ export default function AdminDashboardPage() {
                                   type="file"
                                   accept="image/*"
                                   style={{ display: 'none' }}
-                                  onChange={(e) => handleImageUpload(e, idx)}
+                                  onChange={(e) => handleImageUpload(e, { index: idx, slot: 1 })}
                                 />
                               </label>
                               <input
                                 type="text"
-                                placeholder="URL ou envie a foto"
+                                placeholder="URL ou envie a foto 1"
                                 value={v.image}
                                 onChange={(e) => {
                                   const next = [...variations];
@@ -1320,28 +1512,59 @@ export default function AdminDashboardPage() {
                                     setVariations(next);
                                   }}
                                   className={styles.removeModelPhotoBtn}
-                                  title="Remover foto deste modelo"
+                                  title="Remover 1ª foto"
                                 >
                                   <Trash2 size={11} /> Remover Foto
                                 </button>
                               </div>
                             )}
                           </div>
-                        </div>
 
-                        <div className={styles.formField}>
-                          <label className={styles.label}>Breve Descrição do Modelo</label>
-                          <input
-                            type="text"
-                            placeholder="Ex: Com mini chocolate Talento e frase especial"
-                            value={v.description}
-                            onChange={(e) => {
-                              const next = [...variations];
-                              next[idx].description = e.target.value;
-                              setVariations(next);
-                            }}
-                            className={styles.input}
-                          />
+                          {/* 2ª Foto do Modelo */}
+                          <div className={styles.formField}>
+                            <label className={styles.label}>2ª Foto do Modelo (Opcional - Ângulo 2)</label>
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <label className={styles.uploadBtn} style={{ padding: '0.4rem 0.65rem', fontSize: '0.75rem' }}>
+                                <Upload size={12} />
+                                <span>Upload</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  style={{ display: 'none' }}
+                                  onChange={(e) => handleImageUpload(e, { index: idx, slot: 2 })}
+                                />
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="URL ou envie a foto 2"
+                                value={v.image2 || ''}
+                                onChange={(e) => {
+                                  const next = [...variations];
+                                  next[idx].image2 = e.target.value;
+                                  setVariations(next);
+                                }}
+                                className={styles.input}
+                                style={{ flex: 1 }}
+                              />
+                            </div>
+                            {v.image2 && (
+                              <div className={styles.modelPhotoPreviewRow}>
+                                <img src={v.image2} alt={v.name} className={styles.modelPhotoThumb} />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const next = [...variations];
+                                    next[idx].image2 = '';
+                                    setVariations(next);
+                                  }}
+                                  className={styles.removeModelPhotoBtn}
+                                  title="Remover 2ª foto"
+                                >
+                                  <Trash2 size={11} /> Remover Foto
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}

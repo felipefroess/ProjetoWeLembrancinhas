@@ -93,7 +93,10 @@ export function ProductModal() {
   }
 
   const hasVariations = Boolean(product.variations && product.variations.length > 1);
-  const subtotal = product.price * quantity;
+  const currentPrice = (selectedVariation?.price && selectedVariation.price > 0)
+    ? selectedVariation.price
+    : product.price;
+  const subtotal = currentPrice * quantity;
 
   // Lista de imagens para navegação por setas:
   // Se a variação selecionada tiver suas próprias fotos (ex: modelo com foto fechado e aberto), usa elas!
@@ -378,7 +381,7 @@ export function ProductModal() {
 
                 <div className={styles.metaRow}>
                   <span className={styles.productPrice}>
-                    {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / {product.unit}
+                    {currentPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / {product.unit}
                   </span>
                   <span className={styles.productLeadTime}>
                     <Clock size={13} /> Produção: {product.leadTimeDays} dias úteis
@@ -389,7 +392,7 @@ export function ProductModal() {
                 <div className={styles.craftAlert}>
                   <AlertCircle size={16} className={styles.alertIcon} />
                   <span>
-                    A Wenilze prepara cada detalhe exclusivamente para a sua comemoração.
+                    A Wê prepara cada detalhe exclusivamente para a sua comemoração.
                   </span>
                 </div>
               </div>

@@ -22,35 +22,18 @@
   aspect-ratio: 1 / 1;
   overflow: hidden;
   background-color: #F5EDE4;
+  cursor: pointer;
 }
 
 .mainImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: all 0.5s ease;
+  transition: transform 0.4s ease;
 }
 
-.productCard:hover .mainImageScale {
+.productCard:hover .mainImage {
   transform: scale(1.05);
-}
-
-.productCard:hover .mainImageFade {
-  opacity: 0;
-}
-
-.hoverImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-
-.productCard:hover .hoverImage {
-  opacity: 1;
 }
 
 /* Badges da Imagem */
@@ -118,6 +101,7 @@
 }
 
 .productName {
+  cursor: pointer;
   font-family: var(--font-jakarta, var(--font-sans, 'Plus Jakarta Sans', sans-serif));
   font-weight: 700;
   font-size: 0.975rem;
@@ -168,6 +152,7 @@
 }
 
 .variationThumb {
+  cursor: pointer;
   width: 1.75rem;
   height: 2.25rem;
   border-radius: 0.375rem;

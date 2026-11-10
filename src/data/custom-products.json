@@ -26,7 +26,7 @@
     "id": "kit-presente-professores-bloco-de-notas-com-caixa-estojo-e-caneta-8914",
     "name": "Bloco de Notas com Caixa Estojo e Caneta",
     "category": "dia-dos-professores",
-    "description": "Um presente sofisticado e carinhoso para homenagear e agradecer a dedicação dos professores. Caixa rígida tipo estojo com fecho em fita, bloco de notas encadernado em wire-o e caneta decorada.",
+    "description": "Um presente sofisticado e carinhoso para homenagear e agradecer a dedicação dos professores. Caixa rígida tipo estojo com fecho em fita, bloco de notas e caneta decorada.",
     "price": 59.9,
     "unit": "unidade",
     "leadTimeDays": 5,
@@ -37,14 +37,20 @@
     ],
     "variations": [
       {
-        "id": "var_1794317865699_0",
+        "id": "var_1794336556859_0",
         "name": "Modelo 1",
-        "image": "/uploads/1794274822116-saveclip.app_561757077_18177293875347767_1852012969418825078_n.jpg"
+        "image": "/uploads/1794274822116-saveclip.app_561757077_18177293875347767_1852012969418825078_n.jpg",
+        "images": [
+          "/uploads/1794274822116-saveclip.app_561757077_18177293875347767_1852012969418825078_n.jpg"
+        ]
       },
       {
-        "id": "var_1794317865699_1",
+        "id": "var_1794336556860_1",
         "name": "Modelo 2",
-        "image": "/uploads/1794274832811-saveclip.app_559554486_18177293884347767_1237520079746612932_n.jpg"
+        "image": "/uploads/1794274832811-saveclip.app_559554486_18177293884347767_1237520079746612932_n.jpg",
+        "images": [
+          "/uploads/1794274832811-saveclip.app_559554486_18177293884347767_1237520079746612932_n.jpg"
+        ]
       }
     ],
     "customizationSettings": {
@@ -60,7 +66,7 @@
     "id": "lembrancinha-porta-chocolate-professores",
     "name": "Porta-Chocolate",
     "category": "dia-dos-professores",
-    "description": "Lembrancinha personalizada para o Dia dos Professores. Cartão especial em papel de alta gramatura com corujinha e mensagens afetuosas, embalado individualmente em saquinho com laço de cetim e tag temática. Escolha entre o modelo com mini chocolate Talento ou bombom Sonho de Valsa.",
+    "description": "Lembrancinha personalizada para o Dia dos Professores. Escolha entre o modelo com mini chocolate Talento ou bombom Sonho de Valsa.",
     "price": 9.9,
     "minQuantity": 1,
     "unit": "unidade",
@@ -74,15 +80,21 @@
     ],
     "variations": [
       {
-        "id": "var_1794317922443_0",
+        "id": "var_1794336606384_0",
         "name": "Chocolate Talento",
         "image": "/images/professores/lembrancinha-talento.jpg",
+        "images": [
+          "/images/professores/lembrancinha-talento.jpg"
+        ],
         "description": "Com mini Talento Avelãs (\"Para você que tem muito Talento\")"
       },
       {
-        "id": "var_1794317922443_1",
+        "id": "var_1794336606384_1",
         "name": "Sonho de Valsa",
         "image": "/images/professores/lembrancinha-sonho-de-valsa.jpg",
+        "images": [
+          "/images/professores/lembrancinha-sonho-de-valsa.jpg"
+        ],
         "description": "Com bombom Sonho de Valsa (\"Onde histórias começam e Sonhos se tornam possíveis\")"
       }
     ],
@@ -107,7 +119,7 @@
     "id": "mini-lata-natal-luxo",
     "name": "Mini Lata Natalina Personalizada",
     "category": "natal",
-    "description": "Lembrancinha natalina em lata com acabamento artesanal de luxo. Acompanha rótulo temático personalizado com o nome, laço de cetim com pompom de neve e tag de Boas Festas com cordão dourado. Ideal para rechear com biscoitos caseiros, bombons, pães de mel ou doces.",
+    "description": "Lembrancinha natalina em lata. Acompanha rótulo temático personalizado com o nome, laço de cetim com pompom de neve e tag de Boas Festas com cordão dourado. Ideal para rechear com biscoitos caseiros, bombons, pães de mel ou doces.",
     "price": 14.9,
     "minQuantity": 1,
     "unit": "unidade",
@@ -140,7 +152,7 @@
     "id": "caderno-personalizado-luxo",
     "name": "Caderno Personalizado com Elástico",
     "category": "cadernos",
-    "description": "Caderno e caderneta artesanal personalizada com o seu nome na capa dura laminada. Encadernação wire-o metálica dupla, elástico coordenado para fechamento seguro e miolo pautado especial com cabeçalho de dias da semana (STQQSSD). Perfeito para anotações, estudos, presentes afetivos ou caderneta de vacinação.",
+    "description": "Caderno personalizado com o seu nome. Encadernação wire-o metálica dupla, elástico coordenado para fechamento seguro e miolo pautado especial com cabeçalho de dias da semana. Perfeito para anotações, estudos ou presentes afetivos.",
     "price": 79.9,
     "minQuantity": 1,
     "unit": "unidade",
@@ -157,22 +169,48 @@
     ],
     "variations": [
       {
-        "id": "var_1794317987922_0",
+        "id": "var_1794336730183_0",
         "name": "Geométrico Azul",
         "image": "/images/cadernos/caderno-azul-fechado.jpg",
+        "images": [
+          "/images/cadernos/caderno-azul-fechado.jpg"
+        ],
         "description": "Modelo geométrico moderno em azul marinho com elástico coordenado e miolo pautado."
       },
       {
-        "id": "var_1794317987922_1",
+        "id": "var_1794336730183_1",
         "name": "Geométrico Verde",
         "image": "/images/cadernos/caderno-verde-fechado.jpg",
+        "images": [
+          "/images/cadernos/caderno-verde-fechado.jpg"
+        ],
         "description": "Modelo geométrico em verde oliva e bege com elástico coordenado e miolo pautado."
       },
       {
-        "id": "var_1794317987922_2",
+        "id": "var_1794336730183_2",
         "name": "Floral Lilás (Vacinação)",
-        "image": "/images/cadernos/caderneta-floral-lilas.jpg",
+        "image": "/uploads/1794333437976-saveclip.app_538768100_18172355338347767_2299544466431525219_n.jpg",
+        "images": [
+          "/uploads/1794333437976-saveclip.app_538768100_18172355338347767_2299544466431525219_n.jpg"
+        ],
         "description": "Caderneta com acabamento holográfico, flores campestres, tassel de seda roxo e passante de borboleta dourada."
+      },
+      {
+        "id": "var_1794336730183_3",
+        "name": "Modelo 4",
+        "image": "/uploads/1794333488324-saveclip.app_539454379_18173392714347767_7517392955588664362_n.jpg",
+        "images": [
+          "/uploads/1794333488324-saveclip.app_539454379_18173392714347767_7517392955588664362_n.jpg",
+          "/uploads/1794333493211-saveclip.app_544073499_18173392741347767_8193566408890919383_n.jpg"
+        ]
+      },
+      {
+        "id": "var_1794336730183_4",
+        "name": "Modelo 5",
+        "image": "/uploads/1794333556658-saveclip.app_521541070_18169066933347767_8499588843540459767_n.jpg",
+        "images": [
+          "/uploads/1794333556658-saveclip.app_521541070_18169066933347767_8499588843540459767_n.jpg"
+        ]
       }
     ],
     "availableRibbonColors": [
@@ -239,7 +277,7 @@
     "name": "Kit Taças de Champanhe Acrílicas",
     "category": "dia-dos-namorados",
     "description": "Kit Dia dos Namorados com Suporte Alça e 2 Taças – \"Um Brinde ao Nosso Amor\"",
-    "price": 15,
+    "price": 39.9,
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
@@ -247,6 +285,157 @@
     "images": [
       "/uploads/1794319780757-saveclip.app_502950022_18164158618347767_3604424657868561051_n.jpg",
       "/uploads/1794319788254-saveclip.app_502405449_18164158609347767_4785126441019407278_n.jpg"
+    ],
+    "customizationSettings": {
+      "allowChildName": true,
+      "childNameLabel": "Nome na Lembrancinha",
+      "allowRibbonColors": false,
+      "ribbonColors": [],
+      "allowNotes": true
+    },
+    "popular": true
+  },
+  {
+    "id": "caixas-explosao-com-fotos-e-doces-8012",
+    "name": "Caixas Explosão com Fotos e Doces",
+    "category": "dia-dos-namorados",
+    "description": "Caixa Explosão Personalizada com Fotos e Mensagens para 7 Doces – Dia dos Namorados / Aniversário",
+    "price": 79.9,
+    "unit": "unidade",
+    "leadTimeDays": 5,
+    "minQuantity": 1,
+    "image": "/uploads/1794322329304-saveclip.app_502942743_18164158282347767_2874077480112854440_n.jpg",
+    "images": [
+      "/uploads/1794322329304-saveclip.app_502942743_18164158282347767_2874077480112854440_n.jpg",
+      "/uploads/1794322336977-saveclip.app_502084229_18164158291347767_6072347069785725598_n.jpg"
+    ],
+    "variations": [
+      {
+        "id": "var_1794323176815_0",
+        "name": "Modelo 1",
+        "image": "/uploads/1794322348494-saveclip.app_502942743_18164158282347767_2874077480112854440_n.jpg",
+        "images": [
+          "/uploads/1794322348494-saveclip.app_502942743_18164158282347767_2874077480112854440_n.jpg",
+          "/uploads/1794322336977-saveclip.app_502084229_18164158291347767_6072347069785725598_n.jpg"
+        ]
+      },
+      {
+        "id": "var_1794323176815_1",
+        "name": "Modelo 2",
+        "image": "/uploads/1794322416835-saveclip.app_502659714_18163975918347767_928340238878548303_n.jpg",
+        "images": [
+          "/uploads/1794322416835-saveclip.app_502659714_18163975918347767_928340238878548303_n.jpg",
+          "/uploads/1794323172385-saveclip.app_502069239_18163975927347767_3323008487323382388_n.jpg"
+        ]
+      }
+    ],
+    "customizationSettings": {
+      "allowChildName": false,
+      "childNameLabel": "Nome na Lembrancinha",
+      "allowRibbonColors": false,
+      "ribbonColors": [],
+      "allowNotes": true
+    },
+    "popular": true
+  },
+  {
+    "id": "porta-sabonete-5923",
+    "name": "Porta-sabonete",
+    "category": "natal",
+    "description": "Lembrancinha de Natal Porta-Sabonete com Saco e Laço Vermelho",
+    "price": 15,
+    "unit": "unidade",
+    "leadTimeDays": 5,
+    "minQuantity": 1,
+    "image": "/uploads/1794335405021-saveclip.app_624067620_18171071590384048_8655808288146978986_n.jpg",
+    "images": [
+      "/uploads/1794335405021-saveclip.app_624067620_18171071590384048_8655808288146978986_n.jpg"
+    ],
+    "customizationSettings": {
+      "allowChildName": false,
+      "childNameLabel": "Nome na Lembrancinha",
+      "allowRibbonColors": false,
+      "ribbonColors": [],
+      "allowNotes": true
+    },
+    "popular": true
+  },
+  {
+    "id": "porta-bis-9810",
+    "name": "Porta-Bis",
+    "category": "natal",
+    "description": "Lembrancinha de Natal Porta-Bis (3 Unidades) com Embalagem e Laço",
+    "price": 15,
+    "unit": "unidade",
+    "leadTimeDays": 5,
+    "minQuantity": 1,
+    "image": "/uploads/1794335601162-saveclip.app_654891797_18089775532928331_951258065111492404_n.jpg",
+    "images": [
+      "/uploads/1794335601162-saveclip.app_654891797_18089775532928331_951258065111492404_n.jpg"
+    ],
+    "customizationSettings": {
+      "allowChildName": false,
+      "childNameLabel": "Nome na Lembrancinha",
+      "allowRibbonColors": false,
+      "ribbonColors": [],
+      "allowNotes": true
+    },
+    "popular": true,
+    "variations": [
+      {
+        "id": "var_1794335929828_0",
+        "name": "Modelo 1",
+        "image": "/uploads/1794335810079-saveclip.app_654891797_18089775532928331_951258065111492404_n.jpg",
+        "images": [
+          "/uploads/1794335810079-saveclip.app_654891797_18089775532928331_951258065111492404_n.jpg",
+          "/uploads/1794335815075-saveclip.app_652773064_18084625118254083_8374610967704577579_n.jpg"
+        ]
+      },
+      {
+        "id": "var_1794335929828_1",
+        "name": "Modelo 2",
+        "image": "/uploads/1794335921834-saveclip.app_669951093_18579763231027025_2885427802905799559_n.jpg",
+        "images": [
+          "/uploads/1794335921834-saveclip.app_669951093_18579763231027025_2885427802905799559_n.jpg",
+          "/uploads/1794335925204-saveclip.app_649604025_17938381596014062_8131345668314107267_n.jpg"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "porta-bombom-3259",
+    "name": "Porta-Bombom",
+    "category": "natal",
+    "description": "Lembrancinha de Natal Porta-Bombom com Embalagem Transparente e Laço",
+    "price": 15,
+    "unit": "unidade",
+    "leadTimeDays": 5,
+    "minQuantity": 1,
+    "image": "/uploads/1794336063492-saveclip.app_625871771_18087632734883825_6662944217020735260_n.jpg",
+    "images": [
+      "/uploads/1794336063492-saveclip.app_625871771_18087632734883825_6662944217020735260_n.jpg"
+    ],
+    "customizationSettings": {
+      "allowChildName": false,
+      "childNameLabel": "Nome na Lembrancinha",
+      "allowRibbonColors": false,
+      "ribbonColors": [],
+      "allowNotes": true
+    },
+    "popular": true
+  },
+  {
+    "id": "porta-bala-4315",
+    "name": "Porta-Bala",
+    "category": "natal",
+    "description": "Um mimo simples, acessível e carinhoso para mimar clientes, parceiros ou colaboradores.",
+    "price": 15,
+    "unit": "unidade",
+    "leadTimeDays": 5,
+    "minQuantity": 1,
+    "image": "/uploads/1794336276063-saveclip.app_625053975_18112211146567565_1096708006824092779_n.jpg",
+    "images": [
+      "/uploads/1794336276063-saveclip.app_625053975_18112211146567565_1096708006824092779_n.jpg"
     ],
     "customizationSettings": {
       "allowChildName": true,

@@ -70,7 +70,7 @@ export default function HomePage() {
   return (
     <div className={styles.pageWrapper}>
       {/* Barra de Navegação */}
-      <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} products={productsList} categories={categoriesList} onSelectCategory={setSelectedCategory} />
 
       {/* Hero Section */}
       <HeroBanner />

@@ -22,6 +22,7 @@ export interface ProductVariation {
   image: string;
   images?: string[];
   description?: string;
+  price?: number;
 }
 
 export interface CustomFieldDefinition {

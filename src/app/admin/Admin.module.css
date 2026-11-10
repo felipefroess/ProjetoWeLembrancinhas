@@ -3,7 +3,237 @@
   background-color: #FAF7F2;
   color: #2D231E;
   display: flex;
+  flex-direction: row;
+  font-family: var(--font-sans);
+}
+
+/* Sidebar na Esquerda */
+.sidebar {
+  width: 260px;
+  background-color: #ffffff;
+  border-right: 1px solid #E8DFD5;
+  display: flex;
   flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  flex-shrink: 0;
+  z-index: 40;
+  padding: 1.25rem 1rem;
+}
+
+.sidebarBrand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid #F0E8DE;
+}
+
+.sidebarBrandText {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarBrandTitle {
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: #2D231E;
+  line-height: 1.2;
+}
+
+.sidebarSectionLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9E9084;
+  padding: 0 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.sidebarNavItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6D4C3D;
+  background-color: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.sidebarNavItem:hover {
+  background-color: #FAF6F0;
+  color: #2D231E;
+}
+
+.sidebarNavItemActive {
+  background-color: #6D4C3D;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(109, 76, 61, 0.2);
+}
+
+.sidebarNavItemActive:hover {
+  background-color: #553A2D;
+}
+
+.counterPill {
+  margin-left: auto;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background-color: #F5EDE4;
+  color: #6D4C3D;
+}
+
+.sidebarNavItemActive .counterPill {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.sidebarFooter {
+  padding-top: 1rem;
+  border-top: 1px solid #F0E8DE;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sidebarStatusBox {
+  background-color: #FAF7F2;
+  border: 1px solid #E8DFD5;
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sidebarLink {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #DACFBF;
+  background-color: #ffffff;
+  color: #6D4C3D;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  justify-content: center;
+}
+
+.sidebarLink:hover {
+  background-color: #FAF7F2;
+}
+
+.sidebarLogoutBtn {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #FFCCC7;
+  background-color: #FFF1F0;
+  color: #CF1322;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  justify-content: center;
+}
+
+.sidebarLogoutBtn:hover {
+  background-color: #FF4D4F;
+  color: #ffffff;
+}
+
+/* Área Principal à Direita */
+.mainContainer {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.topBarHeading {
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #2D231E;
+  margin: 0;
+}
+
+.desktopTabTitle {
+  display: block;
+}
+
+/* Navegação Mobile */
+.mobileNavTabs {
+  display: none;
+  gap: 0.4rem;
+}
+
+@media (max-width: 860px) {
+  .sidebar {
+    display: none;
+  }
+  .desktopTabTitle {
+    display: none;
+  }
+  .mobileNavTabs {
+    display: flex;
+  }
+  .adminWrapper {
+    flex-direction: column;
+  }
+}
+
+.mobileTabBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6D4C3D;
+  background-color: #FAF7F2;
+  border: 1px solid #DACFBF;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobileTabBtnActive {
+  background-color: #6D4C3D;
+  color: #ffffff;
+  border-color: #6D4C3D;
+}
+
+.productsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .topBar {
@@ -38,7 +268,7 @@
 }
 
 .brandTitle {
-  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-family: var(--font-sans);
   font-size: 1.25rem;
   font-weight: 700;
   color: #2D231E;
@@ -132,7 +362,7 @@
 }
 
 .pageHeading {
-  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-family: var(--font-sans);
   font-size: 1.75rem;
   font-weight: 700;
   color: #2D231E;
@@ -330,7 +560,7 @@
 }
 
 .modalTitle {
-  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-family: var(--font-sans);
   font-size: 1.35rem;
   font-weight: 700;
   color: #2D231E;
@@ -1542,4 +1772,68 @@
   color: #7D6B5E;
   margin: 0;
   line-height: 1.4;
+}
+
+/* Abas do Modal de Edição/Criação de Produtos */
+.modalTabsBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background-color: #FAF7F2;
+  border-bottom: 1px solid #E8DFD5;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.modalTabBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6D4C3D;
+  background-color: #ffffff;
+  border: 1px solid #DACFBF;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.modalTabBtn:hover {
+  background-color: #F5EDE4;
+  border-color: #C89B6D;
+}
+
+.modalTabBtnActive {
+  background-color: #6D4C3D;
+  color: #ffffff;
+  border-color: #6D4C3D;
+  box-shadow: 0 2px 6px rgba(109, 76, 61, 0.25);
+}
+
+.modalTabBtnActive:hover {
+  background-color: #553A2D;
+  border-color: #553A2D;
+  color: #ffffff;
+}
+
+.modelPriceHighlight {
+  background-color: #FAF6F0;
+  border: 1px solid #E8DFD5;
+  border-radius: 0.5rem;
+  padding: 0.625rem;
+  margin-top: 0.5rem;
+}
+
+.modelPriceBadge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #2E7D32;
+  background-color: #E8F5E9;
+  border: 1px solid #C8E6C9;
+  border-radius: 9999px;
+  padding: 0.15rem 0.5rem;
 }
