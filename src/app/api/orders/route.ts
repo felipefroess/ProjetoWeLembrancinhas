@@ -1,23 +1,33 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { 
+  getAllProductionOrders, 
+  createProductionOrder, 
+  updateProductionOrderStatus, 
+  deleteProductionOrder 
+} from '@/lib/ordersStore';
+import { isSupabaseConfigured } from '@/lib/supabase';
+import { OrderStatus } from '@/types';
 
-// POST: Salvar pedido gerado no checkout
+// GET: Buscar pedidos para o painel Admin e Kanban
+export async function GET() {
+  try {
+    const { orders, source } = await getAllProductionOrders();
+    return NextResponse.json({ 
+      success: true, 
+      orders, 
+      configured: isSupabaseConfigured(),
+      source 
+    });
+  } catch (error) {
+    console.error('Erro ao buscar pedidos:', error);
+    return NextResponse.json({ success: false, error: 'Erro ao buscar pedidos' }, { status: 500 });
+  }
+}
+
+// POST: Salvar pedido gerado no checkout ou cadastrado manualmente
 export async function POST(request: Request) {
   try {
-    const orderData = await request.json();
-
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json({ 
-        success: true, 
-        message: 'Supabase ainda não configurado, pedido processado apenas localmente.',
-        saved: false 
-      });
-    }
-
-    const supabase = getSupabaseAdmin();
-    if (!supabase) {
-      return NextResponse.json({ success: true, saved: false });
-    }
+    const body = await request.json();
 
     const {
       customerName,
@@ -29,58 +39,77 @@ export async function POST(request: Request) {
       totalUnits,
       totalAmount,
       items,
-    } = orderData;
+      status,
+    } = body;
 
-    const { data, error } = await supabase.from('orders').insert({
-      customer_name: customerName,
-      customer_phone: customerPhone || null,
-      event_date: eventDate || null,
-      delivery_method: deliveryMethod || 'retirada-pouso-alegre',
-      delivery_address: deliveryAddress || null,
-      general_notes: generalNotes || null,
-      total_units: Number(totalUnits) || 0,
-      total_amount: Number(totalAmount) || 0,
-      status: 'pendente',
-      items: items || [],
-    }).select('id').single();
-
-    if (error) {
-      console.error('Erro ao salvar pedido no Supabase:', error);
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    if (!customerName) {
+      return NextResponse.json({ success: false, error: 'Nome do cliente é obrigatório' }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, orderId: data?.id, saved: true });
+    const created = await createProductionOrder({
+      customerName,
+      customerPhone,
+      eventDate,
+      deliveryMethod,
+      deliveryAddress,
+      generalNotes,
+      totalUnits: Number(totalUnits) || 0,
+      totalAmount: Number(totalAmount) || 0,
+      items: items || [],
+      status: status as OrderStatus,
+    });
+
+    return NextResponse.json({ 
+      success: true, 
+      orderId: created.id, 
+      order: created,
+      saved: true 
+    });
   } catch (error) {
     console.error('Erro ao processar pedido:', error);
     return NextResponse.json({ success: false, error: 'Erro interno' }, { status: 500 });
   }
 }
 
-// GET: Buscar pedidos para o painel Admin
-export async function GET() {
+// PATCH: Atualizar status ou observações de um pedido no Kanban
+export async function PATCH(request: Request) {
   try {
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json({ orders: [], configured: false });
+    const body = await request.json();
+    const { id, status, generalNotes } = body;
+
+    if (!id || !status) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'ID e status são obrigatórios para atualização' 
+      }, { status: 400 });
     }
 
-    const supabase = getSupabaseAdmin();
-    if (!supabase) {
-      return NextResponse.json({ orders: [], configured: false });
+    const updated = await updateProductionOrderStatus(id, status as OrderStatus, generalNotes);
+    if (!updated) {
+      return NextResponse.json({ success: false, error: 'Pedido não encontrado' }, { status: 404 });
     }
 
-    const { data: orders, error } = await supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Erro ao buscar pedidos:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ orders: orders || [], configured: true });
+    return NextResponse.json({ success: true, order: updated });
   } catch (error) {
-    console.error('Erro ao buscar pedidos:', error);
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
+    console.error('Erro ao atualizar status do pedido:', error);
+    return NextResponse.json({ success: false, error: 'Erro ao atualizar pedido' }, { status: 500 });
+  }
+}
+
+// DELETE: Remover um pedido
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'ID do pedido não informado' }, { status: 400 });
+    }
+
+    await deleteProductionOrder(id);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao remover pedido:', error);
+    return NextResponse.json({ success: false, error: 'Erro ao remover pedido' }, { status: 500 });
   }
 }

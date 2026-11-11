@@ -93,3 +93,33 @@ export interface CustomerOrderData {
   deliveryAddress?: string;
   generalNotes?: string;
 }
+
+export type OrderStatus = 
+  | 'em_analise'
+  | 'em_producao'
+  | 'pronto'
+  | 'entregue';
+
+export interface ProductionOrder {
+  id: string;
+  customer_name: string;
+  customer_phone?: string;
+  event_date?: string;
+  delivery_method?: string;
+  delivery_address?: string;
+  general_notes?: string;
+  total_units: number;
+  total_amount: number;
+  status: OrderStatus;
+  items: any[];
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface AppliedCoupon {
+  code: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+  description?: string;
+}
+

@@ -1,4 +1,5 @@
 import { Product } from '@/types';
+import { getSeasonalTopProductId } from '@/lib/seasonalEvents';
 
 export type AnalyticsPeriod = 'semana' | 'mes' | 'ano';
 
@@ -38,11 +39,11 @@ export interface AnalyticsSummary {
  * Pesos base de vendas e cliques para gerar métricas realistas baseadas nos produtos
  */
 const BASE_WEIGHTS: Record<string, { units: number; clicks: number }> = {
-  'mini-lata-natal-luxo': { units: 68, clicks: 342 },
-  'lembrancinha-porta-chocolate-professores': { units: 115, clicks: 438 },
-  'caderno-personalizado-luxo': { units: 42, clicks: 285 },
-  'lata-personalizada-maternidade-ursinho-classico-2764': { units: 26, clicks: 194 },
-  'kit-presente-professores-bloco-de-notas-com-caixa-estojo-e-caneta-8914': { units: 18, clicks: 146 },
+  'mini-lata-natal-luxo': { units: 135, clicks: 480 },
+  'lembrancinha-porta-chocolate-professores': { units: 72, clicks: 260 },
+  'caderno-personalizado-luxo': { units: 48, clicks: 215 },
+  'lata-personalizada-maternidade-ursinho-classico-2764': { units: 36, clicks: 175 },
+  'kit-presente-professores-bloco-de-notas-com-caixa-estojo-e-caneta-8914': { units: 22, clicks: 140 },
 };
 
 export function getAnalyticsForPeriod(products: Product[], period: AnalyticsPeriod): AnalyticsSummary {
@@ -72,13 +73,24 @@ export function getAnalyticsForPeriod(products: Product[], period: AnalyticsPeri
     growthVisits = '+45.2%';
   }
 
+  // Identifica dinamicamente o produto principal do evento comemorativo mais próximo
+  const topSeasonalId = getSeasonalTopProductId(products);
+
   // Mapeia produtos para estatísticas
   const productStats: TopProductStat[] = products.map((prod, index) => {
-    // Busca dados base ou cria padrão realista caso seja produto novo cadastrado
-    const base = BASE_WEIGHTS[prod.id] || {
+    const isTopSeasonal = prod.id === topSeasonalId;
+
+    let base = BASE_WEIGHTS[prod.id] || {
       units: Math.max(8, 30 - index * 5),
       clicks: Math.max(40, 160 - index * 20),
     };
+
+    // O produto da categoria do evento mais próximo assume a liderança em vendas e procura
+    if (isTopSeasonal) {
+      base = { units: 140, clicks: 495 };
+    } else if (base.units >= 140) {
+      base = { units: 75, clicks: 280 };
+    }
 
     const unitsSold = Math.max(1, Math.round(base.units * multiplier));
     const revenue = unitsSold * (prod.price || 15);
@@ -103,30 +115,36 @@ export function getAnalyticsForPeriod(products: Product[], period: AnalyticsPeri
   const totalRevenue = productStats.reduce((acc, p) => acc + p.revenue, 0);
   const totalUnitsSold = productStats.reduce((acc, p) => acc + p.unitsSold, 0);
 
-  // Calcula porcentagem de participação
-  productStats.forEach((p) => {
-    p.sharePercentage = totalRevenue > 0 ? Math.round((p.revenue / totalRevenue) * 100) : 0;
+  // Calcula porcentagem de participação de cada um nas vendas
+  productStats.forEach(p => {
+    p.sharePercentage = totalUnitsSold > 0 ? Math.round((p.unitsSold / totalUnitsSold) * 100) : 0;
   });
 
-  // Produto com mais cliques
-  let mostClickedProduct: AnalyticsSummary['mostClickedProduct'] = null;
-  if (products.length > 0) {
-    const mostClickedStat = [...productStats].sort((a, b) => b.clicks - a.clicks)[0];
-    const originalProd = products.find((p) => p.id === mostClickedStat.id) || products[0];
+  // Produto mais clicado do catálogo (o mais procurado da época)
+  let mostClickedProduct = null;
+  const sortedByClicks = [...products].sort((a, b) => {
+    const clicksA = a.id === topSeasonalId ? 495 : (BASE_WEIGHTS[a.id]?.clicks || 50);
+    const clicksB = b.id === topSeasonalId ? 495 : (BASE_WEIGHTS[b.id]?.clicks || 50);
+    return clicksB - clicksA;
+  });
 
-    const interestRate = baseVisits > 0 
-      ? ((mostClickedStat.clicks / baseVisits) * 100).toFixed(1) + '%' 
-      : '0%';
+  if (sortedByClicks.length > 0) {
+    const champ = sortedByClicks[0];
+    const topStat = productStats.find(p => p.id === champ.id);
+    const clicks = topStat?.clicks || Math.round(495 * multiplier);
+    const estimatedOrders = topStat?.unitsSold || Math.round(140 * multiplier);
+    const interestRate = ((estimatedOrders / clicks) * 100).toFixed(1) + '% de conversão';
 
     mostClickedProduct = {
-      product: originalProd,
-      clicks: mostClickedStat.clicks,
+      product: champ,
+      clicks,
       interestRate,
-      estimatedOrders: mostClickedStat.unitsSold,
+      estimatedOrders,
     };
   }
 
-  const ordersCount = Math.max(1, Math.round(totalUnitsSold / 5.2));
+  // Gera total de pedidos estimados
+  const ordersCount = Math.max(1, Math.round(totalUnitsSold * 0.45));
 
   return {
     period,
@@ -134,12 +152,12 @@ export function getAnalyticsForPeriod(products: Product[], period: AnalyticsPeri
     periodUnitLabel,
     totalRevenue,
     unitsSold: totalUnitsSold,
-    visits: baseVisits,
+    visits: Math.round(baseVisits),
     ordersCount,
     growthRevenue,
     growthUnits,
     growthVisits,
     mostClickedProduct,
-    topSellingProducts: productStats.slice(0, 5), // Top 5
+    topSellingProducts: productStats.slice(0, 5),
   };
 }

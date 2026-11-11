@@ -1,0 +1,42 @@
+[
+  {
+    "code": "PRIMEIRACOMPRA",
+    "type": "percentage",
+    "value": 10,
+    "description": "10% de desconto na sua primeira compra",
+    "minOrderValue": 0,
+    "isActive": true
+  },
+  {
+    "code": "WE10",
+    "type": "percentage",
+    "value": 10,
+    "description": "10% de desconto especial",
+    "minOrderValue": 0,
+    "isActive": true
+  },
+  {
+    "code": "BEMVINDO",
+    "type": "percentage",
+    "value": 5,
+    "description": "5% de desconto de boas-vindas",
+    "minOrderValue": 0,
+    "isActive": true
+  },
+  {
+    "code": "NATAL5",
+    "type": "fixed",
+    "value": 5,
+    "description": "R$ 5,00 de desconto de Natal",
+    "minOrderValue": 25,
+    "isActive": true
+  },
+  {
+    "code": "WE5",
+    "type": "fixed",
+    "value": 5,
+    "description": "R$ 5,00 de desconto especial",
+    "minOrderValue": 20,
+    "isActive": true
+  }
+]

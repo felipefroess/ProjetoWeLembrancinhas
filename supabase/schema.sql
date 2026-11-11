@@ -99,6 +99,10 @@ CREATE POLICY "Permitir atualização de pedidos"
 ON public.orders FOR UPDATE 
 USING (true);
 
+CREATE POLICY "Permitir exclusão de pedidos" 
+ON public.orders FOR DELETE 
+USING (true);
+
 
 -- ------------------------------------------------------------------------
 -- 5. CONCESSÃO DE PERMISSÕES PARA AS ROLES DA API (ANON e AUTHENTICATED)

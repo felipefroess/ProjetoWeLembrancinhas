@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Product, CartItem, CustomizationOptions, CustomerOrderData } from '@/types';
+import { Product, CartItem, CustomizationOptions, CustomerOrderData, AppliedCoupon } from '@/types';
 import { STORE_CONFIG } from '@/data/products';
 import { trackProductClick } from '@/lib/tracking';
 
@@ -13,6 +13,11 @@ interface CartContextType {
   selectedProductForCustomization: Product | null;
   totalItems: number;
   subtotalAmount: number;
+  appliedCoupon: AppliedCoupon | null;
+  discountAmount: number;
+  finalTotal: number;
+  applyCoupon: (code: string) => Promise<{ success: boolean; message: string }>;
+  removeCoupon: () => void;
   openCart: () => void;
   closeCart: () => void;
   openCustomizationModal: (product: Product) => void;
@@ -29,9 +34,11 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'welembrancinhas_cart_v1';
+const COUPON_STORAGE_KEY = 'welembrancinhas_coupon_v1';
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isCustomizingModalOpen, setIsCustomizingModalOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -44,6 +51,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         setItems(JSON.parse(stored));
+      }
+      const storedCoupon = localStorage.getItem(COUPON_STORAGE_KEY);
+      if (storedCoupon) {
+        setAppliedCoupon(JSON.parse(storedCoupon));
       }
     } catch (e) {
       console.error('Falha ao ler carrinho do localStorage:', e);
@@ -60,6 +71,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       console.error('Falha ao salvar carrinho no localStorage:', e);
     }
   }, [items, isHydrated]);
+
+  // Salvar cupom no localStorage
+  useEffect(() => {
+    if (!isHydrated) return;
+    try {
+      if (appliedCoupon) {
+        localStorage.setItem(COUPON_STORAGE_KEY, JSON.stringify(appliedCoupon));
+      } else {
+        localStorage.removeItem(COUPON_STORAGE_KEY);
+      }
+    } catch (e) {
+      console.error('Falha ao salvar cupom no localStorage:', e);
+    }
+  }, [appliedCoupon, isHydrated]);
 
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
@@ -142,10 +167,49 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = () => {
     setItems([]);
+    setAppliedCoupon(null);
   };
 
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
   const subtotalAmount = items.reduce((acc, item) => acc + item.subtotal, 0);
+
+  // Calcula desconto dinamicamente de acordo com o subtotal atual
+  const discountAmount = appliedCoupon
+    ? appliedCoupon.type === 'percentage'
+      ? Number(((subtotalAmount * appliedCoupon.value) / 100).toFixed(2))
+      : Math.min(appliedCoupon.value, subtotalAmount)
+    : 0;
+
+  const finalTotal = Math.max(0, subtotalAmount - discountAmount);
+
+  const applyCoupon = async (code: string): Promise<{ success: boolean; message: string }> => {
+    const cleanCode = code.trim().toUpperCase();
+    if (!cleanCode) {
+      return { success: false, message: 'Digite o código do cupom.' };
+    }
+
+    try {
+      const res = await fetch('/api/coupons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: cleanCode, subtotal: subtotalAmount }),
+      });
+      const data = await res.json();
+
+      if (data.valid && data.coupon) {
+        setAppliedCoupon(data.coupon);
+        return { success: true, message: data.message || 'Cupom aplicado com sucesso!' };
+      } else {
+        return { success: false, message: data.message || 'Cupom inválido ou expirado.' };
+      }
+    } catch {
+      return { success: false, message: 'Erro ao validar cupom. Tente novamente.' };
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+  };
 
   // Formata o pedido em Markdown limpo para WhatsApp
   const generateWhatsAppOrderUrl = (orderData: CustomerOrderData): string => {
@@ -155,7 +219,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       'entrega-correios': 'Envio por Correios / Transportadora',
     };
 
-    let message = `Olá, Wenilze! Tudo bem?\n`;
+    let message = `Olá, Wê! Tudo bem?\n`;
     message += `Gostaria de fazer um pedido pela sua loja online (*Wê Lembrancinhas*):\n\n`;
     message += `━━━━━━━━━━━━━━━━━━━━━\n`;
     message += `*ITENS DO PEDIDO:*\n`;
@@ -188,7 +252,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
 
     message += `━━━━━━━━━━━━━━━━━━━━━\n`;
-    message += `*TOTAL ESTIMADO:* R$ ${subtotalAmount.toFixed(2).replace('.', ',')}\n`;
+    if (appliedCoupon && discountAmount > 0) {
+      const descText =
+        appliedCoupon.type === 'percentage'
+          ? `${appliedCoupon.value}% OFF`
+          : `R$ ${appliedCoupon.value.toFixed(2).replace('.', ',')} OFF`;
+      message += `*SUBTOTAL:* R$ ${subtotalAmount.toFixed(2).replace('.', ',')}\n`;
+      message += `*CUPOM APLICADO:* ${appliedCoupon.code} (${descText})\n`;
+      message += `*DESCONTO:* -R$ ${discountAmount.toFixed(2).replace('.', ',')}\n`;
+      message += `*TOTAL ESTIMADO:* R$ ${finalTotal.toFixed(2).replace('.', ',')}\n`;
+    } else {
+      message += `*TOTAL ESTIMADO:* R$ ${subtotalAmount.toFixed(2).replace('.', ',')}\n`;
+    }
     message += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
     message += `*DADOS PARA COMBINAR A ENTREGA:*\n`;
@@ -223,6 +298,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         selectedProductForCustomization,
         totalItems,
         subtotalAmount,
+        appliedCoupon,
+        discountAmount,
+        finalTotal,
+        applyCoupon,
+        removeCoupon,
         openCart,
         closeCart,
         openCustomizationModal,

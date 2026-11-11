@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
   LayoutDashboard,
+  ClipboardList,
   Plus, 
   Pencil,
   Trash2, 
@@ -31,6 +32,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { Product, Category, ProductVariation, CustomFieldDefinition } from '@/types';
+import OrdersProductionTab from './components/OrdersProductionTab';
 import { STORE_CONFIG } from '@/data/products';
 import { getAnalyticsForPeriod, AnalyticsPeriod } from '@/lib/analytics';
 import styles from './Admin.module.css';
@@ -46,7 +48,10 @@ export default function AdminDashboardPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
 
   // Aba Principal do Admin (Dashboard ou Produtos)
-  const [mainTab, setMainTab] = useState<'dashboard' | 'produtos'>('dashboard');
+  const [mainTab, setMainTab] = useState<'dashboard' | 'produtos' | 'pedidos'>('dashboard');
+  const [ordersCount, setOrdersCount] = useState<number>(0);
+  const [isStoreOnline, setIsStoreOnline] = useState<boolean>(true);
+  const [updatingStoreStatus, setUpdatingStoreStatus] = useState<boolean>(false);
 
   // Período selecionado no dashboard (semana, mes ou ano)
   const [period, setPeriod] = useState<AnalyticsPeriod>('mes');
@@ -128,6 +133,22 @@ export default function AdminDashboardPage() {
           setProducts(prodData.products || []);
           setCategories(prodData.categories || []);
         }
+
+        try {
+          const ordersRes = await fetch('/api/orders');
+          const ordersData = await ordersRes.json();
+          if (ordersData.orders) {
+            setOrdersCount(ordersData.orders.length);
+          }
+        } catch {}
+
+        try {
+          const statusRes = await fetch('/api/store-status');
+          const statusData = await statusRes.json();
+          if (typeof statusData.isOnline === 'boolean') {
+            setIsStoreOnline(statusData.isOnline);
+          }
+        } catch {}
       } catch (err) {
         console.error('Erro ao inicializar painel:', err);
       } finally {
@@ -137,6 +158,30 @@ export default function AdminDashboardPage() {
 
     checkAuthAndLoad();
   }, [router]);
+
+  const toggleStoreOnline = async () => {
+    setUpdatingStoreStatus(true);
+    const nextStatus = !isStoreOnline;
+    setIsStoreOnline(nextStatus);
+
+    try {
+      const res = await fetch('/api/store-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isOnline: nextStatus }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setIsStoreOnline(!nextStatus);
+        alert('Erro ao atualizar status da loja.');
+      }
+    } catch {
+      setIsStoreOnline(!nextStatus);
+      alert('Erro ao conectar com o servidor.');
+    } finally {
+      setUpdatingStoreStatus(false);
+    }
+  };
 
   const handleLogout = async () => {
     await fetch('/api/admin/logout', { method: 'POST' });
@@ -552,7 +597,7 @@ export default function AdminDashboardPage() {
           <div className={styles.brandBadge}>Wê</div>
           <div className={styles.sidebarBrandText}>
             <span className={styles.sidebarBrandTitle}>Wê Lembrancinhas</span>
-            <span className={styles.adminTag}>Painel Admin</span>
+            <span className={styles.adminTag}>Painel Administrativo</span>
           </div>
         </div>
 
@@ -576,14 +621,46 @@ export default function AdminDashboardPage() {
             <span>Gerenciamento de Produtos</span>
             <span className={styles.counterPill}>{products.length}</span>
           </button>
+        
+          <button
+            type="button"
+            onClick={() => setMainTab('pedidos')}
+            className={`${styles.sidebarNavItem} ${mainTab === 'pedidos' ? styles.sidebarNavItemActive : ''}`}
+          >
+            <ClipboardList size={18} />
+            <span>Pedidos & Produção</span>
+            {ordersCount > 0 && <span className={styles.counterPill}>{ordersCount}</span>}
+          </button>
         </nav>
 
         <div className={styles.sidebarFooter}>
           <div className={styles.sidebarStatusBox}>
-            <span style={{ fontSize: '0.6875rem', color: '#8C7A6B', fontWeight: 600 }}>STATUS DA LOJA</span>
-            <span className={styles.onlineBadge}>
-              <span className={styles.onlineDot} /> Online para Pedidos
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.25rem' }}>
+              <span style={{ fontSize: '0.6875rem', color: '#8C7A6B', fontWeight: 600 }}>STATUS DA LOJA</span>
+              <span className={isStoreOnline ? styles.onlineBadge : styles.offlineBadge}>
+                <span className={isStoreOnline ? styles.onlineDot : styles.offlineDot} /> {isStoreOnline ? 'Online' : 'Offline'}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={toggleStoreOnline}
+              disabled={updatingStoreStatus}
+              className={styles.statusToggleBtn}
+              title={isStoreOnline ? 'Clique para deixar offline para pedidos' : 'Clique para deixar online para pedidos'}
+            >
+              {isStoreOnline ? (
+                <>
+                  <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', backgroundColor: '#FF4D4F' }} />
+                  <span>Deixar Offline</span>
+                </>
+              ) : (
+                <>
+                  <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', backgroundColor: '#52C41A' }} />
+                  <span>Deixar Online</span>
+                </>
+              )}
+            </button>
           </div>
 
           <Link href="/" target="_blank" className={styles.sidebarLink}>
@@ -620,10 +697,19 @@ export default function AdminDashboardPage() {
                 <Package size={14} />
                 <span>Produtos ({products.length})</span>
               </button>
+            
+              <button
+                type="button"
+                onClick={() => setMainTab('pedidos')}
+                className={`${styles.mobileTabBtn} ${mainTab === 'pedidos' ? styles.mobileTabBtnActive : ''}`}
+              >
+                <ClipboardList size={14} />
+                <span>Pedidos ({ordersCount})</span>
+              </button>
             </div>
             <div className={styles.desktopTabTitle}>
               <h2 className={styles.topBarHeading}>
-                {mainTab === 'dashboard' ? 'Dashboard & Métricas' : 'Gerenciamento de Produtos'}
+                {mainTab === 'dashboard' ? 'Dashboard & Métricas' : mainTab === 'produtos' ? 'Gerenciamento de Produtos' : 'Fila de Produção & Pedidos'}
               </h2>
             </div>
           </div>
@@ -1049,6 +1135,11 @@ export default function AdminDashboardPage() {
           </table>
         </div>
             </section>
+          )}
+
+          {/* Aba 3: Gestão de Pedidos & Fila de Produção */}
+          {mainTab === 'pedidos' && (
+            <OrdersProductionTab onOrderCountChange={setOrdersCount} />
           )}
         </main>
       </div>

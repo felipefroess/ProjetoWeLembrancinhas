@@ -12,6 +12,7 @@ import { WhatsappButton } from '@/components/WhatsappButton';
 import { Footer } from '@/components/Footer';
 import { PRODUCTS } from '@/data/products';
 import { CATEGORIES } from '@/data/categories';
+import { sortCategoriesBySeasonalProximity, sortProductsBySeasonalProximity, getSeasonalTopProductId } from '@/lib/seasonalEvents';
 import { Category, CategoryId, Product } from '@/types';
 import { PackageSearch } from 'lucide-react';
 import styles from './Home.module.css';
@@ -21,6 +22,11 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [productsList, setProductsList] = useState<Product[]>(PRODUCTS);
   const [categoriesList, setCategoriesList] = useState<Category[]>(CATEGORIES);
+  const [clientDate, setClientDate] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setClientDate(new Date());
+  }, []);
 
   useEffect(() => {
     async function fetchDynamicData() {
@@ -43,9 +49,27 @@ export default function HomePage() {
     fetchDynamicData();
   }, []);
 
-  // Filtro performático combinando categoria e busca
+  // Mapeia nomes das categorias para consulta rápida
+  const categoryNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    categoriesList.forEach((c) => map.set(c.id, c.name));
+    return map;
+  }, [categoriesList]);
+
+  // Categorias ordenadas automaticamente pela proximidade dos eventos comemorativos do ano
+  // Identifica o ÚNICO produto que recebe o selo de 'Mais Pedido' (pertencente ao evento sazonal mais próximo)
+  const mostRequestedProductId = useMemo(() => {
+    if (!clientDate) return null;
+    return getSeasonalTopProductId(productsList, categoryNameMap, clientDate);
+  }, [productsList, categoryNameMap, clientDate]);
+
+  const sortedCategories = useMemo(() => {
+    return sortCategoriesBySeasonalProximity(categoriesList, clientDate);
+  }, [categoriesList, clientDate]);
+
+  // Filtro performático combinando categoria, busca e ordenação sazonal automática
   const filteredProducts = useMemo(() => {
-    return productsList.filter((product) => {
+    const list = productsList.filter((product) => {
       const matchesCategory =
         selectedCategory === 'todos' || product.category === selectedCategory;
 
@@ -57,7 +81,14 @@ export default function HomePage() {
 
       return matchesCategory && matchesSearch;
     });
-  }, [productsList, selectedCategory, searchQuery]);
+
+    // Quando "Todos os Mimos" está selecionado, os produtos do evento mais próximo do calendário aparecem primeiro!
+    if (selectedCategory === 'todos') {
+      return sortProductsBySeasonalProximity(list, categoryNameMap, clientDate);
+    }
+
+    return list;
+  }, [productsList, selectedCategory, searchQuery, categoryNameMap]);
 
   // Escolhe a classe de grid de acordo com o número de itens
   const gridClass =
@@ -70,7 +101,7 @@ export default function HomePage() {
   return (
     <div className={styles.pageWrapper}>
       {/* Barra de Navegação */}
-      <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} products={productsList} categories={categoriesList} onSelectCategory={setSelectedCategory} />
+      <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} products={productsList} categories={sortedCategories} onSelectCategory={setSelectedCategory} />
 
       {/* Hero Section */}
       <HeroBanner />
@@ -80,7 +111,7 @@ export default function HomePage() {
         <CategoryFilter
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
-          categories={categoriesList}
+          categories={sortedCategories}
         />
       </div>
 
@@ -98,6 +129,8 @@ export default function HomePage() {
                 ? 'Catálogo Dia dos Professores'
                 : selectedCategory === 'cadernos'
                 ? 'Cadernos & Cadernetas Personalizadas'
+                : selectedCategory !== 'todos' && categoryNameMap.get(selectedCategory)
+                ? `Catálogo ${categoryNameMap.get(selectedCategory)}`
                 : 'Catálogo de Lembrancinhas'}
             </h2>
             <p className={styles.catalogSubtitle}>
@@ -113,7 +146,7 @@ export default function HomePage() {
         {filteredProducts.length > 0 ? (
           <div className={gridClass}>
             {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product} isMostRequested={product.id === mostRequestedProductId} />
             ))}
           </div>
         ) : (

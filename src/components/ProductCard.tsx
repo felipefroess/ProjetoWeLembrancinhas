@@ -8,9 +8,10 @@ import styles from './ProductCard.module.css';
 
 interface ProductCardProps {
   product: Product;
+  isMostRequested?: boolean;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, isMostRequested }: ProductCardProps) {
   const { openCustomizationModal } = useCart();
 
   const variationPrices = (product.variations || [])
@@ -51,9 +52,9 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Badges superiores */}
         <div className={styles.badgesWrapper}>
-          {product.popular && (
+          {isMostRequested && (
             <span className={styles.popularBadge}>
-              Mais Pedido
+              Mais Vendido
             </span>
           )}
           {product.minQuantity > 1 && (

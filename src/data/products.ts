@@ -44,7 +44,7 @@ export const PRODUCTS: Product[] = [
     minQuantity: 1,
     unit: 'unidade',
     leadTimeDays: 4,
-    popular: true,
+    popular: false,
     featured: true,
     image: '/images/professores/lembrancinha-talento.jpg',
     images: [
@@ -80,7 +80,7 @@ export const PRODUCTS: Product[] = [
     minQuantity: 1,
     unit: 'unidade',
     leadTimeDays: 5,
-    popular: true,
+    popular: false,
     featured: true,
     image: '/images/cadernos/caderno-azul-fechado.jpg',
     images: [

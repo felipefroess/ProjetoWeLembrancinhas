@@ -25,6 +25,20 @@ export function CheckoutModal() {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [generalNotes, setGeneralNotes] = useState('');
   const [isSent, setIsSent] = useState(false);
+  const [isStoreOnline, setIsStoreOnline] = useState<boolean>(true);
+
+  React.useEffect(() => {
+    if (isCheckoutOpen) {
+      fetch('/api/store-status')
+        .then((res) => res.json())
+        .then((data) => {
+          if (typeof data.isOnline === 'boolean') {
+            setIsStoreOnline(data.isOnline);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isCheckoutOpen]);
 
   if (!isCheckoutOpen) return null;
 
@@ -108,7 +122,7 @@ export function CheckoutModal() {
               Pedido Pronto para Envio!
             </h4>
             <p className={styles.successText}>
-              Abrimos a conversa com a Wenilze no WhatsApp com todos os detalhes do seu pedido formatados. Basta clicar em <strong>Enviar</strong> no chat para combinarem a data e o pagamento!
+              Abrimos a conversa com a Wê no WhatsApp com todos os detalhes do seu pedido formatados. Basta clicar em <strong>Enviar</strong> no chat para combinarem a data e o pagamento!
             </p>
             <button
               onClick={handleFinish}
@@ -224,7 +238,7 @@ export function CheckoutModal() {
                   />
                   <div className={styles.deliveryTextWrap}>
                     <span className={styles.deliveryOptionTitle}>Envio por Correios / Transportadora</span>
-                    <span className={styles.deliveryOptionDesc}>Valor de frete calculado pela Wenilze de acordo com seu CEP</span>
+                    <span className={styles.deliveryOptionDesc}>Valor de frete calculado pela Wê de acordo com seu CEP</span>
                   </div>
                 </label>
               </div>
@@ -250,7 +264,7 @@ export function CheckoutModal() {
             {/* Observações adicionais */}
             <div>
               <label className={styles.fieldLabel}>
-                Mensagem adicional para a Wenilze (opcional)
+                Mensagem adicional para a Wê (opcional)
               </label>
               <textarea
                 rows={2}
@@ -271,7 +285,7 @@ export function CheckoutModal() {
                 <span>Enviar Pedido pelo WhatsApp</span>
               </button>
               <p className={styles.paymentSecurityNote}>
-                Nenhum dado de pagamento é cobrado agora. Você e a Wenilze combinam a arte e a forma de pagamento no chat.
+                Nenhum dado de pagamento é cobrado agora. Você e a Wê combinam a arte e a forma de pagamento no chat.
               </p>
             </div>
           </form>

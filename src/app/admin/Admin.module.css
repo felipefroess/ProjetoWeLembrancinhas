@@ -24,8 +24,11 @@
 
 .sidebarBrand {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: center;
+  text-align: center;
+  gap: 0.625rem;
   padding-bottom: 1.25rem;
   margin-bottom: 1.25rem;
   border-bottom: 1px solid #F0E8DE;
@@ -34,6 +37,10 @@
 .sidebarBrandText {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.35rem;
 }
 
 .sidebarBrandTitle {
@@ -279,10 +286,13 @@
   font-size: 0.6875rem;
   background-color: #F5EDE4;
   color: #6D4C3D;
-  padding: 0.2rem 0.5rem;
+  padding: 0.2rem 0.7rem;
   border-radius: 9999px;
   font-weight: 700;
   border: 1px solid #DACFBF;
+  display: inline-block;
+  text-align: center;
+  margin: 0 auto;
 }
 
 .topActions {
@@ -1836,4 +1846,1115 @@
   border: 1px solid #C8E6C9;
   border-radius: 9999px;
   padding: 0.15rem 0.5rem;
+}
+
+/* ==========================================================================
+   GESTÃO DE PEDIDOS & FILA DE PRODUÇÃO (KANBAN)
+   ========================================================================== */
+
+.ordersSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ordersHeaderRow {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #DACFBF;
+  border-radius: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 10px rgba(109, 76, 61, 0.05);
+}
+
+@media (min-width: 768px) {
+  .ordersHeaderRow {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.ordersHeading {
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #2D231E;
+  margin: 0 0 0.25rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ordersSubheading {
+  font-size: 0.875rem;
+  color: #8C7A6B;
+  margin: 0;
+}
+
+.ordersHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.viewModeToggle {
+  display: flex;
+  align-items: center;
+  background-color: #FAF7F2;
+  border: 1px solid #DACFBF;
+  border-radius: 9999px;
+  padding: 0.25rem;
+}
+
+.viewModeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #6D4C3D;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.viewModeBtnActive {
+  background-color: #6D4C3D;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(109, 76, 61, 0.25);
+}
+
+.refreshOrdersBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6D4C3D;
+  background-color: #FAF7F2;
+  border: 1px solid #DACFBF;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refreshOrdersBtn:hover {
+  background-color: #F5EDE4;
+  border-color: #C89B6D;
+}
+
+/* Barra de Filtros e Busca de Pedidos */
+.ordersControlsRow {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 900px) {
+  .ordersControlsRow {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.ordersSearchBox {
+  position: relative;
+  flex: 1;
+  max-width: 26rem;
+}
+
+.ordersSearchIcon {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8C7A6B;
+}
+
+.ordersSearchInput {
+  width: 100%;
+  padding: 0.65rem 1rem 0.65rem 2.4rem;
+  border-radius: 9999px;
+  border: 1px solid #DACFBF;
+  background-color: #ffffff;
+  font-size: 0.875rem;
+  color: #2D231E;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.ordersSearchInput:focus {
+  border-color: #6D4C3D;
+  box-shadow: 0 0 0 3px rgba(109, 76, 61, 0.12);
+}
+
+.ordersFilterPills {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: thin;
+}
+
+.filterPillBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: 1px solid #DACFBF;
+  background-color: #ffffff;
+  color: #6D4C3D;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.filterPillBtn:hover {
+  background-color: #FAF7F2;
+  border-color: #C89B6D;
+}
+
+.filterPillBtnActive {
+  background-color: #6D4C3D;
+  border-color: #6D4C3D;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(109, 76, 61, 0.2);
+}
+
+/* Quadro Kanban */
+.kanbanBoard {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(280px, 1fr));
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1.5rem;
+  align-items: start;
+}
+
+.kanbanColumn {
+  background-color: #F8F5EE;
+  border: 1px solid #E5DCD1;
+  border-radius: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 16rem);
+  box-shadow: 0 2px 8px rgba(109, 76, 61, 0.04);
+}
+
+.columnHeader {
+  padding: 1rem 1.15rem;
+  border-bottom: 1px solid #E5DCD1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.columnTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.columnTitleWithIcon {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: #2D231E;
+}
+
+.columnBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.columnSubtitle {
+  font-size: 0.75rem;
+  color: #8C7A6B;
+  margin: 0;
+}
+
+/* Cores específicas de cada coluna */
+.colAguardando .columnTitleWithIcon {
+  color: #5B21B6;
+}
+.colAguardando .columnBadge {
+  background-color: #EDE9FE;
+  color: #5B21B6;
+}
+
+.colAprovado .columnTitleWithIcon {
+  color: #0F766E;
+}
+.colAprovado .columnBadge {
+  background-color: #CCFBF1;
+  color: #0F766E;
+}
+
+.colProducao .columnTitleWithIcon {
+  color: #B45309;
+}
+.colProducao .columnBadge {
+  background-color: #FEF3C7;
+  color: #B45309;
+}
+
+.colPronto .columnTitleWithIcon {
+  color: #047857;
+}
+.colPronto .columnBadge {
+  background-color: #D1FAE5;
+  color: #047857;
+}
+
+.colEntregue .columnTitleWithIcon {
+  color: #4B5563;
+}
+.colEntregue .columnBadge {
+  background-color: #E5E7EB;
+  color: #4B5563;
+}
+
+/* Lista de Cards da Coluna */
+.columnCardsList {
+  padding: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.emptyColumnNotice {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #A89A8E;
+  font-size: 0.8125rem;
+  font-style: italic;
+}
+
+/* Card Individual do Pedido no Kanban */
+.kanbanCard {
+  background-color: #ffffff;
+  border: 1px solid #E8DFD5;
+  border-radius: 1rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 2px 6px rgba(109, 76, 61, 0.05);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.kanbanCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(109, 76, 61, 0.1);
+  border-color: #C89B6D;
+}
+
+.cardTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.orderIdBadge {
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #6D4C3D;
+  background-color: #FAF7F2;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid #DACFBF;
+}
+
+.deliveryBadge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background-color: #F3F4F6;
+  color: #4B5563;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.deliveryCorreios {
+  background-color: #EFF6FF;
+  color: #1D4ED8;
+}
+
+.deliveryRetirada {
+  background-color: #FFF7ED;
+  color: #C2410C;
+}
+
+.cardCustomerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.cardCustomerName {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #2D231E;
+}
+
+.cardCustomerPhone {
+  font-size: 0.78125rem;
+  color: #6D4C3D;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+}
+
+.cardCustomerPhone:hover {
+  text-decoration: underline;
+}
+
+.cardEventDateRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #55443B;
+  background-color: #FAF7F2;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.5rem;
+  border: 1px solid #E8DFD5;
+  width: fit-content;
+}
+
+.cardEventDateUrgent {
+  background-color: #FEF2F2;
+  border-color: #FECACA;
+  color: #DC2626;
+  animation: pulseDate 2s infinite ease-in-out;
+}
+
+@keyframes pulseDate {
+  0%, 100% { border-color: #FECACA; }
+  50% { border-color: #EF4444; }
+}
+
+/* Resumo da Personalização no Card */
+.cardCustomizationBox {
+  background-color: #FAF8F5;
+  border: 1px solid #EDE5DB;
+  border-radius: 0.75rem;
+  padding: 0.625rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cardItemHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cardItemThumb {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  border: 1px solid #DACFBF;
+  background-color: #ffffff;
+}
+
+.cardItemName {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #2D231E;
+  line-height: 1.25;
+}
+
+.cardCustomSpecs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+  color: #4A3E39;
+  padding-left: 0.25rem;
+}
+
+.specPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: #ffffff;
+  border: 1px solid #E8DFD5;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.375rem;
+  width: fit-content;
+  font-weight: 500;
+}
+
+.specPillRibbon {
+  background-color: #FFFBEB;
+  border-color: #FDE68A;
+  color: #92400E;
+}
+
+.specPillModel {
+  background-color: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #1E40AF;
+}
+
+.specPillChild {
+  background-color: #FDF2F8;
+  border-color: #FBCFE8;
+  color: #9D174D;
+  font-weight: 600;
+}
+
+.cardMoreItemsNote {
+  font-size: 0.6875rem;
+  color: #8C7A6B;
+  font-style: italic;
+}
+
+/* Rodapé do Card com Ações Rápidas */
+.cardFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  border-top: 1px solid #F0E8DF;
+  padding-top: 0.625rem;
+}
+
+.cardTotalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardTotalValue {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: #2E7D32;
+}
+
+.cardUnitsCount {
+  font-size: 0.75rem;
+  color: #8C7A6B;
+}
+
+/* Botões de Ação no Card */
+.cardActionsRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detailsBtn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6D4C3D;
+  background-color: #FAF7F2;
+  border: 1px solid #DACFBF;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.detailsBtn:hover {
+  background-color: #6D4C3D;
+  color: #ffffff;
+  border-color: #6D4C3D;
+}
+
+/* Botão de WhatsApp "Avisar que está pronto" */
+.whatsappReadyBtn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(37, 211, 102, 0.3);
+  transition: all 0.2s ease;
+}
+
+.whatsappReadyBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(37, 211, 102, 0.45);
+  background: linear-gradient(135deg, #2ae06d 0%, #107c70 100%);
+}
+
+.whatsappContactBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  background-color: #E8F5E9;
+  border: 1px solid #C8E6C9;
+  color: #2E7D32;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.whatsappContactBtn:hover {
+  background-color: #25D366;
+  color: #ffffff;
+  border-color: #25D366;
+}
+
+/* Controles de Transição de Etapa */
+.cardStageControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.stageMoveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  border: 1px solid #DACFBF;
+  background-color: #ffffff;
+  color: #6D4C3D;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stageMoveBtn:hover:not(:disabled) {
+  background-color: #FAF7F2;
+  border-color: #6D4C3D;
+}
+
+.stageMoveBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.stageMoveBtnNext {
+  background-color: #F5EDE4;
+  border-color: #C89B6D;
+  color: #553A2D;
+  font-weight: 700;
+}
+
+.stageMoveBtnNext:hover:not(:disabled) {
+  background-color: #6D4C3D;
+  color: #ffffff;
+  border-color: #6D4C3D;
+}
+
+/* ==========================================================================
+   MODAL DE DETALHES DA PERSONALIZAÇÃO EM 1 CLIQUE
+   ========================================================================== */
+
+.orderModalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.orderModalCard {
+  background-color: #ffffff;
+  border-radius: 1.5rem;
+  width: 100%;
+  max-width: 48rem;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  border: 1px solid #DACFBF;
+  overflow: hidden;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.orderModalHeader {
+  padding: 1.25rem 1.5rem;
+  background-color: #FAF7F2;
+  border-bottom: 1px solid #E8DFD5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.orderModalTitleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.orderModalTitle {
+  font-family: var(--font-sans);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #2D231E;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.orderModalMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+  color: #8C7A6B;
+}
+
+.orderModalBody {
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.orderStatusBanner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.875rem;
+  background-color: #FAF7F2;
+  border: 1px solid #DACFBF;
+}
+
+@media (min-width: 640px) {
+  .orderStatusBanner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.statusChangeGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.statusSelect {
+  padding: 0.5rem 0.85rem;
+  border-radius: 0.5rem;
+  border: 1px solid #DACFBF;
+  background-color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2D231E;
+  outline: none;
+  cursor: pointer;
+}
+
+.statusSelect:focus {
+  border-color: #6D4C3D;
+}
+
+/* Bloco de Itens do Pedido no Modal */
+.modalSectionHeading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2D231E;
+  margin: 0 0 0.75rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modalItemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modalItemCard {
+  border: 1px solid #E8DFD5;
+  border-radius: 1rem;
+  background-color: #FAF8F5;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.modalItemTop {
+  display: flex;
+  gap: 1rem;
+}
+
+.modalItemImage {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 0.75rem;
+  object-fit: cover;
+  border: 1px solid #DACFBF;
+  background-color: #ffffff;
+  flex-shrink: 0;
+}
+
+.modalItemInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.modalItemTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2D231E;
+  margin: 0;
+}
+
+.modalItemPriceRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: #6D4C3D;
+  font-weight: 600;
+}
+
+/* Grid de Especificações da Personalização */
+.modalSpecsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  background-color: #ffffff;
+  padding: 0.875rem;
+  border-radius: 0.75rem;
+  border: 1px solid #E8DFD5;
+}
+
+.specBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.specLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8C7A6B;
+}
+
+.specValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2D231E;
+}
+
+.specValueHighlight {
+  color: #6D4C3D;
+  background-color: #FAF7F2;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid #E8DFD5;
+  width: fit-content;
+}
+
+.itemNotesBox {
+  background-color: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+  color: #92400E;
+}
+
+/* Dados do Cliente e Entrega */
+.modalCustomerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.customerDetailBox {
+  background-color: #FAF7F2;
+  border: 1px solid #E8DFD5;
+  border-radius: 0.875rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.customerBoxLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #8C7A6B;
+  text-transform: uppercase;
+}
+
+.customerBoxContent {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #2D231E;
+}
+
+/* Barra de Ações Rápidas no Rodapé do Modal */
+.orderModalFooter {
+  padding: 1.25rem 1.5rem;
+  background-color: #FAF7F2;
+  border-top: 1px solid #E8DFD5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .orderModalFooter {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.modalWhatsAppActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btnWhatsAppReady {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.35);
+  transition: all 0.2s ease;
+}
+
+.btnWhatsAppReady:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 211, 102, 0.5);
+}
+
+.btnWhatsAppOutline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.15rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #128C7E;
+  background-color: #E8F5E9;
+  border: 1px solid #A5D6A7;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnWhatsAppOutline:hover {
+  background-color: #C8E6C9;
+}
+
+.btnPrintSheet {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6D4C3D;
+  background-color: #ffffff;
+  border: 1px solid #DACFBF;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnPrintSheet:hover {
+  background-color: #FAF7F2;
+  border-color: #6D4C3D;
+}
+
+/* Modo Tabela de Pedidos */
+.ordersTableView {
+  background-color: #ffffff;
+  border: 1px solid #DACFBF;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(109, 76, 61, 0.05);
+}
+
+.ordersTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  text-align: left;
+}
+
+.ordersTable th {
+  background-color: #FAF7F2;
+  padding: 0.875rem 1rem;
+  color: #6D4C3D;
+  font-weight: 700;
+  border-bottom: 1px solid #E8DFD5;
+  white-space: nowrap;
+}
+
+.ordersTable td {
+  padding: 1rem;
+  border-bottom: 1px solid #F0E8DF;
+  vertical-align: middle;
+  color: #2D231E;
+}
+
+.ordersTable tr:hover td {
+  background-color: #FCFBF9;
+}
+
+/* Botões de exclusão de pedidos */
+.deleteOrderBtn {
+  width: 1.625rem;
+  height: 1.625rem;
+  border-radius: 0.375rem;
+  border: 1px solid #FFCCC7;
+  background-color: #FFF1F0;
+  color: #CF1322;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.deleteOrderBtn:hover {
+  background-color: #FF4D4F;
+  color: #ffffff;
+  border-color: #FF4D4F;
+}
+
+.btnDeleteModal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #CF1322;
+  background-color: #FFF1F0;
+  border: 1px solid #FFCCC7;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnDeleteModal:hover {
+  background-color: #FF4D4F;
+  color: #ffffff;
+  border-color: #FF4D4F;
+}
+
+.offlineBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 11px;
+  font-weight: 700;
+  color: #CF1322;
+  background-color: #FFF1F0;
+  border: 1px solid #FFCCC7;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.offlineDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #FF4D4F;
+}
+
+.statusToggleBtn {
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid #DACFBF;
+  background-color: #ffffff;
+  color: #6D4C3D;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.statusToggleBtn:hover {
+  background-color: #FAF6F0;
+  border-color: #6D4C3D;
 }

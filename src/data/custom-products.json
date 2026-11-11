@@ -20,13 +20,13 @@
       "ribbonColors": [],
       "allowNotes": true
     },
-    "popular": true
+    "popular": false
   },
   {
     "id": "kit-presente-professores-bloco-de-notas-com-caixa-estojo-e-caneta-8914",
     "name": "Bloco de Notas com Caixa Estojo e Caneta",
     "category": "dia-dos-professores",
-    "description": "Um presente sofisticado e carinhoso para homenagear e agradecer a dedicação dos professores. Caixa rígida tipo estojo com fecho em fita, bloco de notas e caneta decorada.",
+    "description": "Um presente carinhoso para homenagear e agradecer a dedicação dos professores. Caixa rígida tipo estojo com fecho em fita, bloco de notas e caneta decorada.",
     "price": 59.9,
     "unit": "unidade",
     "leadTimeDays": 5,
@@ -37,7 +37,7 @@
     ],
     "variations": [
       {
-        "id": "var_1794336556859_0",
+        "id": "var_1794366672695_0",
         "name": "Modelo 1",
         "image": "/uploads/1794274822116-saveclip.app_561757077_18177293875347767_1852012969418825078_n.jpg",
         "images": [
@@ -45,7 +45,7 @@
         ]
       },
       {
-        "id": "var_1794336556860_1",
+        "id": "var_1794366672695_1",
         "name": "Modelo 2",
         "image": "/uploads/1794274832811-saveclip.app_559554486_18177293884347767_1237520079746612932_n.jpg",
         "images": [
@@ -60,7 +60,7 @@
       "ribbonColors": [],
       "allowNotes": true
     },
-    "popular": true
+    "popular": false
   },
   {
     "id": "lembrancinha-porta-chocolate-professores",
@@ -71,7 +71,7 @@
     "minQuantity": 1,
     "unit": "unidade",
     "leadTimeDays": 4,
-    "popular": true,
+    "popular": false,
     "featured": true,
     "image": "/images/professores/lembrancinha-talento.jpg",
     "images": [
@@ -157,7 +157,7 @@
     "minQuantity": 1,
     "unit": "unidade",
     "leadTimeDays": 5,
-    "popular": true,
+    "popular": false,
     "featured": true,
     "image": "/images/cadernos/caderno-azul-fechado.jpg",
     "images": [
@@ -270,7 +270,7 @@
       ],
       "allowNotes": true
     },
-    "popular": true
+    "popular": false
   },
   {
     "id": "kit-tacas-de-champanhe-acrilicas-3787",
@@ -293,13 +293,13 @@
       "ribbonColors": [],
       "allowNotes": true
     },
-    "popular": true
+    "popular": false
   },
   {
     "id": "caixas-explosao-com-fotos-e-doces-8012",
     "name": "Caixas Explosão com Fotos e Doces",
     "category": "dia-dos-namorados",
-    "description": "Caixa Explosão Personalizada com Fotos e Mensagens para 7 Doces – Dia dos Namorados / Aniversário",
+    "description": "Caixa com Fotos e Mensagens para 7 Doces",
     "price": 79.9,
     "unit": "unidade",
     "leadTimeDays": 5,
@@ -311,7 +311,7 @@
     ],
     "variations": [
       {
-        "id": "var_1794323176815_0",
+        "id": "var_1794366612290_0",
         "name": "Modelo 1",
         "image": "/uploads/1794322348494-saveclip.app_502942743_18164158282347767_2874077480112854440_n.jpg",
         "images": [
@@ -320,7 +320,7 @@
         ]
       },
       {
-        "id": "var_1794323176815_1",
+        "id": "var_1794366612290_1",
         "name": "Modelo 2",
         "image": "/uploads/1794322416835-saveclip.app_502659714_18163975918347767_928340238878548303_n.jpg",
         "images": [
@@ -336,7 +336,7 @@
       "ribbonColors": [],
       "allowNotes": true
     },
-    "popular": true
+    "popular": false
   },
   {
     "id": "porta-sabonete-5923",
@@ -358,7 +358,7 @@
       "ribbonColors": [],
       "allowNotes": true
     },
-    "popular": true
+    "popular": false
   },
   {
     "id": "porta-bis-9810",
@@ -380,7 +380,7 @@
       "ribbonColors": [],
       "allowNotes": true
     },
-    "popular": true,
+    "popular": false,
     "variations": [
       {
         "id": "var_1794335929828_0",
@@ -422,7 +422,7 @@
       "ribbonColors": [],
       "allowNotes": true
     },
-    "popular": true
+    "popular": false
   },
   {
     "id": "porta-bala-4315",
@@ -444,6 +444,6 @@
       "ribbonColors": [],
       "allowNotes": true
     },
-    "popular": true
+    "popular": false
   }
 ]

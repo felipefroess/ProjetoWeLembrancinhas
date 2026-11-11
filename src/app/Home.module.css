@@ -8,13 +8,33 @@
   font-family: var(--font-sans, system-ui, sans-serif);
 }
 
-.mainCatalog {
+/* Seção Exclusiva do Catálogo com Fundo Floral Personalizado */
+.catalogSection {
+  width: 100%;
   flex: 1;
+  position: relative;
+  background-color: #FAF7F2;
+  background-image: url('/images/background-catalogo-2x.jpg');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  background-attachment: scroll;
+}
+
+@media (min-width: 1024px) {
+  .catalogSection {
+    background-attachment: fixed;
+  }
+}
+
+.mainCatalog {
   max-width: 80rem;
   margin-left: auto;
   margin-right: auto;
   padding: 2.5rem 1rem;
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 @media (min-width: 640px) {

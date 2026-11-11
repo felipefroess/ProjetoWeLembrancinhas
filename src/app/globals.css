@@ -4,7 +4,7 @@
   --background: #FAF7F2;
   --foreground: #2D231E;
   --font-serif: var(--font-sans);
-  --font-sans: var(--font-sans), 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-roboto: 'Roboto', sans-serif;
   --font-jakarta: 'Plus Jakarta Sans', sans-serif;
   --color-brand-primary: #6D4C3D;
