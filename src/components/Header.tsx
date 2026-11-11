@@ -338,7 +338,7 @@ export function Header({
             </div>
             <div>
               <a href="#" className={styles.brandLink}>
-                <span className={styles.brandTitle}>Wê Lembrancinhas</span>
+                <span className={styles.brandTitle}>Lembrancinhas</span>
               </a>
             </div>
           </div>

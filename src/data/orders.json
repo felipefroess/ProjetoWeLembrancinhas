@@ -1,193 +1,5 @@
 [
   {
-    "id": "ord-mwbl9hwu-z1xx",
-    "customer_name": "fe",
-    "customer_phone": "",
-    "event_date": "2026-11-25",
-    "delivery_method": "entrega-correios",
-    "delivery_address": "fe",
-    "general_notes": "fe",
-    "total_units": 2,
-    "total_amount": 30,
-    "status": "em_analise",
-    "items": [
-      {
-        "cartItemId": "porta-sabonete-5923____",
-        "product": {
-          "id": "porta-sabonete-5923",
-          "name": "Porta-sabonete",
-          "category": "natal",
-          "description": "Lembrancinha de Natal Porta-Sabonete com Saco e Laço Vermelho",
-          "price": 15,
-          "unit": "unidade",
-          "leadTimeDays": 5,
-          "minQuantity": 1,
-          "image": "/uploads/1794335405021-saveclip.app_624067620_18171071590384048_8655808288146978986_n.jpg",
-          "images": [
-            "/uploads/1794335405021-saveclip.app_624067620_18171071590384048_8655808288146978986_n.jpg"
-          ],
-          "customizationSettings": {
-            "allowChildName": false,
-            "childNameLabel": "Nome na Lembrancinha",
-            "allowRibbonColors": false,
-            "ribbonColors": [],
-            "allowNotes": true
-          },
-          "popular": false
-        },
-        "quantity": 2,
-        "customization": {},
-        "subtotal": 30
-      }
-    ],
-    "created_at": "2026-11-11T03:58:07.855Z"
-  },
-  {
-    "id": "ord-1001",
-    "customer_name": "Juliana Silveira",
-    "customer_phone": "35998765432",
-    "event_date": "2026-12-20",
-    "delivery_method": "retirada-pouso-alegre",
-    "delivery_address": "Retirada no ateliê em Pouso Alegre - MG",
-    "general_notes": "Favor enviar a prévia da arte com o nome da família antes de estampar.",
-    "total_units": 25,
-    "total_amount": 375,
-    "status": "em_analise",
-    "created_at": "2026-11-10T14:30:00.000Z",
-    "items": [
-      {
-        "cartItemId": "mini-lata-natal-luxo-1",
-        "product": {
-          "id": "mini-lata-natal-luxo",
-          "name": "Mini Lata Natalina Personalizada com Laço e Tag",
-          "price": 15,
-          "image": "/images/natal/lata-natal-1.jpg"
-        },
-        "quantity": 25,
-        "customization": {
-          "childName": "Família Silveira & Bento",
-          "theme": "Natal Clássico",
-          "ribbonColor": "Laço Vermelho com Pompom Branco",
-          "notes": "Colocar no verso a frase: 'Com amor, Bento e família'"
-        },
-        "subtotal": 375
-      }
-    ]
-  },
-  {
-    "id": "ord-1002",
-    "customer_name": "Carlos Eduardo Mendes",
-    "customer_phone": "35991234567",
-    "event_date": "2026-12-15",
-    "delivery_method": "retirada-paraisopolis",
-    "delivery_address": "Retirada em Paraisópolis - MG",
-    "general_notes": "Cliente já conversou pelo WhatsApp e solicitou embalagem para presente.",
-    "total_units": 15,
-    "total_amount": 148.5,
-    "status": "em_analise",
-    "created_at": "2026-11-09T18:15:00.000Z",
-    "items": [
-      {
-        "cartItemId": "porta-chocolate-1",
-        "product": {
-          "id": "lembrancinha-porta-chocolate-professores",
-          "name": "Porta-Chocolate Dia dos Professores",
-          "price": 9.9,
-          "image": "/images/professores/lembrancinha-talento.jpg"
-        },
-        "quantity": 15,
-        "customization": {
-          "childName": "Professora Helena",
-          "variation": "Chocolate Talento",
-          "ribbonColor": "Laço Dourado com Tag",
-          "notes": "Embalar com carinho especial para os professores do 3º ano"
-        },
-        "subtotal": 148.5
-      }
-    ]
-  },
-  {
-    "id": "ord-1003",
-    "customer_name": "Mariana Castro de Souza",
-    "customer_phone": "11987654321",
-    "event_date": "2026-12-10",
-    "delivery_method": "entrega-correios",
-    "delivery_address": "Rua Bela Cintra, 750, Apto 42 - Consolação, São Paulo - SP - CEP: 01415-000",
-    "general_notes": "Enviar código de rastreamento assim que postado no Sedex.",
-    "total_units": 4,
-    "total_amount": 140,
-    "status": "em_producao",
-    "created_at": "2026-11-08T10:00:00.000Z",
-    "items": [
-      {
-        "cartItemId": "caderno-personalizado-1",
-        "product": {
-          "id": "caderno-personalizado-luxo",
-          "name": "Caderno Personalizado Luxo com Wire-o & Elástico",
-          "price": 35,
-          "image": "/images/cadernos/caderno-azul-fechado.jpg"
-        },
-        "quantity": 2,
-        "customization": {
-          "childName": "Dra. Mariana Castro",
-          "variation": "Geométrico Azul",
-          "ribbonColor": "Elástico Prateado",
-          "notes": "Miolo pautado personalizado"
-        },
-        "subtotal": 70
-      },
-      {
-        "cartItemId": "caderno-personalizado-2",
-        "product": {
-          "id": "caderno-personalizado-luxo",
-          "name": "Caderno Personalizado Luxo com Wire-o & Elástico",
-          "price": 35,
-          "image": "/images/cadernos/caderno-verde-fechado.jpg"
-        },
-        "quantity": 2,
-        "customization": {
-          "childName": "Lucas Castro",
-          "variation": "Folhagens Verde",
-          "ribbonColor": "Elástico Dourado",
-          "notes": "Capa fosca com laminação aveludada"
-        },
-        "subtotal": 70
-      }
-    ]
-  },
-  {
-    "id": "ord-1004",
-    "customer_name": "Fernanda Ribeiro Alves",
-    "customer_phone": "35999887766",
-    "event_date": "2026-11-28",
-    "delivery_method": "retirada-pouso-alegre",
-    "delivery_address": "Retirada no ateliê em Pouso Alegre - MG",
-    "general_notes": "Cliente virá retirar na parte da tarde.",
-    "total_units": 30,
-    "total_amount": 450,
-    "status": "pronto",
-    "created_at": "2026-11-06T16:20:00.000Z",
-    "items": [
-      {
-        "cartItemId": "mini-lata-natal-luxo-2",
-        "product": {
-          "id": "mini-lata-natal-luxo",
-          "name": "Mini Lata Natalina Personalizada com Laço e Tag",
-          "price": 15,
-          "image": "/images/natal/lata-natal-1.jpg"
-        },
-        "quantity": 30,
-        "customization": {
-          "childName": "Alice - 1º Aninho",
-          "theme": "Bosque Encantado de Natal",
-          "ribbonColor": "Dourado com Pompom Branco",
-          "notes": "Tag personalizada com mensagem de agradecimento"
-        },
-        "subtotal": 450
-      }
-    ]
-  },
-  {
     "id": "ord-1005",
     "customer_name": "Patrícia Gomes",
     "customer_phone": "35997654321",
@@ -197,7 +9,7 @@
     "general_notes": "Lembrancinhas entregues com sucesso e elogiadas pela cliente.",
     "total_units": 20,
     "total_amount": 198,
-    "status": "entregue",
+    "status": "em_analise",
     "created_at": "2026-11-01T11:45:00.000Z",
     "items": [
       {
@@ -217,6 +29,7 @@
         },
         "subtotal": 198
       }
-    ]
+    ],
+    "updated_at": "2026-11-11T16:37:46.874Z"
   }
 ]

@@ -32,13 +32,15 @@ import {
   Flame,
   Trophy,
   ArrowUpRight,
-  Calendar
+  Calendar,
+  Crop
 } from 'lucide-react';
 import { Product, Category, ProductVariation, CustomFieldDefinition } from '@/types';
 import OrdersProductionTab from './components/OrdersProductionTab';
 import CouponsTab from './components/CouponsTab';
 import StoreSettingsTab from './components/StoreSettingsTab';
 import CostCalculatorTab from './components/CostCalculatorTab';
+import { ImageCropModal } from './components/ImageCropModal';
 import { STORE_CONFIG } from '@/data/products';
 import { getAnalyticsForPeriod, AnalyticsPeriod } from '@/lib/analytics';
 import styles from './Admin.module.css';
@@ -107,6 +109,12 @@ export default function AdminDashboardPage() {
   const [mainImage, setMainImage] = useState('');
   const [additionalImages, setAdditionalImages] = useState<string[]>([]);
   const [newAdditionalUrl, setNewAdditionalUrl] = useState('');
+  const [cropTarget, setCropTarget] = useState<
+    | null
+    | { type: 'main'; url: string; title: string }
+    | { type: 'additional'; index: number; url: string; title: string }
+    | { type: 'variation'; index: number; slot: 1 | 2; url: string; title: string }
+  >(null);
   
   // Modelos / Variações
   const [hasVariations, setHasVariations] = useState(false);
@@ -1234,8 +1242,8 @@ export default function AdminDashboardPage() {
 
       {/* Modal de Criação / Edição de Produto */}
       {isModalOpen && (
-        <div className={styles.modalOverlay} onClick={handleCloseModal}>
-          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalCard}>
             <div className={styles.modalHeader}>
               <h3 className={styles.modalTitle}>
                 {editingProductId ? 'Editar Publicação do Produto' : 'Cadastrar Novo Produto'}
@@ -1441,6 +1449,21 @@ export default function AdminDashboardPage() {
                         <div className={styles.badgeCover}>Capa Principal</div>
                         <span className={styles.photoUrlText}>{mainImage}</span>
                         <div className={styles.photoActionsRow}>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCropTarget({
+                                type: 'main',
+                                url: mainImage,
+                                title: 'Ajustar / Cortar Foto da Capa',
+                              })
+                            }
+                            className={styles.adjustPhotoBtn}
+                            title="Cortar, girar e ajustar foto da capa"
+                          >
+                            <Crop size={13} />
+                            <span>Ajustar / Cortar</span>
+                          </button>
                           <label className={styles.changePhotoBtn}>
                             <Upload size={13} />
                             <span>Trocar Foto</span>
@@ -1522,6 +1545,21 @@ export default function AdminDashboardPage() {
                           </div>
                           <div className={styles.galleryCardFooter}>
                             <span className={styles.galleryPhotoIndex}>Foto #{idx + 2}</span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setCropTarget({
+                                  type: 'additional',
+                                  index: idx,
+                                  url: imgUrl,
+                                  title: `Ajustar / Cortar Foto #${idx + 2}`,
+                                })
+                              }
+                              className={styles.galleryAdjustBtn}
+                              title="Cortar, girar e ajustar esta foto"
+                            >
+                              <Crop size={11} /> Ajustar / Cortar
+                            </button>
                             <button
                               type="button"
                               onClick={() => handlePromoteToMain(idx)}
@@ -1711,6 +1749,22 @@ export default function AdminDashboardPage() {
                                 <img src={v.image} alt={v.name} className={styles.modelPhotoThumb} />
                                 <button
                                   type="button"
+                                  onClick={() =>
+                                    setCropTarget({
+                                      type: 'variation',
+                                      index: idx,
+                                      slot: 1,
+                                      url: v.image,
+                                      title: `Ajustar 1ª Foto — ${v.name || `Modelo ${idx + 1}`}`,
+                                    })
+                                  }
+                                  className={styles.modelAdjustPhotoBtn}
+                                  title="Cortar, girar e ajustar 1ª foto"
+                                >
+                                  <Crop size={11} /> Ajustar / Cortar
+                                </button>
+                                <button
+                                  type="button"
                                   onClick={() => {
                                     const next = [...variations];
                                     next[idx].image = '';
@@ -1755,6 +1809,22 @@ export default function AdminDashboardPage() {
                             {v.image2 && (
                               <div className={styles.modelPhotoPreviewRow}>
                                 <img src={v.image2} alt={v.name} className={styles.modelPhotoThumb} />
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setCropTarget({
+                                      type: 'variation',
+                                      index: idx,
+                                      slot: 2,
+                                      url: v.image2,
+                                      title: `Ajustar 2ª Foto — ${v.name || `Modelo ${idx + 1}`}`,
+                                    })
+                                  }
+                                  className={styles.modelAdjustPhotoBtn}
+                                  title="Cortar, girar e ajustar 2ª foto"
+                                >
+                                  <Crop size={11} /> Ajustar / Cortar
+                                </button>
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -2034,6 +2104,36 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Modal de Recorte e Ajuste de Imagens */}
+      <ImageCropModal
+        isOpen={Boolean(cropTarget)}
+        imageUrl={cropTarget?.url || ''}
+        title={cropTarget?.title}
+        onClose={() => setCropTarget(null)}
+        onSaveCropped={(newUrl) => {
+          if (!cropTarget) return;
+          if (cropTarget.type === 'main') {
+            setMainImage(newUrl);
+          } else if (cropTarget.type === 'additional') {
+            setAdditionalImages((prev) =>
+              prev.map((img, i) => (i === cropTarget.index ? newUrl : img))
+            );
+          } else if (cropTarget.type === 'variation') {
+            setVariations((prev) =>
+              prev.map((v, i) =>
+                i === cropTarget.index
+                  ? {
+                      ...v,
+                      [cropTarget.slot === 1 ? 'image' : 'image2']: newUrl,
+                    }
+                  : v
+              )
+            );
+          }
+          setCropTarget(null);
+        }}
+      />
     </div>
   );
 }
