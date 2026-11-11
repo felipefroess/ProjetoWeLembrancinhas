@@ -3,10 +3,18 @@
 import React from 'react';
 import { MapPin, Lock } from 'lucide-react';
 import { InstagramIcon } from '@/components/InstagramIcon';
+import { useStoreSettings } from '@/context/StoreSettingsContext';
 import { STORE_CONFIG } from '@/data/products';
 import styles from './Footer.module.css';
 
 export function Footer() {
+  const { settings } = useStoreSettings();
+  const artisanName = settings.artisanName || STORE_CONFIG.artisanName;
+  const storeName = settings.storeName || STORE_CONFIG.storeName;
+  const phone = settings.whatsappNumber || STORE_CONFIG.whatsappNumber;
+  const instagram = settings.instagram || STORE_CONFIG.instagram;
+  const instagramUrl = settings.instagramUrl || STORE_CONFIG.instagramUrl;
+
   return (
     <footer className={styles.footerContainer}>
       <div className={styles.innerWrap}>
@@ -16,11 +24,11 @@ export function Footer() {
           <div>
             <div className={styles.brandHeader}>
               <span className={styles.brandName}>
-                Wê Lembrancinhas
+                {storeName}
               </span>
             </div>
             <p className={styles.aboutDescription}>
-              Lembrancinhas personalizadas criadas à mão com amor e precisão por <strong>{STORE_CONFIG.artisanName}</strong>. Cada detalhe é planejado para tornar a sua celebração inesquecível.
+              Lembrancinhas personalizadas criadas à mão com amor e precisão por <strong>{artisanName}</strong>. Cada detalhe é planejado para tornar a sua celebração inesquecível.
             </p>
             <div className={styles.locationNote}>
               <MapPin size={14} className={styles.pinIcon} />
@@ -36,18 +44,18 @@ export function Footer() {
             <ul className={styles.linksList}>
               <li>
                 <a
-                  href={STORE_CONFIG.instagramUrl}
+                  href={instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.footerLink}
                 >
                   <InstagramIcon size={14} className={styles.linkIcon} />
-                  <span>Instagram: @{STORE_CONFIG.instagram}</span>
+                  <span>Instagram: @{instagram}</span>
                 </a>
               </li>
               <li>
                 <a
-                  href={`https://wa.me/${STORE_CONFIG.whatsappNumber}`}
+                  href={`https://wa.me/${phone}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.footerLink}
@@ -71,7 +79,7 @@ export function Footer() {
 
         {/* Rodapé inferior */}
         <div className={styles.bottomRow}>
-          <p>© 2026 Wê Lembrancinhas. Todos os direitos reservados.</p>
+          <p>© 2026 {storeName}. Todos os direitos reservados.</p>
         </div>
       </div>
     </footer>

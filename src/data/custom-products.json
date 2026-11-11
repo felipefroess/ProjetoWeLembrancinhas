@@ -1,7 +1,7 @@
 [
   {
     "id": "lata-personalizada-maternidade-ursinho-classico-2764",
-    "name": "Lata Maternidade – Ursinho Clássico",
+    "name": "Mini Lata Maternidade",
     "category": "maternidade",
     "description": "Uma lembrancinha delicada e encantadora para celebrar a chegada do seu bebê. Perfeita para colocar docinhos, suspiros, amêndoas ou pequenos mimos.",
     "price": 14.9,
@@ -117,7 +117,7 @@
   },
   {
     "id": "mini-lata-natal-luxo",
-    "name": "Mini Lata Natalina Personalizada",
+    "name": "Mini Lata Natalina",
     "category": "natal",
     "description": "Lembrancinha natalina em lata. Acompanha rótulo temático personalizado com o nome, laço de cetim com pompom de neve e tag de Boas Festas com cordão dourado. Ideal para rechear com biscoitos caseiros, bombons, pães de mel ou doces.",
     "price": 14.9,
@@ -445,5 +445,98 @@
       "allowNotes": true
     },
     "popular": false
+  },
+  {
+    "id": "kit-lembrancinhas-personalizadas-4379",
+    "name": "Lembracinhas de Time personalizadas",
+    "category": "anivers-rio-infantil",
+    "description": "Caixas temáticas em camadas 3D com foto. Perfeito para compor a mesa e encantar os convidados!",
+    "price": 15,
+    "unit": "unidade",
+    "leadTimeDays": 5,
+    "minQuantity": 1,
+    "image": "/uploads/1794407326238-saveclip.app_857246287_18218060854347767_5753697527518423786_n.jpg",
+    "images": [
+      "/uploads/1794407326238-saveclip.app_857246287_18218060854347767_5753697527518423786_n.jpg"
+    ],
+    "variations": [
+      {
+        "id": "var_1794407706970_0",
+        "name": "Modelo 1",
+        "image": "/uploads/1794407368494-saveclip.app_859801689_18218060917347767_3784566472842721051_n.jpg",
+        "images": [
+          "/uploads/1794407368494-saveclip.app_859801689_18218060917347767_3784566472842721051_n.jpg"
+        ]
+      },
+      {
+        "id": "var_1794407706970_1",
+        "name": "Modelo 2",
+        "image": "/uploads/1794407375645-saveclip.app_858263650_18218060965347767_7417340956182341151_n.jpg",
+        "images": [
+          "/uploads/1794407375645-saveclip.app_858263650_18218060965347767_7417340956182341151_n.jpg"
+        ]
+      },
+      {
+        "id": "var_1794407706970_2",
+        "name": "Modelo 3",
+        "image": "/uploads/1794407383078-saveclip.app_858263658_18218060863347767_196120946507788477_n.jpg",
+        "images": [
+          "/uploads/1794407383078-saveclip.app_858263658_18218060863347767_196120946507788477_n.jpg"
+        ]
+      }
+    ],
+    "availableRibbonColors": [
+      "Laço Dourado",
+      "Laço Verde",
+      "Laço Vermelho",
+      "Laço Azul",
+      "Laço Preto"
+    ],
+    "customizationSettings": {
+      "allowChildName": true,
+      "childNameLabel": "Nome na Lembrancinha",
+      "allowRibbonColors": true,
+      "ribbonColors": [
+        "Laço Dourado",
+        "Laço Verde",
+        "Laço Vermelho",
+        "Laço Azul",
+        "Laço Preto"
+      ],
+      "allowNotes": true,
+      "customFields": [
+        {
+          "id": "field_1794407683677",
+          "label": "Time",
+          "type": "text",
+          "required": true,
+          "placeholder": "Ex: Palmeiras, Flamengo, Corinthians..."
+        }
+      ]
+    },
+    "popular": true
+  },
+  {
+    "id": "lembrancinha-super-mario-personalizada-7540",
+    "name": "Lembrancinhas de Desenho Personalizadas",
+    "category": "anivers-rio-infantil",
+    "description": "Caixas personalizados com o desenho favorito da criança!",
+    "price": 15,
+    "unit": "unidade",
+    "leadTimeDays": 5,
+    "minQuantity": 1,
+    "image": "/uploads/1794409198624-whatsapp_image_2026-11-11_at_11.50.41.jpeg",
+    "images": [
+      "/uploads/1794409198624-whatsapp_image_2026-11-11_at_11.50.41.jpeg",
+      "/uploads/1794409205039-whatsapp_image_2026-11-11_at_11.50.41__1_.jpeg"
+    ],
+    "customizationSettings": {
+      "allowChildName": true,
+      "childNameLabel": "Nome na Lembrancinha",
+      "allowRibbonColors": false,
+      "ribbonColors": [],
+      "allowNotes": true
+    },
+    "popular": true
   }
 ]

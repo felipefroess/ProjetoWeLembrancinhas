@@ -181,6 +181,14 @@ export function CartDrawer() {
                       &quot;{item.customization.notes}&quot;
                     </p>
                   )}
+                  {item.customization.customFieldValues &&
+                    Object.entries(item.customization.customFieldValues).map(([k, val]) =>
+                      val && String(val).trim() ? (
+                        <p key={k}>
+                          <strong>{k}:</strong> {String(val)}
+                        </p>
+                      ) : null
+                    )}
                 </div>
                 )}
 

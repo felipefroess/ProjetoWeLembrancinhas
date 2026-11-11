@@ -8,5 +8,10 @@
     "id": "dia-dos-namorados",
     "name": "Dia dos Namorados",
     "description": "Produtos da categoria Dia dos Namorados"
+  },
+  {
+    "id": "anivers-rio-infantil",
+    "name": "Aniversário Infantil",
+    "description": "Produtos da categoria Aniversário Infantil"
   }
 ]

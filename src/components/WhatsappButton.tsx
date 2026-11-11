@@ -2,11 +2,14 @@
 
 import React from 'react';
 import { MessageCircle } from 'lucide-react';
+import { useStoreSettings } from '@/context/StoreSettingsContext';
 import { STORE_CONFIG } from '@/data/products';
 import styles from './WhatsappButton.module.css';
 
 export function WhatsappButton() {
-  const whatsappUrl = `https://wa.me/${STORE_CONFIG.whatsappNumber}?text=${encodeURIComponent('Olá, Wê! Visitei o seu site Wê Lembrancinhas e gostaria de tirar uma dúvida!')}`;
+  const { settings } = useStoreSettings();
+  const phone = settings.whatsappNumber || STORE_CONFIG.whatsappNumber;
+  const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent('Olá, Wê! Visitei o seu site Wê Lembrancinhas e gostaria de tirar uma dúvida!')}`;
 
   return (
     <aside aria-label="Atendimento via WhatsApp" className={styles.floatingContainer}>

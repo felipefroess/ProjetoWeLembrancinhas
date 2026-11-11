@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, CartItem, CustomizationOptions, CustomerOrderData, AppliedCoupon } from '@/types';
 import { STORE_CONFIG } from '@/data/products';
 import { trackProductClick } from '@/lib/tracking';
+import { useStoreSettings } from './StoreSettingsContext';
 
 interface CartContextType {
   items: CartItem[];
@@ -37,6 +38,7 @@ const STORAGE_KEY = 'welembrancinhas_cart_v1';
 const COUPON_STORAGE_KEY = 'welembrancinhas_coupon_v1';
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { settings: storeSettings } = useStoreSettings();
   const [items, setItems] = useState<CartItem[]>([]);
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -245,6 +247,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (item.customization.ribbonColor) {
         message += `   • Cor dos laços/detalhes: *${item.customization.ribbonColor}*\n`;
       }
+      if (item.customization.customFieldValues) {
+        Object.entries(item.customization.customFieldValues).forEach(([k, val]) => {
+          if (val && String(val).trim()) {
+            message += `   • ${k}: *${String(val).trim()}*\n`;
+          }
+        });
+      }
       if (item.customization.notes) {
         message += `   • Obs: _${item.customization.notes}_\n`;
       }
@@ -285,7 +294,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     message += `\nFico no aguardo para confirmar a data de produção e os detalhes da arte! Obrigada!`;
 
     const encoded = encodeURIComponent(message);
-    return `https://wa.me/${STORE_CONFIG.whatsappNumber}?text=${encoded}`;
+    const activePhone = storeSettings?.whatsappNumber || STORE_CONFIG.whatsappNumber;
+    return `https://wa.me/${activePhone}?text=${encoded}`;
   };
 
   return (

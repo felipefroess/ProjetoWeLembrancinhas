@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { InstagramIcon } from '@/components/InstagramIcon';
 import { useCart } from '@/context/CartContext';
+import { useStoreSettings } from '@/context/StoreSettingsContext';
 import { STORE_CONFIG, PRODUCTS } from '@/data/products';
 import { CATEGORIES } from '@/data/categories';
 import { Product, Category, CategoryId } from '@/types';
@@ -45,6 +46,10 @@ export function Header({
   onSelectCategory,
 }: HeaderProps) {
   const { totalItems, openCart, openCustomizationModal } = useCart();
+  const { settings } = useStoreSettings();
+  const topBanner = settings.topBanner;
+  const currentInstagram = settings.instagram || STORE_CONFIG.instagram;
+  const currentInstagramUrl = settings.instagramUrl || STORE_CONFIG.instagramUrl;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const desktopSearchRef = useRef<HTMLDivElement>(null);
@@ -306,9 +311,23 @@ export function Header({
   return (
     <header className={styles.headerSticky}>
       {/* Barra de Notificação Superior */}
-      <div className={styles.topBanner}>
-        <span></span>
-      </div>
+      {topBanner?.enabled && topBanner?.text ? (
+        <div 
+          className={styles.topBanner}
+          style={{
+            backgroundColor: topBanner.bgColor || '#6D4C3D',
+            color: topBanner.textColor || '#FFFFFF',
+          }}
+        >
+          {topBanner.link ? (
+            <a href={topBanner.link} className={styles.topBannerLink}>
+              <span>{topBanner.text}</span>
+            </a>
+          ) : (
+            <span>{topBanner.text}</span>
+          )}
+        </div>
+      ) : null}
 
       <div className={styles.headerContainer}>
         <div className={styles.headerRow}>
@@ -332,14 +351,14 @@ export function Header({
           {/* Ações da Direita (Instagram e Carrinho) */}
           <div className={styles.actionsWrapper}>
             <a
-              href={STORE_CONFIG.instagramUrl}
+              href={currentInstagramUrl}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.instagramLink}
               title="Ver nosso Instagram oficial"
             >
               <InstagramIcon size={15} className={styles.instagramIcon} />
-              <span>@{STORE_CONFIG.instagram}</span>
+              <span>@{currentInstagram}</span>
             </a>
 
             {/* Botão do Carrinho */}

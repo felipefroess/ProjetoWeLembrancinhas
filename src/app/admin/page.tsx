@@ -4,6 +4,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
+  Calculator,
+  Sliders,
+  Ticket,
   LayoutDashboard,
   ClipboardList,
   Plus, 
@@ -33,6 +36,9 @@ import {
 } from 'lucide-react';
 import { Product, Category, ProductVariation, CustomFieldDefinition } from '@/types';
 import OrdersProductionTab from './components/OrdersProductionTab';
+import CouponsTab from './components/CouponsTab';
+import StoreSettingsTab from './components/StoreSettingsTab';
+import CostCalculatorTab from './components/CostCalculatorTab';
 import { STORE_CONFIG } from '@/data/products';
 import { getAnalyticsForPeriod, AnalyticsPeriod } from '@/lib/analytics';
 import styles from './Admin.module.css';
@@ -48,8 +54,10 @@ export default function AdminDashboardPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
 
   // Aba Principal do Admin (Dashboard ou Produtos)
-  const [mainTab, setMainTab] = useState<'dashboard' | 'produtos' | 'pedidos'>('dashboard');
+  const [mainTab, setMainTab] = useState<'pedidos' | 'produtos' | 'ajustes' | 'cupons' | 'dashboard' | 'calculadora'>('pedidos');
+  const [isCalculatorModalOpen, setIsCalculatorModalOpen] = useState(false);
   const [ordersCount, setOrdersCount] = useState<number>(0);
+  const [couponsCount, setCouponsCount] = useState<number>(0);
   const [isStoreOnline, setIsStoreOnline] = useState<boolean>(true);
   const [updatingStoreStatus, setUpdatingStoreStatus] = useState<boolean>(false);
 
@@ -107,8 +115,10 @@ export default function AdminDashboardPage() {
 
   // Opções de Personalização
   const [allowChildName, setAllowChildName] = useState(true);
+  const [childNameRequired, setChildNameRequired] = useState(true);
   const [childNameLabel, setChildNameLabel] = useState('Nome na Lembrancinha');
   const [allowRibbonColors, setAllowRibbonColors] = useState(false);
+  const [ribbonColorRequired, setRibbonColorRequired] = useState(false);
   const [ribbonColorsText, setRibbonColorsText] = useState('Laço Dourado, Laço Rosa, Laço Verde');
   const [allowNotes, setAllowNotes] = useState(true);
   const [customFields, setCustomFields] = useState<CustomFieldDefinition[]>([]);
@@ -208,8 +218,10 @@ export default function AdminDashboardPage() {
     setHasVariations(false);
     setVariations([]);
     setAllowChildName(true);
+    setChildNameRequired(true);
     setChildNameLabel('Nome na Lembrancinha');
     setAllowRibbonColors(false);
+    setRibbonColorRequired(false);
     setRibbonColorsText('Laço Dourado, Laço Rosa, Laço Verde');
     setAllowNotes(true);
     setCustomFields([]);
@@ -264,6 +276,7 @@ export default function AdminDashboardPage() {
     // Configurações de personalização
     const cs = product.customizationSettings;
     setAllowChildName(cs?.allowChildName ?? true);
+    setChildNameRequired(cs?.childNameRequired ?? true);
     setChildNameLabel(cs?.childNameLabel || 'Nome na Lembrancinha');
     const hasRibbonColors = cs?.allowRibbonColors ?? (product.availableRibbonColors && product.availableRibbonColors.length > 0 ? true : false);
     setAllowRibbonColors(hasRibbonColors);
@@ -392,7 +405,7 @@ export default function AdminDashboardPage() {
       id: `field_${Date.now()}`,
       label: 'Novo Campo (Ex: Data do Evento)',
       type: 'text',
-      required: false,
+      required: true,
       placeholder: '',
     };
     setCustomFields((prev) => [...prev, newField]);
@@ -605,11 +618,12 @@ export default function AdminDashboardPage() {
         <nav className={styles.sidebarNav}>
           <button
             type="button"
-            onClick={() => setMainTab('dashboard')}
-            className={`${styles.sidebarNavItem} ${mainTab === 'dashboard' ? styles.sidebarNavItemActive : ''}`}
+            onClick={() => setMainTab('pedidos')}
+            className={`${styles.sidebarNavItem} ${mainTab === 'pedidos' ? styles.sidebarNavItemActive : ''}`}
           >
-            <LayoutDashboard size={18} />
-            <span>Dashboard</span>
+            <ClipboardList size={18} />
+            <span>Pedidos & Produção</span>
+            {ordersCount > 0 && <span className={styles.counterPill}>{ordersCount}</span>}
           </button>
 
           <button
@@ -621,15 +635,42 @@ export default function AdminDashboardPage() {
             <span>Gerenciamento de Produtos</span>
             <span className={styles.counterPill}>{products.length}</span>
           </button>
-        
+
           <button
             type="button"
-            onClick={() => setMainTab('pedidos')}
-            className={`${styles.sidebarNavItem} ${mainTab === 'pedidos' ? styles.sidebarNavItemActive : ''}`}
+            onClick={() => setMainTab('ajustes')}
+            className={`${styles.sidebarNavItem} ${mainTab === 'ajustes' ? styles.sidebarNavItemActive : ''}`}
           >
-            <ClipboardList size={18} />
-            <span>Pedidos & Produção</span>
-            {ordersCount > 0 && <span className={styles.counterPill}>{ordersCount}</span>}
+            <Sliders size={18} />
+            <span>Ajustes da Loja</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMainTab('cupons')}
+            className={`${styles.sidebarNavItem} ${mainTab === 'cupons' ? styles.sidebarNavItemActive : ''}`}
+          >
+            <Ticket size={18} />
+            <span>Cupons de Desconto</span>
+            {couponsCount > 0 && <span className={styles.counterPill}>{couponsCount}</span>}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMainTab('dashboard')}
+            className={`${styles.sidebarNavItem} ${mainTab === 'dashboard' ? styles.sidebarNavItemActive : ''}`}
+          >
+            <LayoutDashboard size={18} />
+            <span>Dashboard</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMainTab('calculadora')}
+            className={`${styles.sidebarNavItem} ${mainTab === 'calculadora' ? styles.sidebarNavItemActive : ''}`}
+          >
+            <Calculator size={18} />
+            <span>Calculadora de Preços</span>
           </button>
         </nav>
 
@@ -683,12 +724,13 @@ export default function AdminDashboardPage() {
             <div className={styles.mobileNavTabs}>
               <button
                 type="button"
-                onClick={() => setMainTab('dashboard')}
-                className={`${styles.mobileTabBtn} ${mainTab === 'dashboard' ? styles.mobileTabBtnActive : ''}`}
+                onClick={() => setMainTab('pedidos')}
+                className={`${styles.mobileTabBtn} ${mainTab === 'pedidos' ? styles.mobileTabBtnActive : ''}`}
               >
-                <LayoutDashboard size={14} />
-                <span>Dashboard</span>
+                <ClipboardList size={14} />
+                <span>Pedidos ({ordersCount})</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => setMainTab('produtos')}
@@ -697,19 +739,46 @@ export default function AdminDashboardPage() {
                 <Package size={14} />
                 <span>Produtos ({products.length})</span>
               </button>
-            
+
               <button
                 type="button"
-                onClick={() => setMainTab('pedidos')}
-                className={`${styles.mobileTabBtn} ${mainTab === 'pedidos' ? styles.mobileTabBtnActive : ''}`}
+                onClick={() => setMainTab('ajustes')}
+                className={`${styles.mobileTabBtn} ${mainTab === 'ajustes' ? styles.mobileTabBtnActive : ''}`}
               >
-                <ClipboardList size={14} />
-                <span>Pedidos ({ordersCount})</span>
+                <Sliders size={14} />
+                <span>Ajustes</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMainTab('cupons')}
+                className={`${styles.mobileTabBtn} ${mainTab === 'cupons' ? styles.mobileTabBtnActive : ''}`}
+              >
+                <Ticket size={14} />
+                <span>Cupons ({couponsCount})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMainTab('dashboard')}
+                className={`${styles.mobileTabBtn} ${mainTab === 'dashboard' ? styles.mobileTabBtnActive : ''}`}
+              >
+                <LayoutDashboard size={14} />
+                <span>Dashboard</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMainTab('calculadora')}
+                className={`${styles.mobileTabBtn} ${mainTab === 'calculadora' ? styles.mobileTabBtnActive : ''}`}
+              >
+                <Calculator size={14} />
+                <span>Calculadora</span>
               </button>
             </div>
             <div className={styles.desktopTabTitle}>
               <h2 className={styles.topBarHeading}>
-                {mainTab === 'dashboard' ? 'Dashboard & Métricas' : mainTab === 'produtos' ? 'Gerenciamento de Produtos' : 'Fila de Produção & Pedidos'}
+                {mainTab === 'pedidos' ? 'Fila de Produção & Pedidos' : mainTab === 'produtos' ? 'Gerenciamento de Produtos' : mainTab === 'ajustes' ? 'Ajustes & Configurações da Loja' : mainTab === 'cupons' ? 'Cupons de Desconto & Promoções' : mainTab === 'dashboard' ? 'Dashboard & Métricas' : 'Calculadora de Custos & Preço Sugerido'}
               </h2>
             </div>
           </div>
@@ -728,7 +797,150 @@ export default function AdminDashboardPage() {
 
         {/* Conteúdo Principal */}
         <main className={styles.mainContent}>
-          {/* Aba 1: Dashboard de Métricas */}
+          {/* Aba 1: Gestão de Pedidos & Fila de Produção */}
+          {mainTab === 'pedidos' && (
+            <OrdersProductionTab onOrderCountChange={setOrdersCount} />
+          )}
+
+          {/* Aba 2: Gerenciamento de Produtos */}
+          {mainTab === 'produtos' && (
+            <section className={styles.productsSection}>
+              {/* Cabeçalho da Tabela de Catálogo */}
+        <div className={styles.headerRow}>
+          <div>
+            <h2 className={styles.pageHeading}>Gerenciamento de Produtos</h2>
+            <p className={styles.pageSubheading}>
+              Edite fotos, modelos, preços e perguntas personalizadas de cada lembrancinha.
+            </p>
+          </div>
+
+          <button onClick={handleOpenCreateModal} className={styles.newProductBtn}>
+            <Plus size={18} />
+            <span>Novo Produto</span>
+          </button>
+        </div>
+
+        {/* Barra de Filtro e Busca Rápida */}
+        <div className={styles.searchFilterBar}>
+          <div className={styles.searchBox}>
+            <Search size={16} color="#8C7A6B" />
+            <input
+              type="text"
+              placeholder="Buscar produto por nome ou descrição..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={styles.searchInput}
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9E9084' }}
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          <div className={styles.filterControls}>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className={styles.filterSelect}
+            >
+              <option value="todos">Todas as Categorias</option>
+              {activeCategories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+
+            <span className={styles.filterCountBadge}>
+              {filteredProducts.length} {filteredProducts.length === 1 ? 'produto' : 'produtos'}
+            </span>
+          </div>
+        </div>
+
+        {/* Tabela de Produtos */}
+        <div className={styles.tableCard}>
+          <table className={styles.productsTable}>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Prazo</th>
+                <th style={{ textAlign: 'right' }}>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map((p) => (
+                  <tr key={p.id}>
+                    <td>
+                      <div className={styles.productRowInfo}>
+                        <img src={p.image} alt={p.name} className={styles.tableThumb} />
+                        <div>
+                          <div className={styles.productNameCell}>{p.name}</div>
+                          <div className={styles.productDescCell}>{p.description}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={styles.categoryBadge}>{p.category}</span>
+                    </td>
+                    <td>
+                      <span className={styles.priceTag}>
+                        {p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
+                    </td>
+                    <td>{p.leadTimeDays} dias úteis</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div className={styles.actionsCell} style={{ justifyContent: 'flex-end' }}>
+                        <button
+                          onClick={() => handleOpenEditProduct(p)}
+                          className={styles.editBtn}
+                          title="Editar publicação do produto"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(p.id, p.name)}
+                          className={styles.deleteBtn}
+                          title="Excluir produto"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#8C7A6B' }}>
+                    <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Nenhum produto encontrado</p>
+                    <p style={{ fontSize: '0.75rem' }}>Tente alterar a busca ou filtro de categoria.</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+            </section>
+          )}
+
+          {/* Aba 3: Ajustes & Configurações da Loja */}
+          {mainTab === 'ajustes' && (
+            <StoreSettingsTab />
+          )}
+
+          {/* Aba 4: Gestão de Cupons de Desconto */}
+          {mainTab === 'cupons' && (
+            <CouponsTab onCouponsCountChange={setCouponsCount} />
+          )}
+
+          {/* Aba 5: Dashboard de Métricas */}
           {mainTab === 'dashboard' && (
             <section className={styles.dashboardSection}>
           <div className={styles.periodHeaderRow}>
@@ -1009,137 +1221,13 @@ export default function AdminDashboardPage() {
         </section>
           )}
 
-          {/* Aba 2: Gerenciamento de Produtos */}
-          {mainTab === 'produtos' && (
-            <section className={styles.productsSection}>
-              {/* Cabeçalho da Tabela de Catálogo */}
-        <div className={styles.headerRow}>
-          <div>
-            <h2 className={styles.pageHeading}>Gerenciamento de Produtos</h2>
-            <p className={styles.pageSubheading}>
-              Edite fotos, modelos, preços e perguntas personalizadas de cada lembrancinha.
-            </p>
-          </div>
-
-          <button onClick={handleOpenCreateModal} className={styles.newProductBtn}>
-            <Plus size={18} />
-            <span>Novo Produto</span>
-          </button>
-        </div>
-
-        {/* Barra de Filtro e Busca Rápida */}
-        <div className={styles.searchFilterBar}>
-          <div className={styles.searchBox}>
-            <Search size={16} color="#8C7A6B" />
-            <input
-              type="text"
-              placeholder="Buscar produto por nome ou descrição..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={styles.searchInput}
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9E9084' }}
-              >
-                <X size={14} />
-              </button>
-            )}
-          </div>
-
-          <div className={styles.filterControls}>
-            <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className={styles.filterSelect}
-            >
-              <option value="todos">Todas as Categorias</option>
-              {activeCategories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-
-            <span className={styles.filterCountBadge}>
-              {filteredProducts.length} {filteredProducts.length === 1 ? 'produto' : 'produtos'}
-            </span>
-          </div>
-        </div>
-
-        {/* Tabela de Produtos */}
-        <div className={styles.tableCard}>
-          <table className={styles.productsTable}>
-            <thead>
-              <tr>
-                <th>Produto</th>
-                <th>Categoria</th>
-                <th>Preço</th>
-                <th>Prazo</th>
-                <th style={{ textAlign: 'right' }}>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProducts.length > 0 ? (
-                filteredProducts.map((p) => (
-                  <tr key={p.id}>
-                    <td>
-                      <div className={styles.productRowInfo}>
-                        <img src={p.image} alt={p.name} className={styles.tableThumb} />
-                        <div>
-                          <div className={styles.productNameCell}>{p.name}</div>
-                          <div className={styles.productDescCell}>{p.description}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className={styles.categoryBadge}>{p.category}</span>
-                    </td>
-                    <td>
-                      <span className={styles.priceTag}>
-                        {p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                      </span>
-                    </td>
-                    <td>{p.leadTimeDays} dias úteis</td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div className={styles.actionsCell} style={{ justifyContent: 'flex-end' }}>
-                        <button
-                          onClick={() => handleOpenEditProduct(p)}
-                          className={styles.editBtn}
-                          title="Editar publicação do produto"
-                        >
-                          <Pencil size={14} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(p.id, p.name)}
-                          className={styles.deleteBtn}
-                          title="Excluir produto"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#8C7A6B' }}>
-                    <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Nenhum produto encontrado</p>
-                    <p style={{ fontSize: '0.75rem' }}>Tente alterar a busca ou filtro de categoria.</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-            </section>
-          )}
-
-          {/* Aba 3: Gestão de Pedidos & Fila de Produção */}
-          {mainTab === 'pedidos' && (
-            <OrdersProductionTab onOrderCountChange={setOrdersCount} />
+          {/* Aba 6: Calculadora de Custos & Preço Sugerido */}
+          {mainTab === 'calculadora' && (
+            <CostCalculatorTab onApplyPrice={(suggested) => {
+              setPrice(suggested);
+              setMainTab('produtos');
+              setIsModalOpen(true);
+            }} />
           )}
         </main>
       </div>
@@ -1257,7 +1345,33 @@ export default function AdminDashboardPage() {
 
                 <div className={styles.grid3}>
                   <div className={styles.formField}>
-                    <label className={styles.label}>Preço (R$) <span className={styles.reqStar}>*</span></label>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                      <label className={styles.label} style={{ margin: 0 }}>
+                        Preço (R$) <span className={styles.reqStar}>*</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setIsCalculatorModalOpen(true)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#6D4C3D',
+                          fontSize: '0.71875rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          padding: '0.15rem 0.45rem',
+                          borderRadius: '0.35rem',
+                          backgroundColor: '#F5EDE4',
+                        }}
+                        title="Calcular preço ideal com base em custos e margem"
+                      >
+                        <Calculator size={11} />
+                        <span>Calcular</span>
+                      </button>
+                    </div>
                     <input
                       type="text"
                       required
@@ -1688,7 +1802,7 @@ export default function AdminDashboardPage() {
                     <span>Pedir Nome na Lembrancinha</span>
                   </label>
                   {allowChildName && (
-                    <div style={{ paddingLeft: '1.75rem' }}>
+                    <div style={{ paddingLeft: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                       <input
                         type="text"
                         placeholder="Rótulo do campo (ex: Nome na Lembrancinha, Nome da Criança...)"
@@ -1696,6 +1810,17 @@ export default function AdminDashboardPage() {
                         onChange={(e) => setChildNameLabel(e.target.value)}
                         className={styles.input}
                       />
+                      <label className={styles.checkboxLabel} style={{ fontSize: '0.8125rem' }}>
+                        <input
+                          type="checkbox"
+                          checked={childNameRequired}
+                          onChange={(e) => setChildNameRequired(e.target.checked)}
+                          className={styles.checkboxInput}
+                        />
+                        <span style={{ fontWeight: 600, color: childNameRequired ? '#CF1322' : '#6D4C3D' }}>
+                          {childNameRequired ? 'Preenchimento Obrigatório *' : 'Opcional (cliente pode deixar em branco)'}
+                        </span>
+                      </label>
                     </div>
                   )}
                 </div>
@@ -1712,7 +1837,7 @@ export default function AdminDashboardPage() {
                     <span>Oferecer escolha de Cores de Laços / Fitas</span>
                   </label>
                   {allowRibbonColors && (
-                    <div style={{ paddingLeft: '1.75rem' }}>
+                    <div style={{ paddingLeft: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                       <input
                         type="text"
                         placeholder="Digite as cores separadas por vírgula (ex: Laço Dourado, Laço Rosa, Laço Verde)"
@@ -1720,6 +1845,17 @@ export default function AdminDashboardPage() {
                         onChange={(e) => setRibbonColorsText(e.target.value)}
                         className={styles.input}
                       />
+                      <label className={styles.checkboxLabel} style={{ fontSize: '0.8125rem' }}>
+                        <input
+                          type="checkbox"
+                          checked={ribbonColorRequired}
+                          onChange={(e) => setRibbonColorRequired(e.target.checked)}
+                          className={styles.checkboxInput}
+                        />
+                        <span style={{ fontWeight: 600, color: ribbonColorRequired ? '#CF1322' : '#6D4C3D' }}>
+                          {ribbonColorRequired ? 'Escolha do laço Obrigatória *' : 'Opcional (usa o laço padrão da foto)'}
+                        </span>
+                      </label>
                     </div>
                   )}
                 </div>
@@ -1740,30 +1876,103 @@ export default function AdminDashboardPage() {
                 {/* Campos Extras Dinâmicos */}
                 {customFields.length > 0 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#6D4C3D' }}>
-                      Campos Personalizados Extras:
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#6D4C3D' }}>
+                        Campos Personalizados Extras ({customFields.length}):
+                      </span>
+                      <span style={{ fontSize: '0.6875rem', color: '#8C7A6B' }}>
+                        Defina quais campos são obrigatórios ou opcionais
+                      </span>
+                    </div>
+
                     {customFields.map((field, idx) => (
-                      <div key={field.id} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <input
-                          type="text"
-                          placeholder="Nome da pergunta (ex: Tema da Festa, Idade...)"
-                          value={field.label}
-                          onChange={(e) => {
-                            const next = [...customFields];
-                            next[idx].label = e.target.value;
-                            setCustomFields(next);
-                          }}
-                          className={styles.input}
-                          style={{ flex: 1 }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveCustomField(field.id)}
-                          className={styles.removeModelBtn}
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                      <div
+                        key={field.id}
+                        style={{
+                          backgroundColor: '#FAF7F2',
+                          border: '1px solid #E8DFD5',
+                          borderRadius: '0.625rem',
+                          padding: '0.75rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.625rem',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#6D4C3D', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            Campo Extra #{idx + 1}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCustomField(field.id)}
+                            className={styles.removeModelBtn}
+                            title="Remover este campo personalizado"
+                            style={{ margin: 0, padding: 0 }}
+                          >
+                            <Trash2 size={13} />
+                            <span>Remover</span>
+                          </button>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.625rem' }}>
+                          <div>
+                            <label style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#553A2D', display: 'block', marginBottom: '0.25rem' }}>
+                              Nome do Campo (Pergunta acima da caixa) <span className={styles.reqStar}>*</span>
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="Ex: Time, Frase do Cartão, Tema..."
+                              value={field.label}
+                              onChange={(e) => {
+                                const next = [...customFields];
+                                next[idx].label = e.target.value;
+                                setCustomFields(next);
+                              }}
+                              className={styles.input}
+                              style={{ backgroundColor: '#FFFFFF' }}
+                            />
+                          </div>
+
+                          <div>
+                            <label style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#553A2D', display: 'block', marginBottom: '0.25rem' }}>
+                              Texto dentro da caixa (Exemplo / Placeholder)
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="Ex: Ex: Palmeiras, Flamengo, Vasco..."
+                              value={field.placeholder || ''}
+                              onChange={(e) => {
+                                const next = [...customFields];
+                                next[idx].placeholder = e.target.value;
+                                setCustomFields(next);
+                              }}
+                              className={styles.input}
+                              style={{ backgroundColor: '#FFFFFF' }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Caixa para definir se o campo é OBRIGATÓRIO */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.35rem', borderTop: '1px dashed #E8DFD5' }}>
+                          <label className={styles.checkboxLabel} style={{ fontSize: '0.8125rem', margin: 0, cursor: 'pointer' }}>
+                            <input
+                              type="checkbox"
+                              checked={field.required !== false}
+                              onChange={(e) => {
+                                const next = [...customFields];
+                                next[idx].required = e.target.checked;
+                                setCustomFields(next);
+                              }}
+                              className={styles.checkboxInput}
+                            />
+                            <span style={{ fontWeight: 600, color: field.required !== false ? '#CF1322' : '#6D4C3D' }}>
+                              {field.required !== false ? 'Preenchimento Obrigatório *' : 'Opcional (cliente pode deixar em branco)'}
+                            </span>
+                          </label>
+                          <span style={{ fontSize: '0.6875rem', color: '#8C7A6B' }}>
+                            {field.required !== false ? 'Exige resposta para avançar' : 'Não bloqueia a compra'}
+                          </span>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1797,6 +2006,31 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Rápido da Calculadora de Custos */}
+      {isCalculatorModalOpen && (
+        <div className={styles.modalOverlay} onClick={() => setIsCalculatorModalOpen(false)}>
+          <div 
+            className={styles.modalCard} 
+            style={{ maxWidth: '64rem', maxHeight: '92vh', overflowY: 'auto', padding: '1.5rem' }} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.5rem' }}>
+              <button 
+                type="button" 
+                onClick={() => setIsCalculatorModalOpen(false)}
+                className={styles.closeBtn}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <CostCalculatorTab onApplyPrice={(suggested) => {
+              setPrice(suggested);
+              setIsCalculatorModalOpen(false);
+            }} />
           </div>
         </div>
       )}

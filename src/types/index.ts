@@ -37,7 +37,9 @@ export interface CustomFieldDefinition {
 export interface CustomizationSettings {
   allowChildName?: boolean;      // Solicita nome na lembrancinha (padrão: true)
   childNameLabel?: string;       // Rótulo customizável (ex: "Nome da Criança", "Nome do Casal")
+  childNameRequired?: boolean;   // Se o nome é obrigatório (padrão: true)
   allowRibbonColors?: boolean;   // Oferece opções de laços/fitas
+  ribbonColorRequired?: boolean; // Se a escolha da fita é obrigatória
   ribbonColors?: string[];       // Cores disponíveis
   allowNotes?: boolean;          // Campo de observações especiais (padrão: true)
   customFields?: CustomFieldDefinition[]; // Campos extras flexíveis

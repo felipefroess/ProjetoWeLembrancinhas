@@ -76,7 +76,7 @@
 }
 
 .heroTitle {
-  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
+  font-family: var(--font-playfair, 'Playfair Display', Georgia, serif);
   font-size: 1.875rem;
   font-weight: 700;
   color: #2D231E;

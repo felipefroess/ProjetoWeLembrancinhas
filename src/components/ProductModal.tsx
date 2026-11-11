@@ -470,11 +470,15 @@ export function ProductModal() {
                     <div>
                       <label className={styles.formLabel}>
                         {product.customizationSettings?.childNameLabel || 'Nome na Lembrancinha'}{' '}
-                        <span className={styles.reqStar}>*</span>
+                        {product.customizationSettings?.childNameRequired !== false ? (
+                          <span className={styles.reqStar}>*</span>
+                        ) : (
+                          <span style={{ fontSize: '0.75rem', fontWeight: 400, color: '#8C7A6B' }}>(opcional)</span>
+                        )}
                       </label>
                       <input
                         type="text"
-                        required
+                        required={product.customizationSettings?.childNameRequired !== false}
                         placeholder="Ex: Professora Leandra, Luís..."
                         value={childName}
                         onChange={(e) => setChildName(e.target.value)}
@@ -492,16 +496,25 @@ export function ProductModal() {
 
                     if (!shouldShow || !ribbonList || ribbonList.length === 0) return null;
 
+                    const isRibbonReq = Boolean(product.customizationSettings?.ribbonColorRequired);
+
                     return (
                       <div>
                         <label className={styles.formLabel}>
-                          Cor dos Laços / Fitas
+                          Cor dos Laços / Fitas{' '}
+                          {isRibbonReq ? (
+                            <span className={styles.reqStar}>*</span>
+                          ) : (
+                            <span style={{ fontSize: '0.75rem', fontWeight: 400, color: '#8C7A6B' }}>(opcional)</span>
+                          )}
                         </label>
                         <select
                           value={ribbonColor}
+                          required={isRibbonReq}
                           onChange={(e) => setRibbonColor(e.target.value)}
                           className={styles.formInput}
                         >
+                          {isRibbonReq && <option value="">Selecione a cor do laço...</option>}
                           {ribbonList.map((color) => (
                             <option key={color} value={color}>
                               {color}
@@ -513,32 +526,45 @@ export function ProductModal() {
                   })()}
 
                   {/* Campos Extras Dinâmicos cadastrados no painel administrativo */}
-                  {product.customizationSettings?.customFields && product.customizationSettings.customFields.map((field) => (
-                    <div key={field.id}>
-                      <label className={styles.formLabel}>
-                        {field.label} {field.required && <span className={styles.reqStar}>*</span>}
-                      </label>
-                      {field.type === 'textarea' ? (
-                        <textarea
-                          rows={2}
-                          required={field.required}
-                          placeholder={field.placeholder || `Preencha ${field.label.toLowerCase()}`}
-                          value={customFieldValues[field.id] || ''}
-                          onChange={(e) => setCustomFieldValues((prev) => ({ ...prev, [field.id]: e.target.value }))}
-                          className={styles.formTextarea}
-                        />
-                      ) : (
-                        <input
-                          type="text"
-                          required={field.required}
-                          placeholder={field.placeholder || `Preencha ${field.label.toLowerCase()}`}
-                          value={customFieldValues[field.id] || ''}
-                          onChange={(e) => setCustomFieldValues((prev) => ({ ...prev, [field.id]: e.target.value }))}
-                          className={styles.formInput}
-                        />
-                      )}
-                    </div>
-                  ))}
+                  {product.customizationSettings?.customFields && product.customizationSettings.customFields.map((field) => {
+                    const fieldKey = field.label && field.label.trim() ? field.label.trim() : field.id;
+                    const isReq = field.required !== false;
+                    const inputPlaceholder = field.placeholder && field.placeholder.trim()
+                      ? field.placeholder.trim()
+                      : (field.label ? `Ex: ${field.label}...` : 'Digite aqui...');
+
+                    return (
+                      <div key={field.id}>
+                        <label className={styles.formLabel}>
+                          {field.label}{' '}
+                          {isReq ? (
+                            <span className={styles.reqStar}>*</span>
+                          ) : (
+                            <span style={{ fontSize: '0.75rem', fontWeight: 400, color: '#8C7A6B' }}>(opcional)</span>
+                          )}
+                        </label>
+                        {field.type === 'textarea' ? (
+                          <textarea
+                            rows={2}
+                            required={isReq}
+                            placeholder={inputPlaceholder}
+                            value={customFieldValues[fieldKey] || ''}
+                            onChange={(e) => setCustomFieldValues((prev) => ({ ...prev, [fieldKey]: e.target.value }))}
+                            className={styles.formTextarea}
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            required={isReq}
+                            placeholder={inputPlaceholder}
+                            value={customFieldValues[fieldKey] || ''}
+                            onChange={(e) => setCustomFieldValues((prev) => ({ ...prev, [fieldKey]: e.target.value }))}
+                            className={styles.formInput}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
 
                   {/* Observações livres */}
                   {(product.customizationSettings?.allowNotes !== false) && (

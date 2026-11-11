@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
+import { Cormorant_Garamond, Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
+import { StoreSettingsProvider } from "@/context/StoreSettingsContext";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 
 const cormorant = Cormorant_Garamond({
@@ -15,6 +16,13 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
   display: "swap",
 });
 
@@ -55,12 +63,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${cormorant.variable} ${jakarta.variable}`}>
+    <html lang="pt-BR" className={`${cormorant.variable} ${jakarta.variable} ${playfair.variable}`}>
       <body>
-        <CartProvider>
-          <AnalyticsTracker />
-          {children}
-        </CartProvider>
+        <StoreSettingsProvider>
+          <CartProvider>
+            <AnalyticsTracker />
+            {children}
+          </CartProvider>
+        </StoreSettingsProvider>
       </body>
     </html>
   );

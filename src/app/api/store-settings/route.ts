@@ -1,0 +1,45 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getStoreSettings, updateStoreSettings } from '@/lib/storeSettingsStore';
+
+// GET: Retornar as configurações atuais da loja
+export async function GET() {
+  try {
+    const settings = getStoreSettings();
+    return NextResponse.json({ success: true, settings });
+  } catch (error) {
+    console.error('Erro na API de store-settings (GET):', error);
+    return NextResponse.json(
+      { success: false, error: 'Erro ao buscar configurações da loja.' },
+      { status: 500 }
+    );
+  }
+}
+
+// POST: Salvar ou atualizar as configurações da loja
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { applyLeadTimeToAllProducts, ...updates } = body;
+
+    const result = updateStoreSettings(updates, Boolean(applyLeadTimeToAllProducts));
+
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, error: result.error || 'Erro ao salvar configurações.' },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      settings: result.settings,
+      message: 'Configurações da loja atualizadas com sucesso!',
+    });
+  } catch (error) {
+    console.error('Erro na API de store-settings (POST):', error);
+    return NextResponse.json(
+      { success: false, error: 'Erro ao processar atualização das configurações.' },
+      { status: 500 }
+    );
+  }
+}
