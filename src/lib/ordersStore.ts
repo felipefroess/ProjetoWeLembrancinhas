@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { ProductionOrder, OrderStatus } from '@/types';
 import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 
@@ -63,6 +64,7 @@ function readLocalOrders(): ProductionOrder[] {
     }
     const content = fs.readFileSync(ORDERS_FILE_PATH, 'utf-8');
     const parsed = JSON.parse(content) as any[];
+    if (!Array.isArray(parsed)) return [];
     return parsed.map((o) => ({
       ...o,
       status: normalizeStatus(o.status),
@@ -87,8 +89,52 @@ function writeLocalOrders(orders: ProductionOrder[]): void {
 }
 
 /**
- * Busca todos os pedidos, mesclando dados do Supabase (quando configurado) com o fallback local
- * e filtrando com segurança pedidos cancelados/removidos.
+ * Tenta sincronizar pedidos que foram criados localmente para o Supabase
+ */
+async function syncUnsyncedOrdersToSupabase(orders: ProductionOrder[]): Promise<void> {
+  if (!isSupabaseConfigured() || orders.length === 0) return;
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return;
+
+  for (const ord of orders) {
+    try {
+      const payload: any = {
+        customer_name: ord.customer_name,
+        customer_phone: ord.customer_phone || null,
+        event_date: ord.event_date || null,
+        delivery_method: ord.delivery_method,
+        delivery_address: ord.delivery_address || null,
+        general_notes: ord.general_notes || null,
+        total_units: ord.total_units,
+        total_amount: ord.total_amount,
+        status: ord.status,
+        items: ord.items,
+      };
+
+      // Se o ID já for UUID válido, preserva no banco
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ord.id);
+      if (isUuid) {
+        payload.id = ord.id;
+      }
+
+      const { data, error } = await supabase
+        .from('orders')
+        .insert(payload)
+        .select('id')
+        .maybeSingle();
+
+      if (!error && data?.id && data.id !== ord.id) {
+        ord.id = String(data.id);
+      }
+    } catch {
+      // Ignora falha silenciosa para não travar a aplicação
+    }
+  }
+}
+
+/**
+ * Busca todos os pedidos com redundância dupla (Supabase + Local),
+ * espelhando automaticamente os dados para nunca perder pedidos.
  */
 export async function getAllProductionOrders(): Promise<{ orders: ProductionOrder[]; source: 'supabase' | 'local' }> {
   const deletedIds = readDeletedOrderIds();
@@ -106,7 +152,7 @@ export async function getAllProductionOrders(): Promise<{ orders: ProductionOrde
           .neq('status', 'cancelado')
           .order('created_at', { ascending: false });
 
-        if (!error && dbOrders) {
+        if (!error && Array.isArray(dbOrders)) {
           const normalizedDbOrders: ProductionOrder[] = dbOrders
             .filter((o) => !deletedIds.has(String(o.id)) && o.status !== 'cancelado')
             .map((o) => ({
@@ -125,7 +171,7 @@ export async function getAllProductionOrders(): Promise<{ orders: ProductionOrde
               updated_at: o.updated_at || undefined,
             }));
 
-          // Mescla pedidos locais que ainda não existam no Supabase (evita sumiço se algum insert falhou)
+          // Mescla pedidos locais que ainda não existam no Supabase
           const dbIds = new Set(normalizedDbOrders.map((o) => String(o.id)));
           const unsyncedLocal = localOrders.filter((local) => {
             if (dbIds.has(String(local.id))) return false;
@@ -135,7 +181,7 @@ export async function getAllProductionOrders(): Promise<{ orders: ProductionOrde
               return (
                 db.customer_name === local.customer_name &&
                 Math.abs(db.total_amount - local.total_amount) < 0.01 &&
-                Math.abs(dbTime - localTime) < 10000
+                Math.abs(dbTime - localTime) < 15000
               );
             });
             return !hasMatchingDb;
@@ -145,17 +191,23 @@ export async function getAllProductionOrders(): Promise<{ orders: ProductionOrde
             (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           );
 
-          if (merged.length > 0) {
-            return { orders: merged, source: 'supabase' };
+          // Espelho local: mantém orders.json sempre sincronizado com o Supabase
+          writeLocalOrders(merged);
+
+          // Se houver pedidos locais não salvos no Supabase, sincroniza em segundo plano
+          if (unsyncedLocal.length > 0) {
+            syncUnsyncedOrdersToSupabase(unsyncedLocal).catch(() => {});
           }
+
+          return { orders: merged, source: 'supabase' };
         }
       }
     } catch (err) {
-      console.error('Falha ao consultar pedidos no Supabase, usando arquivo local:', err);
+      console.error('Falha ao consultar pedidos no Supabase, usando arquivo local como fallback:', err);
     }
   }
 
-  // Ordena por data de criação descrescente
+  // Ordena por data de criação descrescente (fallback local)
   const sorted = [...localOrders].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
@@ -164,7 +216,7 @@ export async function getAllProductionOrders(): Promise<{ orders: ProductionOrde
 }
 
 /**
- * Salva um novo pedido no arquivo local e no Supabase (se configurado)
+ * Salva um novo pedido com UUID seguro no arquivo local e no Supabase
  */
 export async function createProductionOrder(orderData: {
   customerName: string;
@@ -178,7 +230,7 @@ export async function createProductionOrder(orderData: {
   items: any[];
   status?: OrderStatus;
 }): Promise<ProductionOrder> {
-  const newId = `ord-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
+  const newId = crypto.randomUUID();
   const nowIso = new Date().toISOString();
 
   const newOrder: ProductionOrder = {
@@ -196,7 +248,7 @@ export async function createProductionOrder(orderData: {
     created_at: nowIso,
   };
 
-  // Se Supabase estiver configurado, salva também no banco
+  // Se Supabase estiver configurado, salva no banco com o mesmo UUID
   if (isSupabaseConfigured()) {
     try {
       const supabase = getSupabaseAdmin();
@@ -204,6 +256,7 @@ export async function createProductionOrder(orderData: {
         const { data: inserted, error } = await supabase
           .from('orders')
           .insert({
+            id: newOrder.id,
             customer_name: newOrder.customer_name,
             customer_phone: newOrder.customer_phone || null,
             event_date: newOrder.event_date || null,
@@ -216,7 +269,7 @@ export async function createProductionOrder(orderData: {
             items: newOrder.items,
           })
           .select('id')
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Erro retornado pelo Supabase ao inserir pedido:', error);
@@ -229,8 +282,8 @@ export async function createProductionOrder(orderData: {
     }
   }
 
-  // Salva no arquivo local (já com o UUID real do Supabase se sincronizado)
-  const currentOrders = readLocalOrders();
+  // Salva no arquivo local imediatamente (evita duplicações)
+  const currentOrders = readLocalOrders().filter((o) => String(o.id) !== String(newOrder.id));
   currentOrders.unshift(newOrder);
   writeLocalOrders(currentOrders);
 
@@ -276,29 +329,32 @@ export async function updateProductionOrderStatus(
           updatePayload.general_notes = generalNotes;
         }
 
-        const { data, error } = await supabase
-          .from('orders')
-          .update(updatePayload)
-          .eq('id', orderId)
-          .select('*')
-          .maybeSingle();
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
+        if (isUuid) {
+          const { data, error } = await supabase
+            .from('orders')
+            .update(updatePayload)
+            .eq('id', orderId)
+            .select('*')
+            .maybeSingle();
 
-        if (!error && data) {
-          updatedOrder = {
-            id: String(data.id),
-            customer_name: data.customer_name,
-            customer_phone: data.customer_phone || '',
-            event_date: data.event_date || '',
-            delivery_method: data.delivery_method || 'retirada-pouso-alegre',
-            delivery_address: data.delivery_address || '',
-            general_notes: data.general_notes || '',
-            total_units: Number(data.total_units) || 0,
-            total_amount: Number(data.total_amount) || 0,
-            status: normalizeStatus(data.status),
-            items: Array.isArray(data.items) ? data.items : [],
-            created_at: data.created_at || nowIso,
-            updated_at: data.updated_at || nowIso,
-          };
+          if (!error && data) {
+            updatedOrder = {
+              id: String(data.id),
+              customer_name: data.customer_name,
+              customer_phone: data.customer_phone || '',
+              event_date: data.event_date || '',
+              delivery_method: data.delivery_method || 'retirada-pouso-alegre',
+              delivery_address: data.delivery_address || '',
+              general_notes: data.general_notes || '',
+              total_units: Number(data.total_units) || 0,
+              total_amount: Number(data.total_amount) || 0,
+              status: normalizeStatus(data.status),
+              items: Array.isArray(data.items) ? data.items : [],
+              created_at: data.created_at || nowIso,
+              updated_at: data.updated_at || nowIso,
+            };
+          }
         }
       }
     } catch (err) {
@@ -328,17 +384,20 @@ export async function deleteProductionOrder(orderId: string): Promise<boolean> {
     try {
       const supabase = getSupabaseAdmin();
       if (supabase) {
-        // Marca como cancelado (sempre permitido pelas policies de UPDATE do Supabase)
-        await supabase
-          .from('orders')
-          .update({ 
-            status: 'cancelado',
-            updated_at: new Date().toISOString() 
-          })
-          .eq('id', orderId);
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
+        if (isUuid) {
+          // Marca como cancelado
+          await supabase
+            .from('orders')
+            .update({ 
+              status: 'cancelado',
+              updated_at: new Date().toISOString() 
+            })
+            .eq('id', orderId);
 
-        // Tenta também a remoção física
-        await supabase.from('orders').delete().eq('id', orderId);
+          // Tenta também a remoção física
+          await supabase.from('orders').delete().eq('id', orderId);
+        }
       }
     } catch (err) {
       console.error('Erro ao deletar pedido no Supabase:', err);

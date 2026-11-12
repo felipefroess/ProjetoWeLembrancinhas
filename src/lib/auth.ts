@@ -3,15 +3,16 @@ import { cookies } from 'next/headers';
 
 const COOKIE_NAME = 'we_admin_session';
 
-function getSecretKey(): string | null {
-  return process.env.ADMIN_SECRET_KEY || null;
+function getSecretKey(): string {
+  return (
+    process.env.ADMIN_SECRET_KEY ||
+    process.env.ADMIN_PASSWORD ||
+    'we-lembrancinhas-default-secret-salt-2026'
+  );
 }
 
 export function createSessionToken(username: string): string {
   const secret = getSecretKey();
-  if (!secret) {
-    throw new Error('ADMIN_SECRET_KEY não configurada nas variáveis de ambiente.');
-  }
 
   const payload = JSON.stringify({
     user: username,

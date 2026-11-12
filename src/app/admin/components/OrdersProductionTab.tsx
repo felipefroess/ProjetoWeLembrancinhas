@@ -24,6 +24,7 @@ import {
   Tag
 } from 'lucide-react';
 import { ProductionOrder, OrderStatus } from '@/types';
+import { getSupabase } from '@/lib/supabase';
 import styles from '../Admin.module.css';
 
 interface OrdersProductionTabProps {
@@ -124,24 +125,46 @@ export default function OrdersProductionTab({ onOrderCountChange }: OrdersProduc
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'todos' | OrderStatus>('todos');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [dataSource, setDataSource] = useState<'supabase' | 'local'>('supabase');
 
   // Notifica o componente pai sobre a contagem de pedidos de forma segura após o render
   useEffect(() => {
     onOrderCountChange?.(orders.length);
   }, [orders.length, onOrderCountChange]);
 
-  // Busca inicial dos pedidos
+  // Busca inicial e atualização dos pedidos sem cache
   const loadOrders = async (silent = false) => {
     if (!silent) setRefreshing(true);
     try {
-      const res = await fetch('/api/orders');
+      const res = await fetch(`/api/orders?t=${Date.now()}`, { cache: 'no-store' });
       const data = await res.json();
-      if (data.orders) {
+      if (data.orders && Array.isArray(data.orders)) {
         setOrders(data.orders);
+        if (data.source) setDataSource(data.source);
         if (selectedOrder) {
           const fresh = data.orders.find((o: ProductionOrder) => String(o.id) === String(selectedOrder.id));
           if (fresh) setSelectedOrder(fresh);
         }
+      }
+
+      // Verificação de contingência: restaura pedidos offline salvos em localStorage se existirem
+      try {
+        const backupKey = 'we_backup_orders';
+        const stored = typeof window !== 'undefined' ? localStorage.getItem(backupKey) : null;
+        if (stored) {
+          const backupList = JSON.parse(stored);
+          if (Array.isArray(backupList) && backupList.length > 0) {
+            for (const backupOrder of backupList) {
+              fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(backupOrder),
+              }).catch(() => {});
+            }
+          }
+        }
+      } catch {
+        // Ignora erro de contingência
       }
     } catch (err) {
       console.error('Erro ao carregar pedidos:', err);
@@ -151,8 +174,45 @@ export default function OrdersProductionTab({ onOrderCountChange }: OrdersProduc
     }
   };
 
+  // Sincronização ao vivo: Supabase Realtime + Polling a cada 10s + Foco da aba
   useEffect(() => {
     loadOrders();
+
+    const supabase = getSupabase();
+    let channel: any = null;
+    if (supabase) {
+      channel = supabase
+        .channel('admin-orders-live-sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+          loadOrders(true);
+        })
+        .subscribe();
+    }
+
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadOrders(true);
+      }
+    }, 10000);
+
+    const handleFocus = () => loadOrders(true);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        loadOrders(true);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if (supabase && channel) {
+        supabase.removeChannel(channel);
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -279,6 +339,25 @@ export default function OrdersProductionTab({ onOrderCountChange }: OrdersProduc
           <h2 className={styles.ordersHeading}>
             <ClipboardList size={26} color="#6D4C3D" />
             <span>Gestão de Pedidos & Fila de Produção</span>
+            <span
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                padding: '0.2rem 0.6rem',
+                borderRadius: '999px',
+                background: dataSource === 'supabase' ? '#DCFCE7' : '#FEF3C7',
+                color: dataSource === 'supabase' ? '#166534' : '#92400E',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                marginLeft: '0.5rem',
+                verticalAlign: 'middle',
+              }}
+              title={dataSource === 'supabase' ? 'Conectado e sincronizado com o banco Supabase em tempo real' : 'Usando armazenamento local com redundância'}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: dataSource === 'supabase' ? '#16A34A' : '#D97706' }} />
+              {dataSource === 'supabase' ? 'Sincronizado ao Vivo' : 'Armazenamento Local'}
+            </span>
           </h2>
           <p className={styles.ordersSubheading}>
             Acompanhe cada etapa de fabricação, consulte a personalização em 1 clique e notifique clientes pelo WhatsApp.

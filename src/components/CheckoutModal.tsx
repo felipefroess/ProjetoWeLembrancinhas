@@ -47,6 +47,7 @@ export function CheckoutModal() {
   const [generalNotes, setGeneralNotes] = useState('');
   const [isSent, setIsSent] = useState(false);
   const [isStoreOnline, setIsStoreOnline] = useState<boolean>(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [shippingLoading, setShippingLoading] = useState(false);
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);

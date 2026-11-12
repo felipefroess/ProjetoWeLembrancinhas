@@ -9,19 +9,34 @@ import { syncOrderToCustomerCard } from '@/lib/customersStore';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { OrderStatus } from '@/types';
 
+const NO_CACHE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+  'Pragma': 'no-cache',
+  'Expires': '0',
+  'Surrogate-Control': 'no-store',
+};
+
 // GET: Buscar pedidos para o painel Admin e Kanban
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const { orders, source } = await getAllProductionOrders();
-    return NextResponse.json({ 
-      success: true, 
-      orders, 
-      configured: isSupabaseConfigured(),
-      source 
-    });
+    return NextResponse.json(
+      { 
+        success: true, 
+        orders, 
+        configured: isSupabaseConfigured(),
+        source 
+      },
+      {
+        headers: NO_CACHE_HEADERS,
+      }
+    );
   } catch (error) {
     console.error('Erro ao buscar pedidos:', error);
-    return NextResponse.json({ success: false, error: 'Erro ao buscar pedidos' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Erro ao buscar pedidos' }, 
+      { status: 500, headers: NO_CACHE_HEADERS }
+    );
   }
 }
 
@@ -44,7 +59,10 @@ export async function POST(request: Request) {
     } = body;
 
     if (!customerName) {
-      return NextResponse.json({ success: false, error: 'Nome do cliente é obrigatório' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Nome do cliente é obrigatório' }, 
+        { status: 400, headers: NO_CACHE_HEADERS }
+      );
     }
 
     const created = await createProductionOrder({
@@ -67,15 +85,23 @@ export async function POST(request: Request) {
       console.error('Aviso: falha ao sincronizar pedido na ficha do cliente:', syncError);
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      orderId: created.id, 
-      order: created,
-      saved: true 
-    });
+    return NextResponse.json(
+      { 
+        success: true, 
+        orderId: created.id, 
+        order: created,
+        saved: true 
+      },
+      {
+        headers: NO_CACHE_HEADERS,
+      }
+    );
   } catch (error) {
     console.error('Erro ao processar pedido:', error);
-    return NextResponse.json({ success: false, error: 'Erro interno' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Erro interno' }, 
+      { status: 500, headers: NO_CACHE_HEADERS }
+    );
   }
 }
 
@@ -86,21 +112,33 @@ export async function PATCH(request: Request) {
     const { id, status, generalNotes } = body;
 
     if (!id || !status) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'ID e status são obrigatórios para atualização' 
-      }, { status: 400 });
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'ID e status são obrigatórios para atualização' 
+        }, 
+        { status: 400, headers: NO_CACHE_HEADERS }
+      );
     }
 
     const updated = await updateProductionOrderStatus(id, status as OrderStatus, generalNotes);
     if (!updated) {
-      return NextResponse.json({ success: false, error: 'Pedido não encontrado' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: 'Pedido não encontrado' }, 
+        { status: 404, headers: NO_CACHE_HEADERS }
+      );
     }
 
-    return NextResponse.json({ success: true, order: updated });
+    return NextResponse.json(
+      { success: true, order: updated },
+      { headers: NO_CACHE_HEADERS }
+    );
   } catch (error) {
     console.error('Erro ao atualizar status do pedido:', error);
-    return NextResponse.json({ success: false, error: 'Erro ao atualizar pedido' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Erro ao atualizar pedido' }, 
+      { status: 500, headers: NO_CACHE_HEADERS }
+    );
   }
 }
 
@@ -111,13 +149,22 @@ export async function DELETE(request: Request) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ success: false, error: 'ID do pedido não informado' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'ID do pedido não informado' }, 
+        { status: 400, headers: NO_CACHE_HEADERS }
+      );
     }
 
     await deleteProductionOrder(id);
-    return NextResponse.json({ success: true });
+    return NextResponse.json(
+      { success: true },
+      { headers: NO_CACHE_HEADERS }
+    );
   } catch (error) {
     console.error('Erro ao remover pedido:', error);
-    return NextResponse.json({ success: false, error: 'Erro ao remover pedido' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Erro ao remover pedido' }, 
+      { status: 500, headers: NO_CACHE_HEADERS }
+    );
   }
 }
