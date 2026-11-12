@@ -16,9 +16,25 @@
     "customizationSettings": {
       "allowChildName": true,
       "childNameLabel": "Nome na Lembrancinha",
+      "childNamePlaceholder": "Ex: Lucas, Davi, Enzo...",
       "allowRibbonColors": false,
       "ribbonColors": [],
-      "allowNotes": true
+      "allowNotes": true,
+      "customFields": [
+        {
+          "id": "field_1794440341528",
+          "label": "Cor",
+          "type": "select",
+          "required": true,
+          "placeholder": "Verde",
+          "options": [
+            "Azul",
+            "Rosa",
+            "Outros"
+          ]
+        }
+      ],
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
     },
     "popular": false
   },
@@ -58,7 +74,8 @@
       "childNameLabel": "Nome na Lembrancinha",
       "allowRibbonColors": false,
       "ribbonColors": [],
-      "allowNotes": true
+      "allowNotes": true,
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
     },
     "popular": false
   },
@@ -112,7 +129,8 @@
         "Laço Verde com Tag",
         "Laço Dourado com Tag"
       ],
-      "allowNotes": true
+      "allowNotes": true,
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
     }
   },
   {
@@ -139,6 +157,8 @@
     "customizationSettings": {
       "allowChildName": true,
       "childNameLabel": "Nome na Lembrancinha",
+      "childNamePlaceholder": "Ex: Luís, Felipe, João...",
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial...",
       "allowRibbonColors": true,
       "ribbonColors": [
         "Laço Verde com Pompom Branco",
@@ -152,7 +172,7 @@
     "id": "caderno-personalizado-luxo",
     "name": "Caderno Personalizado com Elástico",
     "category": "cadernos",
-    "description": "Caderno personalizado com o seu nome. Encadernação wire-o metálica dupla, elástico coordenado para fechamento seguro e miolo pautado especial com cabeçalho de dias da semana. Perfeito para anotações, estudos ou presentes afetivos.",
+    "description": "Caderno personalizado com o seu nome. Perfeito para anotações, estudos ou presentes afetivos.",
     "price": 79.9,
     "minQuantity": 1,
     "unit": "unidade",
@@ -169,67 +189,59 @@
     ],
     "variations": [
       {
-        "id": "var_1794336730183_0",
-        "name": "Geométrico Azul",
+        "id": "var_1794440252152_0",
+        "name": "Modelo 1",
         "image": "/images/cadernos/caderno-azul-fechado.jpg",
         "images": [
           "/images/cadernos/caderno-azul-fechado.jpg"
         ],
-        "description": "Modelo geométrico moderno em azul marinho com elástico coordenado e miolo pautado."
+        "description": "Modelo conta com capa dura em azul marinho com elástico e personalizado com o nome"
       },
       {
-        "id": "var_1794336730183_1",
-        "name": "Geométrico Verde",
-        "image": "/images/cadernos/caderno-verde-fechado.jpg",
-        "images": [
-          "/images/cadernos/caderno-verde-fechado.jpg"
-        ],
-        "description": "Modelo geométrico em verde oliva e bege com elástico coordenado e miolo pautado."
-      },
-      {
-        "id": "var_1794336730183_2",
-        "name": "Floral Lilás (Vacinação)",
+        "id": "var_1794440252152_1",
+        "name": "Modelo 2",
         "image": "/uploads/1794333437976-saveclip.app_538768100_18172355338347767_2299544466431525219_n.jpg",
         "images": [
           "/uploads/1794333437976-saveclip.app_538768100_18172355338347767_2299544466431525219_n.jpg"
         ],
-        "description": "Caderneta com acabamento holográfico, flores campestres, tassel de seda roxo e passante de borboleta dourada."
+        "description": "Modelo conta com a capa dura e acabamento holográfico, flores campestres, tassel roxo e passante de borboleta dourada."
       },
       {
-        "id": "var_1794336730183_3",
-        "name": "Modelo 4",
+        "id": "var_1794440252152_2",
+        "name": "Modelo 3",
         "image": "/uploads/1794333488324-saveclip.app_539454379_18173392714347767_7517392955588664362_n.jpg",
         "images": [
           "/uploads/1794333488324-saveclip.app_539454379_18173392714347767_7517392955588664362_n.jpg",
           "/uploads/1794333493211-saveclip.app_544073499_18173392741347767_8193566408890919383_n.jpg"
-        ]
+        ],
+        "description": "Modelo conta com a capa dura e holográfica floral, nome e inicial, e elástico com passante dourado."
       },
       {
-        "id": "var_1794336730183_4",
-        "name": "Modelo 5",
+        "id": "var_1794440252152_3",
+        "name": "Modelo 4",
         "image": "/uploads/1794333556658-saveclip.app_521541070_18169066933347767_8499588843540459767_n.jpg",
         "images": [
           "/uploads/1794333556658-saveclip.app_521541070_18169066933347767_8499588843540459767_n.jpg"
-        ]
+        ],
+        "description": "Modelo conta com capa dura floral holográfica, nome com inicial, elástico e tassel."
       }
-    ],
-    "availableRibbonColors": [
-      "Elástico Coordenado com a Capa",
-      "Elástico com Passante Dourado",
-      "Elástico Branco",
-      "Elástico Preto"
     ],
     "customizationSettings": {
       "allowChildName": true,
       "childNameLabel": "Nome na Lembrancinha",
-      "allowRibbonColors": true,
-      "ribbonColors": [
-        "Elástico Coordenado com a Capa",
-        "Elástico com Passante Dourado",
-        "Elástico Branco",
-        "Elástico Preto"
+      "allowRibbonColors": false,
+      "ribbonColors": [],
+      "allowNotes": true,
+      "customFields": [
+        {
+          "id": "field_1794440222764",
+          "label": "Cor do Caderno",
+          "type": "text",
+          "required": true,
+          "placeholder": "Ex: Azul, Rosa, Roxo..."
+        }
       ],
-      "allowNotes": true
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
     }
   },
   {
@@ -247,7 +259,7 @@
     ],
     "variations": [
       {
-        "id": "var_1794419838255_0",
+        "id": "var_1794441887458_0",
         "name": "Modelo 1",
         "image": "/uploads/1794419831520-gemini_generated_image_s2zf35s2zf35s2zf.jfif",
         "images": [
@@ -255,7 +267,7 @@
         ]
       },
       {
-        "id": "var_1794419838255_1",
+        "id": "var_1794441887458_1",
         "name": "Modelo 2",
         "image": "/uploads/1794419827872-saveclip.app_588720354_18183661219347767_9060147958946855120_n.jpg",
         "images": [
@@ -264,24 +276,27 @@
       }
     ],
     "availableRibbonColors": [
-      "Laço Dourado",
       "Laço Vermelho",
+      "Laço Dourado",
       "Laço Verde",
       "Laço Rosa"
     ],
     "customizationSettings": {
-      "allowChildName": true,
+      "allowChildName": false,
       "childNameLabel": "Nome na Lembrancinha",
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial...",
+      "variationsNote": "OBS: As fotos para a personalização das bolinhas devem ser enviadas pelo nosso WhatsApp após o fechamento do pedido!",
       "allowRibbonColors": true,
       "ribbonColors": [
-        "Laço Dourado",
         "Laço Vermelho",
+        "Laço Dourado",
         "Laço Verde",
         "Laço Rosa"
       ],
       "allowNotes": true
     },
-    "popular": false
+    "popular": false,
+    "variationsNote": "OBS: As fotos para a personalização das bolinhas devem ser enviadas pelo nosso WhatsApp após o fechamento do pedido!"
   },
   {
     "id": "kit-tacas-de-champanhe-acrilicas-3787",
@@ -302,7 +317,8 @@
       "childNameLabel": "Nome na Lembrancinha",
       "allowRibbonColors": false,
       "ribbonColors": [],
-      "allowNotes": true
+      "allowNotes": true,
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
     },
     "popular": false
   },
@@ -345,7 +361,8 @@
       "childNameLabel": "Nome na Lembrancinha",
       "allowRibbonColors": false,
       "ribbonColors": [],
-      "allowNotes": true
+      "allowNotes": true,
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
     },
     "popular": false
   },
@@ -365,17 +382,27 @@
     "customizationSettings": {
       "allowChildName": false,
       "childNameLabel": "Nome na Lembrancinha",
-      "allowRibbonColors": false,
-      "ribbonColors": [],
-      "allowNotes": true
+      "allowRibbonColors": true,
+      "ribbonColors": [
+        "Laço Vermelho",
+        "Laço Verde",
+        "Laço Dourado"
+      ],
+      "allowNotes": true,
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
     },
-    "popular": false
+    "popular": false,
+    "availableRibbonColors": [
+      "Laço Vermelho",
+      "Laço Verde",
+      "Laço Dourado"
+    ]
   },
   {
     "id": "porta-bis-9810",
     "name": "Porta-Bis",
     "category": "natal",
-    "description": "Lembrancinha de Natal Porta-Bis (3 Unidades) com Embalagem e Laço",
+    "description": "Lembrancinha de Natal Porta-Bis com Embalagem e Laço",
     "price": 15,
     "unit": "unidade",
     "leadTimeDays": 5,
@@ -389,27 +416,30 @@
       "childNameLabel": "Nome na Lembrancinha",
       "allowRibbonColors": false,
       "ribbonColors": [],
-      "allowNotes": true
+      "allowNotes": true,
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
     },
     "popular": false,
     "variations": [
       {
-        "id": "var_1794335929828_0",
+        "id": "var_1794438450489_0",
         "name": "Modelo 1",
         "image": "/uploads/1794335810079-saveclip.app_654891797_18089775532928331_951258065111492404_n.jpg",
         "images": [
           "/uploads/1794335810079-saveclip.app_654891797_18089775532928331_951258065111492404_n.jpg",
           "/uploads/1794335815075-saveclip.app_652773064_18084625118254083_8374610967704577579_n.jpg"
-        ]
+        ],
+        "description": "Lembrancinha de Natal Porta-Bis com 3 unidades"
       },
       {
-        "id": "var_1794335929828_1",
+        "id": "var_1794438450489_1",
         "name": "Modelo 2",
         "image": "/uploads/1794335921834-saveclip.app_669951093_18579763231027025_2885427802905799559_n.jpg",
         "images": [
           "/uploads/1794335921834-saveclip.app_669951093_18579763231027025_2885427802905799559_n.jpg",
           "/uploads/1794335925204-saveclip.app_649604025_17938381596014062_8131345668314107267_n.jpg"
-        ]
+        ],
+        "description": "Lembrancinha de Natal Porta-Bis com 6 unidades"
       }
     ]
   },
@@ -429,11 +459,34 @@
     "customizationSettings": {
       "allowChildName": false,
       "childNameLabel": "Nome na Lembrancinha",
-      "allowRibbonColors": false,
-      "ribbonColors": [],
-      "allowNotes": true
+      "allowRibbonColors": true,
+      "ribbonColors": [
+        "Laço Vermelho",
+        "Laço Dourado",
+        "Laço Verde"
+      ],
+      "allowNotes": true,
+      "customFields": [
+        {
+          "id": "field_1794438917631",
+          "label": "Chocolate",
+          "type": "select",
+          "required": true,
+          "placeholder": "Sonho de Valsa",
+          "options": [
+            "Ouro Branco",
+            "Outros"
+          ]
+        }
+      ],
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
     },
-    "popular": false
+    "popular": false,
+    "availableRibbonColors": [
+      "Laço Vermelho",
+      "Laço Dourado",
+      "Laço Verde"
+    ]
   },
   {
     "id": "porta-bala-4315",
@@ -449,11 +502,26 @@
       "/uploads/1794336276063-saveclip.app_625053975_18112211146567565_1096708006824092779_n.jpg"
     ],
     "customizationSettings": {
-      "allowChildName": true,
+      "allowChildName": false,
       "childNameLabel": "Nome na Lembrancinha",
       "allowRibbonColors": false,
       "ribbonColors": [],
-      "allowNotes": true
+      "allowNotes": true,
+      "customFields": [
+        {
+          "id": "field_1794439599023",
+          "label": "Bala",
+          "type": "select",
+          "required": true,
+          "placeholder": "7Belo",
+          "options": [
+            "Yogurte",
+            "Freegells",
+            "Outros"
+          ]
+        }
+      ],
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
     },
     "popular": false
   },
@@ -523,7 +591,8 @@
           "required": true,
           "placeholder": "Ex: Palmeiras, Flamengo, Corinthians..."
         }
-      ]
+      ],
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
     },
     "popular": true
   },
@@ -545,7 +614,8 @@
       "childNameLabel": "Nome na Lembrancinha",
       "allowRibbonColors": false,
       "ribbonColors": [],
-      "allowNotes": true
+      "allowNotes": true,
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
     },
     "popular": true,
     "variations": [
@@ -613,7 +683,8 @@
       "childNameLabel": "Nome na Lembrancinha",
       "allowRibbonColors": false,
       "ribbonColors": [],
-      "allowNotes": true
+      "allowNotes": true,
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
     },
     "popular": true
   },
@@ -635,7 +706,8 @@
       "childNameLabel": "Nome na Lembrancinha",
       "allowRibbonColors": false,
       "ribbonColors": [],
-      "allowNotes": true
+      "allowNotes": true,
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
     },
     "popular": true
   },
@@ -666,7 +738,8 @@
           "required": true,
           "placeholder": "Ex: Astronauta, desenho..."
         }
-      ]
+      ],
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
     },
     "popular": true
   }

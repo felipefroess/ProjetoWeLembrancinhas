@@ -120,11 +120,14 @@ export default function AdminDashboardPage() {
   const [hasVariations, setHasVariations] = useState(false);
   const [modalTab, setModalTab] = useState<'basico' | 'fotos' | 'modelos' | 'personalizacao'>('basico');
   const [variations, setVariations] = useState<Array<{ name: string; image: string; image2: string; description: string; price: string }>>([]);
+  const [variationsNote, setVariationsNote] = useState('');
 
   // Opções de Personalização
   const [allowChildName, setAllowChildName] = useState(true);
   const [childNameRequired, setChildNameRequired] = useState(true);
   const [childNameLabel, setChildNameLabel] = useState('Nome na Lembrancinha');
+  const [childNamePlaceholder, setChildNamePlaceholder] = useState('');
+  const [notesPlaceholder, setNotesPlaceholder] = useState('');
   const [allowRibbonColors, setAllowRibbonColors] = useState(false);
   const [ribbonColorRequired, setRibbonColorRequired] = useState(false);
   const [ribbonColorsText, setRibbonColorsText] = useState('Laço Dourado, Laço Rosa, Laço Verde');
@@ -225,9 +228,12 @@ export default function AdminDashboardPage() {
     setNewAdditionalUrl('');
     setHasVariations(false);
     setVariations([]);
+    setVariationsNote('');
     setAllowChildName(true);
     setChildNameRequired(true);
     setChildNameLabel('Nome na Lembrancinha');
+    setChildNamePlaceholder('');
+    setNotesPlaceholder('');
     setAllowRibbonColors(false);
     setRibbonColorRequired(false);
     setRibbonColorsText('Laço Dourado, Laço Rosa, Laço Verde');
@@ -282,10 +288,13 @@ export default function AdminDashboardPage() {
     }
 
     // Configurações de personalização
+    setVariationsNote(product.variationsNote || product.customizationSettings?.variationsNote || '');
     const cs = product.customizationSettings;
     setAllowChildName(cs?.allowChildName ?? true);
     setChildNameRequired(cs?.childNameRequired ?? true);
     setChildNameLabel(cs?.childNameLabel || 'Nome na Lembrancinha');
+    setChildNamePlaceholder(cs?.childNamePlaceholder || '');
+    setNotesPlaceholder(cs?.notesPlaceholder || '');
     const hasRibbonColors = cs?.allowRibbonColors ?? (product.availableRibbonColors && product.availableRibbonColors.length > 0 ? true : false);
     setAllowRibbonColors(hasRibbonColors);
     setRibbonColorsText(
@@ -294,7 +303,16 @@ export default function AdminDashboardPage() {
       'Laço Dourado, Laço Rosa, Laço Verde'
     );
     setAllowNotes(cs?.allowNotes ?? true);
-    setCustomFields(cs?.customFields ? cs.customFields.map((f) => ({ ...f })) : []);
+    setCustomFields(
+      cs?.customFields
+        ? cs.customFields.map((f) => ({
+            ...f,
+            type: f.type || 'text',
+            options: Array.isArray(f.options) ? [...f.options] : [],
+            optionsText: Array.isArray(f.options) ? f.options.join(', ') : '',
+          }))
+        : []
+    );
     setIsModalOpen(true);
   };
 
@@ -411,10 +429,12 @@ export default function AdminDashboardPage() {
   const handleAddCustomField = () => {
     const newField: CustomFieldDefinition = {
       id: `field_${Date.now()}`,
-      label: 'Novo Campo (Ex: Data do Evento)',
+      label: 'Novo Campo',
       type: 'text',
       required: true,
       placeholder: '',
+      options: [],
+      optionsText: '',
     };
     setCustomFields((prev) => [...prev, newField]);
   };
@@ -519,14 +539,48 @@ export default function AdminDashboardPage() {
         image: finalMainImage,
         images: finalImagesList,
         variations: variationsFormatted.length > 0 ? variationsFormatted : undefined,
+        variationsNote: variationsNote.trim() || undefined,
         availableRibbonColors: ribbonColorsList.length > 0 ? ribbonColorsList : undefined,
         customizationSettings: {
           allowChildName,
           childNameLabel: childNameLabel.trim() || 'Nome na Lembrancinha',
+          childNamePlaceholder: childNamePlaceholder.trim() || undefined,
+          notesPlaceholder: notesPlaceholder.trim() || undefined,
+          variationsNote: variationsNote.trim() || undefined,
           allowRibbonColors,
           ribbonColors: ribbonColorsList,
           allowNotes,
-          customFields: customFields.length > 0 ? customFields : undefined,
+          customFields:
+            customFields.length > 0
+              ? customFields
+                  .filter((f) => f.label && f.label.trim())
+                  .map((f) => {
+                    const fieldObj: CustomFieldDefinition = {
+                      id: f.id,
+                      label: f.label.trim(),
+                      type: f.type === 'select' ? 'select' : 'text',
+                      required: f.required !== false,
+                    };
+                    if (f.placeholder && f.placeholder.trim()) {
+                      fieldObj.placeholder = f.placeholder.trim();
+                    }
+                    if (f.type === 'select') {
+                      let opts: string[] = [];
+                      if (f.optionsText !== undefined && f.optionsText.trim()) {
+                        opts = f.optionsText
+                          .split(',')
+                          .map((s) => s.trim())
+                          .filter(Boolean);
+                      } else if (Array.isArray(f.options)) {
+                        opts = f.options
+                          .map((s) => (typeof s === 'string' ? s.trim() : ''))
+                          .filter(Boolean);
+                      }
+                      fieldObj.options = opts;
+                    }
+                    return fieldObj;
+                  })
+              : undefined,
         },
         popular: existingProduct?.popular ?? true,
       };
@@ -1655,11 +1709,13 @@ export default function AdminDashboardPage() {
 
                         <div className={styles.grid2}>
                           <div className={styles.formField}>
-                            <label className={styles.label}>Nome do Modelo</label>
+                            <label className={styles.label}>
+                              Nome do Modelo <span className={styles.reqStar}>*</span>
+                            </label>
                             <input
                               type="text"
                               required
-                              placeholder="Ex: Talento Avelãs, Azul Marinho..."
+                              placeholder="Ex: Talento Avelãs, Azul Marinho, Capa Vermelha..."
                               value={v.name}
                               onChange={(e) => {
                                 const next = [...variations];
@@ -1670,15 +1726,29 @@ export default function AdminDashboardPage() {
                             />
                           </div>
 
+                          {/* Campo de Preço Específico do Modelo */}
                           <div className={styles.formField}>
-                            <label className={styles.label}>Breve Descrição do Modelo (Opcional)</label>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                              <label className={styles.label} style={{ margin: 0, fontWeight: 700, color: '#4A3326' }}>
+                                Preço deste Modelo (R$)
+                              </label>
+                              {v.price && !isNaN(parseFloat(v.price.replace(',', '.'))) ? (
+                                <span className={styles.modelPriceBadge}>
+                                  R$ {parseFloat(v.price.replace(',', '.')).toFixed(2).replace('.', ',')}
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: '0.6875rem', color: '#8C7A6B' }}>
+                                  Herda R$ {price || '0,00'}
+                                </span>
+                              )}
+                            </div>
                             <input
                               type="text"
-                              placeholder="Ex: Com mini chocolate Talento e frase especial"
-                              value={v.description}
+                              placeholder={`Ex: 79.90 (ou vazio p/ herdar R$ ${price || '0,00'})`}
+                              value={v.price || ''}
                               onChange={(e) => {
                                 const next = [...variations];
-                                next[idx].description = e.target.value;
+                                next[idx].price = e.target.value;
                                 setVariations(next);
                               }}
                               className={styles.input}
@@ -1686,33 +1756,51 @@ export default function AdminDashboardPage() {
                           </div>
                         </div>
 
-                        {/* Campo de Preço Específico do Modelo */}
-                        <div className={styles.modelPriceHighlight}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                            <label className={styles.label} style={{ margin: 0, fontWeight: 700, color: '#4A3326' }}>
-                              💰 Preço Específico deste Modelo (R$)
+                        {/* Campo de Descrição Específica do Modelo */}
+                        <div className={styles.formField} style={{ marginTop: '0.625rem', backgroundColor: '#FDFBF7', padding: '0.75rem', borderRadius: '0.625rem', border: '1px solid #E8DFD5' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+                            <label className={styles.label} style={{ margin: 0, fontWeight: 700, color: '#4A3326', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <span>📝 Descrição do Modelo</span>
+                              <span style={{ fontSize: '0.6875rem', fontWeight: 400, color: '#8C7A6B' }}>(O que muda neste modelo)</span>
                             </label>
-                            {v.price && !isNaN(parseFloat(v.price.replace(',', '.'))) ? (
-                              <span className={styles.modelPriceBadge}>
-                                R$ {parseFloat(v.price.replace(',', '.')).toFixed(2).replace('.', ',')}
-                              </span>
-                            ) : (
-                              <span style={{ fontSize: '0.6875rem', color: '#8C7A6B' }}>
-                                Herda preço base (R$ {price || '0,00'})
-                              </span>
+                            {description && description.trim() && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const next = [...variations];
+                                  next[idx].description = description.trim();
+                                  setVariations(next);
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: '#6D4C3D',
+                                  fontSize: '0.71875rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  textDecoration: 'underline',
+                                  padding: 0,
+                                }}
+                                title="Copiar o texto da descrição geral do produto para personalizar apenas o que muda neste modelo"
+                              >
+                                📋 Copiar descrição geral como base
+                              </button>
                             )}
                           </div>
-                          <input
-                            type="text"
-                            placeholder={`Ex: 79.90 (ou deixe em branco para herdar R$ ${price || '0,00'})`}
-                            value={v.price || ''}
+                          <textarea
+                            rows={3}
+                            placeholder="Descreva o que muda neste modelo (materiais, tamanhos, cores, itens ou doces inclusos...). Se deixar em branco, o produto continuará exibindo a descrição geral."
+                            value={v.description || ''}
                             onChange={(e) => {
                               const next = [...variations];
-                              next[idx].price = e.target.value;
+                              next[idx].description = e.target.value;
                               setVariations(next);
                             }}
-                            className={styles.input}
+                            className={styles.textarea}
                           />
+                          <span style={{ fontSize: '0.6875rem', color: '#8C7A6B', marginTop: '0.25rem', display: 'block' }}>
+                            💡 Quando o cliente selecionar este modelo na loja, esta descrição substituirá o texto geral automaticamente.
+                          </span>
                         </div>
 
                         {/* Fotos do Modelo (Até 2 Fotos: Principal e 2ª Foto) */}
@@ -1847,6 +1935,44 @@ export default function AdminDashboardPage() {
                     <button type="button" onClick={handleAddVariation} className={styles.addModelBtn}>
                       <Plus size={14} /> Adicionar Outro Modelo
                     </button>
+
+                    {/* Mensagem / Aviso abaixo dos Modelos na Loja */}
+                    <div style={{ marginTop: '0.875rem', backgroundColor: '#FAF7F2', border: '1px solid #E8DFD5', borderRadius: '0.625rem', padding: '0.875rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.35rem' }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4A3326', display: 'flex', alignItems: 'center', gap: '0.35rem', margin: 0 }}>
+                          <span>📸 Aviso / Mensagem abaixo dos Modelos (Opcional)</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setVariationsNote('📸 As fotos para a personalização deste produto devem ser enviadas pelo nosso WhatsApp após o fechamento do pedido!')}
+                          style={{
+                            background: 'none',
+                            border: '1px solid #DACFBF',
+                            borderRadius: '0.375rem',
+                            padding: '0.2rem 0.5rem',
+                            fontSize: '0.6875rem',
+                            fontWeight: 600,
+                            color: '#6D4C3D',
+                            cursor: 'pointer',
+                            backgroundColor: '#FFFFFF',
+                          }}
+                          title="Inserir texto padrão para envio de fotos pelo WhatsApp"
+                        >
+                          + Inserir aviso de fotos pelo WhatsApp
+                        </button>
+                      </div>
+                      <span style={{ fontSize: '0.6875rem', color: '#8C7A6B' }}>
+                        Este aviso aparecerá em destaque logo abaixo dos modelos na loja do cliente.
+                      </span>
+                      <textarea
+                        rows={2}
+                        placeholder="Ex: 📸 As fotos para este modelo devem ser enviadas pelo nosso WhatsApp após o fechamento do pedido!"
+                        value={variationsNote}
+                        onChange={(e) => setVariationsNote(e.target.value)}
+                        className={styles.textarea}
+                        style={{ backgroundColor: '#FFFFFF' }}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -1872,14 +1998,37 @@ export default function AdminDashboardPage() {
                     <span>Pedir Nome na Lembrancinha</span>
                   </label>
                   {allowChildName && (
-                    <div style={{ paddingLeft: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      <input
-                        type="text"
-                        placeholder="Rótulo do campo (ex: Nome na Lembrancinha, Nome da Criança...)"
-                        value={childNameLabel}
-                        onChange={(e) => setChildNameLabel(e.target.value)}
-                        className={styles.input}
-                      />
+                    <div style={{ paddingLeft: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.625rem' }}>
+                        <div>
+                          <label style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#553A2D', display: 'block', marginBottom: '0.25rem' }}>
+                            Nome do Campo (Pergunta exibida ao cliente) <span className={styles.reqStar}>*</span>
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Ex: Nome na Lembrancinha, Nome da Criança..."
+                            value={childNameLabel}
+                            onChange={(e) => setChildNameLabel(e.target.value)}
+                            className={styles.input}
+                            style={{ backgroundColor: '#FFFFFF' }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#553A2D', display: 'block', marginBottom: '0.25rem' }}>
+                            Texto de Exemplo dentro da caixa (Placeholder)
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Ex: Professora Leandra, Luís (ou digite seu exemplo)..."
+                            value={childNamePlaceholder}
+                            onChange={(e) => setChildNamePlaceholder(e.target.value)}
+                            className={styles.input}
+                            style={{ backgroundColor: '#FFFFFF' }}
+                          />
+                        </div>
+                      </div>
+
                       <label className={styles.checkboxLabel} style={{ fontSize: '0.8125rem' }}>
                         <input
                           type="checkbox"
@@ -1931,7 +2080,7 @@ export default function AdminDashboardPage() {
                 </div>
 
                 {/* Switch: Observações Especiais */}
-                <div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <label className={styles.checkboxLabel}>
                     <input
                       type="checkbox"
@@ -1941,6 +2090,21 @@ export default function AdminDashboardPage() {
                     />
                     <span>Permitir campo de Observações Especiais</span>
                   </label>
+                  {allowNotes && (
+                    <div style={{ paddingLeft: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <label style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#553A2D', display: 'block', marginBottom: '0.15rem' }}>
+                        Texto de Exemplo das Observações (Placeholder)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ex: Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
+                        value={notesPlaceholder}
+                        onChange={(e) => setNotesPlaceholder(e.target.value)}
+                        className={styles.input}
+                        style={{ backgroundColor: '#FFFFFF' }}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Campos Extras Dinâmicos */}
@@ -1984,43 +2148,198 @@ export default function AdminDashboardPage() {
                           </button>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.625rem' }}>
-                          <div>
-                            <label style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#553A2D', display: 'block', marginBottom: '0.25rem' }}>
-                              Nome do Campo (Pergunta acima da caixa) <span className={styles.reqStar}>*</span>
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="Ex: Time, Frase do Cartão, Tema..."
-                              value={field.label}
-                              onChange={(e) => {
+                        {/* Botões para alternar entre "Para Escrever" e "Para Escolher" */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', backgroundColor: '#FFFFFF', padding: '0.45rem 0.625rem', borderRadius: '0.5rem', border: '1px solid #E8DFD5' }}>
+                          <span style={{ fontSize: '0.71875rem', fontWeight: 700, color: '#4A3326', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            <span>Tipo do Campo:</span>
+                          </span>
+                          <div style={{ display: 'inline-flex', borderRadius: '0.375rem', overflow: 'hidden', border: '1px solid #DACFBF', backgroundColor: '#FAF7F2' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
                                 const next = [...customFields];
-                                next[idx].label = e.target.value;
+                                next[idx].type = 'text';
                                 setCustomFields(next);
                               }}
-                              className={styles.input}
-                              style={{ backgroundColor: '#FFFFFF' }}
-                            />
-                          </div>
-
-                          <div>
-                            <label style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#553A2D', display: 'block', marginBottom: '0.25rem' }}>
-                              Texto dentro da caixa (Exemplo / Placeholder)
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="Ex: Ex: Palmeiras, Flamengo, Vasco..."
-                              value={field.placeholder || ''}
-                              onChange={(e) => {
+                              style={{
+                                padding: '0.3rem 0.75rem',
+                                fontSize: '0.75rem',
+                                fontWeight: field.type !== 'select' ? 700 : 500,
+                                backgroundColor: field.type !== 'select' ? '#6D4C3D' : 'transparent',
+                                color: field.type !== 'select' ? '#FFFFFF' : '#6D4C3D',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                transition: 'all 0.15s ease',
+                              }}
+                            >
+                              <span>✍️ Para Escrever (Texto)</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
                                 const next = [...customFields];
-                                next[idx].placeholder = e.target.value;
+                                next[idx].type = 'select';
+                                if (!next[idx].options) next[idx].options = [];
                                 setCustomFields(next);
                               }}
-                              className={styles.input}
-                              style={{ backgroundColor: '#FFFFFF' }}
-                            />
+                              style={{
+                                padding: '0.3rem 0.75rem',
+                                fontSize: '0.75rem',
+                                fontWeight: field.type === 'select' ? 700 : 500,
+                                backgroundColor: field.type === 'select' ? '#6D4C3D' : 'transparent',
+                                color: field.type === 'select' ? '#FFFFFF' : '#6D4C3D',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                transition: 'all 0.15s ease',
+                              }}
+                            >
+                              <span>📋 Para Escolher (Lista de Opções)</span>
+                            </button>
                           </div>
                         </div>
+
+                        {/* Conteúdo dependente do tipo do campo */}
+                        {field.type !== 'select' ? (
+                          /* Modo 1: Texto Livre */
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.625rem' }}>
+                            <div>
+                              <label style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#553A2D', display: 'block', marginBottom: '0.25rem' }}>
+                                Nome do Campo (Pergunta acima da caixa) <span className={styles.reqStar}>*</span>
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="Ex: Time, Frase do Cartão, Nome..."
+                                value={field.label}
+                                onChange={(e) => {
+                                  const next = [...customFields];
+                                  next[idx].label = e.target.value;
+                                  setCustomFields(next);
+                                }}
+                                className={styles.input}
+                                style={{ backgroundColor: '#FFFFFF' }}
+                              />
+                            </div>
+
+                            <div>
+                              <label style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#553A2D', display: 'block', marginBottom: '0.25rem' }}>
+                                Texto dentro da caixa (Exemplo / Placeholder)
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="Ex: Palmeiras, Flamengo, Vasco..."
+                                value={field.placeholder || ''}
+                                onChange={(e) => {
+                                  const next = [...customFields];
+                                  next[idx].placeholder = e.target.value;
+                                  setCustomFields(next);
+                                }}
+                                className={styles.input}
+                                style={{ backgroundColor: '#FFFFFF' }}
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          /* Modo 2: Lista de Escolha (Dropdown/Select) */
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.625rem' }}>
+                              <div>
+                                <label style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#553A2D', display: 'block', marginBottom: '0.25rem' }}>
+                                  Nome da Pergunta de Escolha <span className={styles.reqStar}>*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="Ex: Escolha o Bombom, Sabor, Cor..."
+                                  value={field.label}
+                                  onChange={(e) => {
+                                    const next = [...customFields];
+                                    next[idx].label = e.target.value;
+                                    setCustomFields(next);
+                                  }}
+                                  className={styles.input}
+                                  style={{ backgroundColor: '#FFFFFF' }}
+                                />
+                              </div>
+
+                              <div>
+                                <label style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#553A2D', display: 'block', marginBottom: '0.25rem' }}>
+                                  Texto da 1ª Opção Padrão (Placeholder)
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="Ex: Selecione o bombom..."
+                                  value={field.placeholder || ''}
+                                  onChange={(e) => {
+                                    const next = [...customFields];
+                                    next[idx].placeholder = e.target.value;
+                                    setCustomFields(next);
+                                  }}
+                                  className={styles.input}
+                                  style={{ backgroundColor: '#FFFFFF' }}
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#553A2D', display: 'block', marginBottom: '0.25rem' }}>
+                                Opções para o cliente escolher (Separe cada opção por vírgula) <span className={styles.reqStar}>*</span>
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="Ex: Sonho de Valsa, Ouro Branco, Serenata de Amor"
+                                value={field.optionsText !== undefined ? field.optionsText : (field.options?.join(', ') || '')}
+                                onChange={(e) => {
+                                  const text = e.target.value;
+                                  const next = [...customFields];
+                                  next[idx].optionsText = text;
+                                  next[idx].options = text.split(',').map((s) => s.trim()).filter(Boolean);
+                                  setCustomFields(next);
+                                }}
+                                className={styles.input}
+                                style={{ backgroundColor: '#FFFFFF' }}
+                              />
+
+                              {/* Prévia visual das opções detectadas */}
+                              <div style={{ marginTop: '0.35rem' }}>
+                                {field.options && field.options.filter(Boolean).length > 0 ? (
+                                  <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.35rem' }}>
+                                    <span style={{ fontSize: '0.6875rem', color: '#8C7A6B', fontWeight: 600 }}>
+                                      Opções que aparecerão na lista:
+                                    </span>
+                                    {field.options.filter(Boolean).map((opt, oIdx) => (
+                                      <span
+                                        key={oIdx}
+                                        style={{
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: '0.25rem',
+                                          backgroundColor: '#FAF0E6',
+                                          border: '1px solid #DACFBF',
+                                          color: '#553A2D',
+                                          padding: '0.2rem 0.5rem',
+                                          borderRadius: '0.375rem',
+                                          fontSize: '0.71875rem',
+                                          fontWeight: 600,
+                                        }}
+                                      >
+                                        ✓ {opt}
+                                      </span>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <span style={{ fontSize: '0.6875rem', color: '#8C7A6B', fontStyle: 'italic' }}>
+                                    💡 Digite as opções separadas por vírgula (ex: Sonho de Valsa, Ouro Branco)
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         {/* Caixa para definir se o campo é OBRIGATÓRIO */}
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.35rem', borderTop: '1px dashed #E8DFD5' }}>
@@ -2036,11 +2355,13 @@ export default function AdminDashboardPage() {
                               className={styles.checkboxInput}
                             />
                             <span style={{ fontWeight: 600, color: field.required !== false ? '#CF1322' : '#6D4C3D' }}>
-                              {field.required !== false ? 'Preenchimento Obrigatório *' : 'Opcional (cliente pode deixar em branco)'}
+                              {field.type === 'select'
+                                ? (field.required !== false ? 'Escolha Obrigatória *' : 'Escolha Opcional')
+                                : (field.required !== false ? 'Preenchimento Obrigatório *' : 'Opcional (cliente pode deixar em branco)')}
                             </span>
                           </label>
                           <span style={{ fontSize: '0.6875rem', color: '#8C7A6B' }}>
-                            {field.required !== false ? 'Exige resposta para avançar' : 'Não bloqueia a compra'}
+                            {field.required !== false ? 'Exige resposta antes de adicionar ao carrinho' : 'Não bloqueia a compra'}
                           </span>
                         </div>
                       </div>

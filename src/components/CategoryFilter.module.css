@@ -54,10 +54,10 @@
   align-items: center;
   gap: 0.75rem;
   overflow-x: auto;
-  margin-top: -0.5rem;
+  margin-top: -0.75rem;
   margin-left: -0.5rem;
   margin-right: -0.5rem;
-  padding: 0.5rem 0.5rem 0.75rem 0.5rem;
+  padding: 1.125rem 0.75rem 0.75rem 0.75rem; /* Respiro no topo para que a touca de natal nunca seja cortada */
   scroll-snap-type: x mandatory;
   -ms-overflow-style: none; /* Internet Explorer e Edge */
   scrollbar-width: none; /* Firefox */
@@ -68,6 +68,7 @@
 }
 
 .categoryButton {
+  position: relative; /* Permite posicionar a touca de natal no topo do botão */
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -79,7 +80,7 @@
   flex-shrink: 0;
   cursor: pointer;
   scroll-snap-align: start;
-  border: 1px solid #DACFBF;
+  border: 1px solid #4A3B32;
   background-color: #ffffff;
   color: #4A3B32;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -114,7 +115,7 @@
 
 /* Destaque visual suave para o próximo evento mais procurado */
 .categoryButtonHighlight {
-  border-color: #D4AF37;
+  border-color: #5A3E31;
   background: linear-gradient(135deg, #FFFFFF 0%, #FAF6EE 100%);
   color: #5A3E31;
   box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
@@ -125,11 +126,23 @@
   border-color: #B58A2B;
 }
 
-.sparkleIcon {
-  color: #D4AF37;
-  flex-shrink: 0;
+/* Botão temático de Natal com a touca */
+.categoryButtonNatal {
+  position: relative;
 }
 
-.categoryButtonSelected .sparkleIcon {
-  color: #FFDE8A;
+.natalSantaHat {
+  position: absolute;
+  top: -12px;
+  right: -8px;
+  width: 32px;
+  height: auto;
+  pointer-events: none;
+  z-index: 10;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.16));
+  transition: transform 0.2s ease;
+}
+
+.categoryButton:hover .natalSantaHat {
+  transform: translateY(-2px) rotate(3deg) scale(1.08);
 }

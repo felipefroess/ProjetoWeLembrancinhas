@@ -105,7 +105,7 @@
 }
 
 .brandTitle {
-  font-family: var(--font-sans);
+  font-family: var(--font-playfair, 'Playfair Display', Georgia, serif);
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.025em;

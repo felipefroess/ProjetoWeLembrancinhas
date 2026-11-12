@@ -32,16 +32,20 @@ export interface CustomFieldDefinition {
   required?: boolean;
   placeholder?: string;
   options?: string[]; // Opções quando o tipo for 'select'
+  optionsText?: string; // Helper para edição no painel
 }
 
 export interface CustomizationSettings {
   allowChildName?: boolean;      // Solicita nome na lembrancinha (padrão: true)
   childNameLabel?: string;       // Rótulo customizável (ex: "Nome da Criança", "Nome do Casal")
+  childNamePlaceholder?: string; // Exemplo/placeholder dentro da caixa (ex: "Ex: Professora Leandra, Luís...")
+  notesPlaceholder?: string;     // Exemplo/placeholder de observações
   childNameRequired?: boolean;   // Se o nome é obrigatório (padrão: true)
   allowRibbonColors?: boolean;   // Oferece opções de laços/fitas
   ribbonColorRequired?: boolean; // Se a escolha da fita é obrigatória
   ribbonColors?: string[];       // Cores disponíveis
   allowNotes?: boolean;          // Campo de observações especiais (padrão: true)
+  variationsNote?: string;       // Mensagem/aviso exibido abaixo dos modelos
   customFields?: CustomFieldDefinition[]; // Campos extras flexíveis
 }
 
@@ -65,6 +69,7 @@ export interface Product {
   image: string;
   images?: string[];
   variations?: ProductVariation[];
+  variationsNote?: string; // Mensagem/aviso exibido abaixo dos modelos (ex: Enviar fotos pelo WhatsApp)
   leadTimeDays: number; // Prazo de produção em dias úteis
   popular?: boolean;
   featured?: boolean;
