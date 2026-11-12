@@ -106,7 +106,7 @@ export async function getAllProductionOrders(): Promise<{ orders: ProductionOrde
           .neq('status', 'cancelado')
           .order('created_at', { ascending: false });
 
-        if (!error && dbOrders && dbOrders.length > 0) {
+        if (!error && dbOrders) {
           const normalizedDbOrders: ProductionOrder[] = dbOrders
             .filter((o) => !deletedIds.has(String(o.id)) && o.status !== 'cancelado')
             .map((o) => ({
@@ -125,7 +125,29 @@ export async function getAllProductionOrders(): Promise<{ orders: ProductionOrde
               updated_at: o.updated_at || undefined,
             }));
 
-          return { orders: normalizedDbOrders, source: 'supabase' };
+          // Mescla pedidos locais que ainda não existam no Supabase (evita sumiço se algum insert falhou)
+          const dbIds = new Set(normalizedDbOrders.map((o) => String(o.id)));
+          const unsyncedLocal = localOrders.filter((local) => {
+            if (dbIds.has(String(local.id))) return false;
+            const localTime = new Date(local.created_at).getTime();
+            const hasMatchingDb = normalizedDbOrders.some((db) => {
+              const dbTime = new Date(db.created_at).getTime();
+              return (
+                db.customer_name === local.customer_name &&
+                Math.abs(db.total_amount - local.total_amount) < 0.01 &&
+                Math.abs(dbTime - localTime) < 10000
+              );
+            });
+            return !hasMatchingDb;
+          });
+
+          const merged = [...unsyncedLocal, ...normalizedDbOrders].sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+
+          if (merged.length > 0) {
+            return { orders: merged, source: 'supabase' };
+          }
         }
       }
     } catch (err) {
@@ -174,36 +196,43 @@ export async function createProductionOrder(orderData: {
     created_at: nowIso,
   };
 
-  // Salva no arquivo local
-  const currentOrders = readLocalOrders();
-  currentOrders.unshift(newOrder);
-  writeLocalOrders(currentOrders);
-
   // Se Supabase estiver configurado, salva também no banco
   if (isSupabaseConfigured()) {
     try {
       const supabase = getSupabaseAdmin();
       if (supabase) {
-        const { error } = await supabase.from('orders').insert({
-          customer_name: newOrder.customer_name,
-          customer_phone: newOrder.customer_phone || null,
-          event_date: newOrder.event_date || null,
-          delivery_method: newOrder.delivery_method,
-          delivery_address: newOrder.delivery_address || null,
-          general_notes: newOrder.general_notes || null,
-          total_units: newOrder.total_units,
-          total_amount: newOrder.total_amount,
-          status: newOrder.status,
-          items: newOrder.items,
-        });
+        const { data: inserted, error } = await supabase
+          .from('orders')
+          .insert({
+            customer_name: newOrder.customer_name,
+            customer_phone: newOrder.customer_phone || null,
+            event_date: newOrder.event_date || null,
+            delivery_method: newOrder.delivery_method,
+            delivery_address: newOrder.delivery_address || null,
+            general_notes: newOrder.general_notes || null,
+            total_units: newOrder.total_units,
+            total_amount: newOrder.total_amount,
+            status: newOrder.status,
+            items: newOrder.items,
+          })
+          .select('id')
+          .single();
+
         if (error) {
           console.error('Erro retornado pelo Supabase ao inserir pedido:', error);
+        } else if (inserted?.id) {
+          newOrder.id = String(inserted.id);
         }
       }
     } catch (err) {
       console.error('Erro ao sincronizar pedido criado com Supabase:', err);
     }
   }
+
+  // Salva no arquivo local (já com o UUID real do Supabase se sincronizado)
+  const currentOrders = readLocalOrders();
+  currentOrders.unshift(newOrder);
+  writeLocalOrders(currentOrders);
 
   return newOrder;
 }
