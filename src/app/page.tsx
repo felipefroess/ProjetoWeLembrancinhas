@@ -33,6 +33,27 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
+    // 1. Hidratação instantânea do cache local do navegador (0ms de delay visual)
+    try {
+      const cachedCategories = localStorage.getItem("we_cached_categories");
+      if (cachedCategories) {
+        const parsedCats = JSON.parse(cachedCategories);
+        if (Array.isArray(parsedCats) && parsedCats.length > 0) {
+          setCategoriesList(parsedCats);
+        }
+      }
+      const cachedProducts = localStorage.getItem("we_cached_products");
+      if (cachedProducts) {
+        const parsedProds = JSON.parse(cachedProducts);
+        if (Array.isArray(parsedProds) && parsedProds.length > 0) {
+          setProductsList(parsedProds);
+        }
+      }
+    } catch {
+      // Ignora erro de parsing e usa dados embutidos
+    }
+
+    // 2. Revalidação em segundo plano sem travar a interface
     async function fetchDynamicData() {
       try {
         const res = await fetch("/api/products");
@@ -40,9 +61,15 @@ export default function HomePage() {
         if (data.success) {
           if (data.products && data.products.length > 0) {
             setProductsList(data.products);
+            try {
+              localStorage.setItem("we_cached_products", JSON.stringify(data.products));
+            } catch {}
           }
           if (data.categories && data.categories.length > 0) {
             setCategoriesList(data.categories);
+            try {
+              localStorage.setItem("we_cached_categories", JSON.stringify(data.categories));
+            } catch {}
           }
         }
       } catch (err) {

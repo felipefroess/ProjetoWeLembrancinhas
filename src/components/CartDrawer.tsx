@@ -260,6 +260,9 @@ export function CartDrawer() {
                       }}
                       className={styles.couponInput}
                       maxLength={25}
+                      autoCapitalize="characters"
+                      autoCorrect="off"
+                      spellCheck={false}
                     />
                     <button
                       type="submit"

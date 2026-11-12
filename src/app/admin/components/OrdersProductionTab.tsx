@@ -288,7 +288,7 @@ export default function OrdersProductionTab({ onOrderCountChange }: OrdersProduc
 
   // Disparo WhatsApp de pedido pronto
   const handleWhatsAppReady = (order: ProductionOrder) => {
-    const msg = `Olá ${order.customer_name}! Sua encomenda da Wê Lembrancinhas está pronta com todo carinho para envio/retirada!`;
+    const msg = `Olá ${order.customer_name}! Sua encomenda da Wê Lembrancinhas está pronta para envio/retirada!`;
     const url = formatWhatsAppUrl(order.customer_phone, msg);
     if (!url) {
       alert('Este pedido não possui telefone cadastrado.');

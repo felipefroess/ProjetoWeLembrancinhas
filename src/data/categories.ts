@@ -20,5 +20,20 @@ export const CATEGORIES: Category[] = [
     id: 'cadernos',
     name: 'Cadernos',
     description: 'Cadernos, cadernetas e planners personalizados com wire-o e acabamento luxo'
+  },
+  {
+    id: 'maternidade',
+    name: 'Maternidade',
+    description: 'Lembrancinhas delicadas e encantadoras para celebrar a chegada do seu bebê'
+  },
+  {
+    id: 'dia-dos-namorados',
+    name: 'Dia dos Namorados',
+    description: 'Mimos românticos e personalizados para surpreender quem você ama'
+  },
+  {
+    id: 'anivers-rio-infantil',
+    name: 'Aniversário Infantil',
+    description: 'Lembrancinhas alegres e personalizadas para festas infantis inesquecíveis'
   }
 ];

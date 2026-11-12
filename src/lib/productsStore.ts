@@ -344,9 +344,12 @@ export async function saveCategory(category: Category): Promise<Category> {
   }
 
   const customCategories = readJsonFile<Category[]>(CUSTOM_CATEGORIES_PATH, []);
-  if (!customCategories.some((c) => c.id === category.id)) {
+  const existingIdx = customCategories.findIndex((c) => c.id === category.id);
+  if (existingIdx >= 0) {
+    customCategories[existingIdx] = category;
+  } else {
     customCategories.push(category);
-    writeJsonFile(CUSTOM_CATEGORIES_PATH, customCategories);
   }
+  writeJsonFile(CUSTOM_CATEGORIES_PATH, customCategories);
   return category;
 }
