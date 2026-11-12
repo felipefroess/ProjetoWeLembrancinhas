@@ -1,6 +1,9 @@
 /* Estilos da Página Principal (HomePage) */
 .pageWrapper {
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
   background-color: #FAF7F2;
   color: #2D231E;
   display: flex;

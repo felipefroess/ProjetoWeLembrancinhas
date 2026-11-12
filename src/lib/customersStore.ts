@@ -345,8 +345,16 @@ export async function deleteCustomer(customerId: string): Promise<{ success: boo
     if (supabase) {
       const { error } = await supabase.from('customers').delete().eq('id', customerId);
       if (error) {
-        console.error('Erro ao excluir ficha do cliente no Supabase:', error);
-        return { success: false, error: 'Falha ao excluir ficha do cliente no Supabase.' };
+        const isMissingTable =
+          error.code === '42P01' ||
+          error.code === 'PGRST205' ||
+          error.message?.includes('customers');
+        if (isMissingTable) {
+          console.warn('Tabela customers ausente no Supabase; excluindo apenas no JSON local.');
+        } else {
+          console.error('Erro ao excluir ficha do cliente no Supabase:', error);
+          return { success: false, error: `Falha ao excluir no Supabase: ${error.message}` };
+        }
       }
     }
   }

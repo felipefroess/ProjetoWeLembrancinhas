@@ -317,11 +317,7 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
         if (!res.ok || !data.success) {
           throw new Error(data.error || 'Erro ao cadastrar ficha.');
         }
-        setCustomers((prev) => {
-          const next = [data.customer, ...prev];
-          onCustomersCountChange?.(next.length);
-          return next;
-        });
+        setCustomers((prev) => [data.customer, ...prev]);
       }
 
       setIsCustomerModalOpen(false);
@@ -441,11 +437,10 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
         );
         const data = await res.json();
         if (res.ok && data.success) {
-          setCustomers((prev) => {
-            const next = prev.filter((c) => c.id !== deleteTarget.customer.id);
-            onCustomersCountChange?.(next.length);
-            return next;
-          });
+          setCustomers((prev) => prev.filter((c) => c.id !== deleteTarget.customer.id));
+          setDeleteTarget(null);
+        } else {
+          alert(data.error || 'Não foi possível excluir a ficha do cliente.');
         }
       } else {
         const res = await fetch(
@@ -461,11 +456,14 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
               c.id === deleteTarget.customer.id ? data.customer : c
             )
           );
+          setDeleteTarget(null);
+        } else {
+          alert(data.error || 'Não foi possível excluir a compra.');
         }
       }
-      setDeleteTarget(null);
     } catch (err) {
       console.error('Erro ao excluir:', err);
+      alert('Erro de conexão ao tentar excluir.');
     } finally {
       setDeleting(false);
     }
