@@ -78,11 +78,14 @@ export async function POST(request: Request) {
       status: status as OrderStatus,
     });
 
-    // Registra ou atualiza automaticamente a ficha do cliente (por telefone ou nome)
-    try {
-      await syncOrderToCustomerCard(created);
-    } catch (syncError) {
-      console.error('Aviso: falha ao sincronizar pedido na ficha do cliente:', syncError);
+    // Se o pedido já nascer ou for cadastrado como entregue, arquiva na ficha do cliente
+    let customerSyncResult: any = null;
+    if (created.status === 'entregue') {
+      try {
+        customerSyncResult = await syncOrderToCustomerCard(created);
+      } catch (syncError) {
+        console.error('Aviso: falha ao sincronizar pedido na ficha do cliente:', syncError);
+      }
     }
 
     return NextResponse.json(
@@ -90,7 +93,10 @@ export async function POST(request: Request) {
         success: true, 
         orderId: created.id, 
         order: created,
-        saved: true 
+        saved: true,
+        customerSynced: Boolean(customerSyncResult && customerSyncResult.action !== 'skipped'),
+        customerAction: customerSyncResult?.action,
+        customerName: customerSyncResult?.customer?.name || created.customer_name,
       },
       {
         headers: NO_CACHE_HEADERS,
@@ -129,8 +135,28 @@ export async function PATCH(request: Request) {
       );
     }
 
+    // Se o pedido foi colocado como ENTREGUE, envia e salva permanentemente na ficha do cliente
+    let customerSyncResult: {
+      action: 'created_customer' | 'added_purchase' | 'updated_purchase' | 'skipped';
+      customer?: any;
+    } | null = null;
+
+    if (updated.status === 'entregue') {
+      try {
+        customerSyncResult = await syncOrderToCustomerCard(updated);
+      } catch (syncErr) {
+        console.error('Erro ao sincronizar pedido entregue na ficha do cliente:', syncErr);
+      }
+    }
+
     return NextResponse.json(
-      { success: true, order: updated },
+      { 
+        success: true, 
+        order: updated,
+        customerSynced: Boolean(customerSyncResult && customerSyncResult.action !== 'skipped'),
+        customerAction: customerSyncResult?.action,
+        customerName: customerSyncResult?.customer?.name || updated.customer_name,
+      },
       { headers: NO_CACHE_HEADERS }
     );
   } catch (error) {

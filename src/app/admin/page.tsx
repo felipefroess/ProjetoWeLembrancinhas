@@ -953,7 +953,10 @@ export default function AdminDashboardPage() {
         <main className={styles.mainContent}>
           {/* Aba 1: Gestão de Pedidos & Fila de Produção */}
           {mainTab === 'pedidos' && (
-            <OrdersProductionTab onOrderCountChange={setOrdersCount} />
+            <OrdersProductionTab 
+              onOrderCountChange={setOrdersCount} 
+              onNavigateToCustomers={() => setMainTab('clientes')}
+            />
           )}
 
           {/* Aba 2: Gerenciamento de Produtos */}

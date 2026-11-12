@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { getSeedMeta, markSeedMeta } from '@/lib/seedMeta';
+import { hasCustomerCompletedOrders } from '@/lib/ordersStore';
 
 export interface AdminCoupon {
   id: string;
@@ -12,6 +13,7 @@ export interface AdminCoupon {
   minOrderValue?: number;
   expiresAt?: string | null; // Formato YYYY-MM-DD ou ISO
   isActive: boolean;
+  firstPurchaseOnly?: boolean; // Válido apenas na 1ª compra do cliente
   createdAt: string;
 }
 
@@ -32,15 +34,19 @@ function readLocalCoupons(): AdminCoupon[] {
       const id = item.id || `cupom_${item.code?.toLowerCase() || index}_${Date.now()}`;
       if (!item.id) hasChanges = true;
 
+      const cleanCode = (item.code || '').trim().toUpperCase();
+      const isFirstPurchase = item.firstPurchaseOnly === true || cleanCode === 'PRIMEIRACOMPRA';
+
       return {
         id,
-        code: (item.code || '').trim().toUpperCase(),
+        code: cleanCode,
         type: item.type === 'fixed' ? 'fixed' : 'percentage',
         value: Number(item.value) || 0,
         description: item.description || '',
         minOrderValue: Number(item.minOrderValue) || 0,
         expiresAt: item.expiresAt || null,
         isActive: item.isActive !== false,
+        firstPurchaseOnly: isFirstPurchase,
         createdAt: item.createdAt || new Date().toISOString(),
       };
     });
@@ -70,15 +76,19 @@ function saveLocalCoupons(coupons: AdminCoupon[]): boolean {
 }
 
 function mapRowToCoupon(row: any): AdminCoupon {
+  const cleanCode = String(row.code || '').trim().toUpperCase();
+  const isFirstPurchase = row.first_purchase_only === true || row.firstPurchaseOnly === true || cleanCode === 'PRIMEIRACOMPRA';
+
   return {
     id: String(row.id),
-    code: String(row.code || '').trim().toUpperCase(),
+    code: cleanCode,
     type: row.type === 'fixed' ? 'fixed' : 'percentage',
     value: Number(row.value) || 0,
     description: row.description || '',
     minOrderValue: Number(row.min_order_value) || 0,
     expiresAt: row.expires_at || null,
     isActive: row.is_active !== false,
+    firstPurchaseOnly: isFirstPurchase,
     createdAt: row.created_at || new Date().toISOString(),
   };
 }
@@ -148,6 +158,7 @@ export async function createCoupon(data: {
   minOrderValue?: number;
   expiresAt?: string | null;
   isActive?: boolean;
+  firstPurchaseOnly?: boolean;
 }): Promise<{ success: boolean; coupon?: AdminCoupon; error?: string }> {
   const cleanCode = (data.code || '').trim().toUpperCase();
 
@@ -172,6 +183,8 @@ export async function createCoupon(data: {
     return { success: false, error: `Já existe um cupom com o código "${cleanCode}".` };
   }
 
+  const isFirstPurchase = data.firstPurchaseOnly === true || cleanCode === 'PRIMEIRACOMPRA';
+
   const newCoupon: AdminCoupon = {
     id: `cupom_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
     code: cleanCode,
@@ -181,13 +194,14 @@ export async function createCoupon(data: {
     minOrderValue: Number(data.minOrderValue) || 0,
     expiresAt: data.expiresAt || null,
     isActive: data.isActive !== false,
+    firstPurchaseOnly: isFirstPurchase,
     createdAt: new Date().toISOString(),
   };
 
   if (isSupabaseConfigured()) {
     const supabase = getSupabaseAdmin();
     if (supabase) {
-      const { error } = await supabase.from('coupons').insert({
+      const payload: any = {
         id: newCoupon.id,
         code: newCoupon.code,
         type: newCoupon.type,
@@ -197,7 +211,17 @@ export async function createCoupon(data: {
         expires_at: newCoupon.expiresAt || null,
         is_active: newCoupon.isActive,
         created_at: newCoupon.createdAt,
-      });
+      };
+      if (newCoupon.firstPurchaseOnly !== undefined) {
+        payload.first_purchase_only = newCoupon.firstPurchaseOnly;
+      }
+
+      let { error } = await supabase.from('coupons').insert(payload);
+      if (error && error.message && error.message.includes('first_purchase_only')) {
+        delete payload.first_purchase_only;
+        const retry = await supabase.from('coupons').insert(payload);
+        error = retry.error;
+      }
 
       if (error) {
         console.error('Erro ao criar cupom no Supabase:', error);
@@ -255,18 +279,29 @@ export async function updateCoupon(
   if (isSupabaseConfigured()) {
     const supabase = getSupabaseAdmin();
     if (supabase) {
-      const { error } = await supabase
+      const updatePayload: any = {
+        code: updatedCoupon.code,
+        type: updatedCoupon.type,
+        value: updatedCoupon.value,
+        description: updatedCoupon.description || '',
+        min_order_value: updatedCoupon.minOrderValue || 0,
+        expires_at: updatedCoupon.expiresAt || null,
+        is_active: updatedCoupon.isActive,
+      };
+      if (updatedCoupon.firstPurchaseOnly !== undefined) {
+        updatePayload.first_purchase_only = updatedCoupon.firstPurchaseOnly;
+      }
+
+      let { error } = await supabase
         .from('coupons')
-        .update({
-          code: updatedCoupon.code,
-          type: updatedCoupon.type,
-          value: updatedCoupon.value,
-          description: updatedCoupon.description || '',
-          min_order_value: updatedCoupon.minOrderValue || 0,
-          expires_at: updatedCoupon.expiresAt || null,
-          is_active: updatedCoupon.isActive,
-        })
+        .update(updatePayload)
         .eq('id', id);
+
+      if (error && error.message && error.message.includes('first_purchase_only')) {
+        delete updatePayload.first_purchase_only;
+        const retry = await supabase.from('coupons').update(updatePayload).eq('id', id);
+        error = retry.error;
+      }
 
       if (error) {
         console.error('Erro ao atualizar cupom no Supabase:', error);
@@ -325,7 +360,8 @@ export async function deleteCoupon(id: string): Promise<{ success: boolean; erro
  */
 export async function validateCoupon(
   rawCode: string,
-  subtotal: number
+  subtotal: number,
+  phone?: string
 ): Promise<{
   valid: boolean;
   message: string;
@@ -334,6 +370,7 @@ export async function validateCoupon(
     type: 'percentage' | 'fixed';
     value: number;
     description: string;
+    firstPurchaseOnly?: boolean;
   };
   discountAmount?: number;
 }> {
@@ -351,6 +388,19 @@ export async function validateCoupon(
 
   if (!matched.isActive) {
     return { valid: false, message: 'Este cupom não está mais ativo.' };
+  }
+
+  const isFirstPurchaseCoupon = matched.firstPurchaseOnly === true || matched.code === 'PRIMEIRACOMPRA';
+
+  // Se for cupom de primeira compra e o telefone foi informado, verifica histórico no banco
+  if (isFirstPurchaseCoupon && phone) {
+    const hasPrevious = await hasCustomerCompletedOrders(phone);
+    if (hasPrevious) {
+      return {
+        valid: false,
+        message: 'Este cupom é exclusivo para novos clientes e este número de WhatsApp já possui pedidos anteriores.',
+      };
+    }
   }
 
   if (matched.expiresAt) {
@@ -393,6 +443,7 @@ export async function validateCoupon(
       type: matched.type,
       value: matched.value,
       description: matched.description || '',
+      firstPurchaseOnly: isFirstPurchaseCoupon,
     },
     discountAmount,
   };

@@ -406,3 +406,36 @@ export async function deleteProductionOrder(orderId: string): Promise<boolean> {
 
   return true;
 }
+
+/**
+ * Normaliza número de telefone para comparação segura de dígitos (ignora máscaras e DDI 55)
+ */
+export function cleanPhoneNumber(phone?: string): string {
+  if (!phone) return '';
+  const digits = phone.replace(/\D/g, '');
+  if (digits.startsWith('55') && digits.length >= 12) {
+    return digits.slice(2);
+  }
+  return digits;
+}
+
+/**
+ * Verifica se um número de telefone/WhatsApp já possui pedidos anteriores no sistema
+ */
+export async function hasCustomerCompletedOrders(phone: string): Promise<boolean> {
+  const cleanTarget = cleanPhoneNumber(phone);
+  if (!cleanTarget || cleanTarget.length < 8) return false;
+
+  const { orders } = await getAllProductionOrders();
+  const lastTargetDigits = cleanTarget.slice(-8);
+
+  return orders.some((order) => {
+    const cleanOrderPhone = cleanPhoneNumber(order.customer_phone);
+    if (!cleanOrderPhone || cleanOrderPhone.length < 8) return false;
+    return (
+      cleanOrderPhone === cleanTarget ||
+      cleanOrderPhone.endsWith(lastTargetDigits) ||
+      cleanTarget.endsWith(cleanOrderPhone.slice(-8))
+    );
+  });
+}

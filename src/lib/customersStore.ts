@@ -101,7 +101,41 @@ export async function listCustomers(): Promise<CustomerRecord[]> {
           .order('updated_at', { ascending: false });
 
         if (!error && rows) {
-          return rows.map(normalizeCustomer);
+          const remote = rows.map(normalizeCustomer);
+          const local = readLocalCustomers();
+
+          // Identifica registros locais que ainda não existam no Supabase
+          const remoteIds = new Set(remote.map((r) => r.id));
+          const unsynced = local.filter((l) => !remoteIds.has(l.id));
+
+          if (unsynced.length > 0) {
+            // Sincroniza em segundo plano para o Supabase
+            (async () => {
+              for (const u of unsynced) {
+                try {
+                  await supabase.from('customers').upsert(
+                    {
+                      id: u.id,
+                      name: u.name,
+                      phone: u.phone || '',
+                      instagram: u.instagram || '',
+                      notes: u.notes || '',
+                      purchases: u.purchases,
+                      created_at: u.createdAt,
+                      updated_at: u.updatedAt,
+                    },
+                    { onConflict: 'id' }
+                  );
+                } catch (e) {
+                  console.error('Erro ao sincronizar cliente local para Supabase:', e);
+                }
+              }
+            })();
+          }
+
+          const merged = [...unsynced, ...remote];
+          writeLocalCustomers(merged);
+          return merged;
         }
       } catch (err) {
         console.error('Erro ao buscar fichas de clientes no Supabase:', err);
@@ -116,27 +150,31 @@ async function saveCustomerRecord(record: CustomerRecord): Promise<CustomerRecor
   if (isSupabaseConfigured()) {
     const supabase = getSupabaseAdmin();
     if (supabase) {
-      const { error } = await supabase.from('customers').upsert(
-        {
-          id: record.id,
-          name: record.name,
-          phone: record.phone || '',
-          instagram: record.instagram || '',
-          notes: record.notes || '',
-          purchases: record.purchases,
-          created_at: record.createdAt,
-          updated_at: record.updatedAt,
-        },
-        { onConflict: 'id' }
-      );
+      try {
+        const { error } = await supabase.from('customers').upsert(
+          {
+            id: record.id,
+            name: record.name,
+            phone: record.phone || '',
+            instagram: record.instagram || '',
+            notes: record.notes || '',
+            purchases: record.purchases,
+            created_at: record.createdAt,
+            updated_at: record.updatedAt,
+          },
+          { onConflict: 'id' }
+        );
 
-      if (error) {
-        console.error('Erro ao salvar ficha do cliente no Supabase:', error);
-        throw new Error(`Erro ao salvar ficha no banco: ${error.message}`);
+        if (error) {
+          console.error('Aviso ao salvar ficha do cliente no Supabase:', error);
+        }
+      } catch (err) {
+        console.error('Falha de rede com Supabase ao salvar cliente:', err);
       }
     }
   }
 
+  // Grava sempre no arquivo local como garantia de redundância eterna
   const local = readLocalCustomers();
   const idx = local.findIndex((c) => c.id === record.id);
   if (idx >= 0) {
@@ -521,7 +559,7 @@ function isOrderAlreadyInCustomer(
  * Se o cliente ainda não tiver ficha, cria uma nova automaticamente.
  */
 export async function syncOrderToCustomerCard(order: ProductionOrder): Promise<{
-  action: 'created_customer' | 'added_purchase' | 'skipped';
+  action: 'created_customer' | 'added_purchase' | 'updated_purchase' | 'skipped';
   customer?: CustomerRecord;
 }> {
   const cleanName = String(order.customer_name || '').trim();
@@ -536,19 +574,42 @@ export async function syncOrderToCustomerCard(order: ProductionOrder): Promise<{
   const nowIso = new Date().toISOString();
 
   if (matched) {
-    if (isOrderAlreadyInCustomer(matched, order, purchase)) {
-      return { action: 'skipped', customer: matched };
+    // Procura se essa compra já está cadastrada na ficha (pelo orderId ou combinação de data/valor/item)
+    const existingIndex = matched.purchases.findIndex((p) => {
+      if (p.orderId && p.orderId === String(order.id)) return true;
+      const sameDate = p.date === purchase.date;
+      const sameAmount = Math.abs((Number(p.amount) || 0) - purchase.amount) < 0.01;
+      const sameItem = normalizeNameForMatch(p.item) === normalizeNameForMatch(purchase.item);
+      return sameDate && sameAmount && sameItem;
+    });
+
+    let nextPurchases: CustomerPurchase[];
+    let action: 'created_customer' | 'added_purchase' | 'updated_purchase';
+
+    if (existingIndex >= 0) {
+      const existing = matched.purchases[existingIndex];
+      const updatedPurchase: CustomerPurchase = {
+        ...purchase,
+        id: existing.id,
+        orderId: String(order.id),
+      };
+      nextPurchases = [...matched.purchases];
+      nextPurchases[existingIndex] = updatedPurchase;
+      action = 'updated_purchase';
+    } else {
+      nextPurchases = [purchase, ...matched.purchases];
+      action = 'added_purchase';
     }
 
     const updatedRecord: CustomerRecord = {
       ...matched,
       phone: matched.phone || cleanPhone,
-      purchases: sortPurchasesDesc([purchase, ...matched.purchases]),
+      purchases: sortPurchasesDesc(nextPurchases),
       updatedAt: nowIso,
     };
 
     const saved = await saveCustomerRecord(updatedRecord);
-    return { action: 'added_purchase', customer: saved };
+    return { action, customer: saved };
   }
 
   const newRecord: CustomerRecord = {
@@ -568,18 +629,20 @@ export async function syncOrderToCustomerCard(order: ProductionOrder): Promise<{
 
 /**
  * Sincroniza em lote uma lista de pedidos existentes para as fichas de clientes,
- * agrupando pelo mesmo telefone ou nome e ignorando pedidos já registrados.
+ * agrupando pelo mesmo telefone ou nome e atualizando compras já registradas.
  */
 export async function syncOrdersBatchToCustomers(orders: ProductionOrder[]): Promise<{
   customers: CustomerRecord[];
   createdCustomers: number;
   addedPurchases: number;
+  updatedPurchases: number;
   skippedOrders: number;
 }> {
   const workingCustomers = await listCustomers();
   const touchedIds = new Set<string>();
   let createdCustomers = 0;
   let addedPurchases = 0;
+  let updatedPurchases = 0;
   let skippedOrders = 0;
 
   // Processa do mais antigo para o mais recente para manter ordem consistente
@@ -602,16 +665,32 @@ export async function syncOrdersBatchToCustomers(orders: ProductionOrder[]): Pro
     const nowIso = new Date().toISOString();
 
     if (matched) {
-      if (isOrderAlreadyInCustomer(matched, order, purchase)) {
-        skippedOrders++;
-        continue;
-      }
+      const existingIndex = matched.purchases.findIndex((p) => {
+        if (p.orderId && p.orderId === String(order.id)) return true;
+        const sameDate = p.date === purchase.date;
+        const sameAmount = Math.abs((Number(p.amount) || 0) - purchase.amount) < 0.01;
+        const sameItem = normalizeNameForMatch(p.item) === normalizeNameForMatch(purchase.item);
+        return sameDate && sameAmount && sameItem;
+      });
 
-      matched.phone = matched.phone || cleanPhone;
-      matched.purchases = sortPurchasesDesc([purchase, ...matched.purchases]);
-      matched.updatedAt = nowIso;
-      touchedIds.add(matched.id);
-      addedPurchases++;
+      if (existingIndex >= 0) {
+        const existing = matched.purchases[existingIndex];
+        matched.purchases[existingIndex] = {
+          ...purchase,
+          id: existing.id,
+          orderId: String(order.id),
+        };
+        matched.purchases = sortPurchasesDesc(matched.purchases);
+        matched.updatedAt = nowIso;
+        touchedIds.add(matched.id);
+        updatedPurchases++;
+      } else {
+        matched.phone = matched.phone || cleanPhone;
+        matched.purchases = sortPurchasesDesc([purchase, ...matched.purchases]);
+        matched.updatedAt = nowIso;
+        touchedIds.add(matched.id);
+        addedPurchases++;
+      }
     } else {
       const newRecord: CustomerRecord = {
         id: `cli_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
@@ -640,6 +719,7 @@ export async function syncOrdersBatchToCustomers(orders: ProductionOrder[]): Pro
     customers: refreshed,
     createdCustomers,
     addedPurchases,
+    updatedPurchases,
     skippedOrders,
   };
 }

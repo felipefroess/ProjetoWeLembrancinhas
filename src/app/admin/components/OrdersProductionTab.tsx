@@ -29,6 +29,7 @@ import styles from '../Admin.module.css';
 
 interface OrdersProductionTabProps {
   onOrderCountChange?: (count: number) => void;
+  onNavigateToCustomers?: () => void;
 }
 
 interface KanbanStageConfig {
@@ -116,7 +117,7 @@ function formatWhatsAppUrl(rawPhone: string | undefined, message: string): strin
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
-export default function OrdersProductionTab({ onOrderCountChange }: OrdersProductionTabProps) {
+export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCustomers }: OrdersProductionTabProps) {
   const [orders, setOrders] = useState<ProductionOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -126,6 +127,11 @@ export default function OrdersProductionTab({ onOrderCountChange }: OrdersProduc
   const [statusFilter, setStatusFilter] = useState<'todos' | OrderStatus>('todos');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [dataSource, setDataSource] = useState<'supabase' | 'local'>('supabase');
+  const [syncedCustomerToast, setSyncedCustomerToast] = useState<{
+    text: string;
+    customerName: string;
+    orderShortId: string;
+  } | null>(null);
 
   // Notifica o componente pai sobre a contagem de pedidos de forma segura após o render
   useEffect(() => {
@@ -263,6 +269,13 @@ export default function OrdersProductionTab({ onOrderCountChange }: OrdersProduc
       if (!data.success) {
         alert(data.error || 'Erro ao atualizar etapa do pedido.');
         loadOrders(true);
+      } else if (newStatus === 'entregue' && data.customerSynced) {
+        const shortId = orderId.slice(-6).toUpperCase();
+        setSyncedCustomerToast({
+          text: `Pedido #${shortId} finalizado com sucesso! Ficha de ${data.customerName || 'cliente'} atualizada e salva no histórico.`,
+          customerName: data.customerName || '',
+          orderShortId: shortId,
+        });
       }
     } catch {
       alert('Falha ao comunicar com o servidor.');
@@ -400,6 +413,35 @@ export default function OrdersProductionTab({ onOrderCountChange }: OrdersProduc
           </button>
         </div>
       </div>
+
+      {/* Alerta de Confirmação de Sincronização com a Ficha de Clientes */}
+      {syncedCustomerToast && (
+        <div className={styles.customerSyncToast}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+            <CheckCheck size={18} color="#15803D" />
+            <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#166534' }}>
+              {syncedCustomerToast.text}
+            </span>
+          </div>
+          {onNavigateToCustomers && (
+            <button
+              type="button"
+              onClick={onNavigateToCustomers}
+              className={styles.customerSyncToastAction}
+            >
+              Ver Ficha de Clientes →
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setSyncedCustomerToast(null)}
+            className={styles.customerSyncToastClose}
+            aria-label="Fechar aviso"
+          >
+            <X size={15} />
+          </button>
+        </div>
+      )}
 
       {/* Controles de Busca e Filtros de Status */}
       <div className={styles.ordersControlsRow}>
@@ -559,6 +601,29 @@ export default function OrdersProductionTab({ onOrderCountChange }: OrdersProduc
                               </span>
                             </div>
 
+                            {/* Indicador de Pedido Concluído e Arquivado na Ficha de Clientes */}
+                            {col.id === 'entregue' && (
+                              <div className={styles.cardDeliveredSyncedBadge}>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                                  <CheckCheck size={13} color="#15803D" />
+                                  <span>Salvo na Ficha de Clientes</span>
+                                </div>
+                                {onNavigateToCustomers && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onNavigateToCustomers();
+                                    }}
+                                    className={styles.cardDeliveredViewLink}
+                                    title="Abrir a Ficha de Clientes"
+                                  >
+                                    Ver Ficha →
+                                  </button>
+                                )}
+                              </div>
+                            )}
+
                             {/* Botão de Notificação via WhatsApp */}
                             {col.id === 'pronto' ? (
                               <button
@@ -715,18 +780,25 @@ export default function OrdersProductionTab({ onOrderCountChange }: OrdersProduc
                         </strong>
                       </td>
                       <td>
-                        <select
-                          value={order.status}
-                          onChange={(e) => handleUpdateStatus(order.id, e.target.value as OrderStatus)}
-                          className={styles.statusSelect}
-                          style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }}
-                        >
-                          {STAGES.map((s) => (
-                            <option key={s.id} value={s.id}>
-                              {s.label}
-                            </option>
-                          ))}
-                        </select>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                          <select
+                            value={order.status}
+                            onChange={(e) => handleUpdateStatus(order.id, e.target.value as OrderStatus)}
+                            className={styles.statusSelect}
+                            style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }}
+                          >
+                            {STAGES.map((s) => (
+                              <option key={s.id} value={s.id}>
+                                {s.label}
+                              </option>
+                            ))}
+                          </select>
+                          {order.status === 'entregue' && (
+                            <span className={styles.tableDeliveredPill} title="Pedido registrado na ficha de clientes">
+                              <CheckCheck size={11} /> Salvo na Ficha
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td style={{ textAlign: 'right' }}>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -845,6 +917,28 @@ export default function OrdersProductionTab({ onOrderCountChange }: OrdersProduc
                   </select>
                 </div>
               </div>
+
+              {/* Aviso no Modal quando Pedido estiver Entregue */}
+              {selectedOrder.status === 'entregue' && (
+                <div className={styles.modalDeliveredNotice}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <CheckCheck size={16} color="#15803D" />
+                    <span><strong>Pedido Entregue:</strong> Todas as informações deste pedido estão salvas permanentemente na Ficha de Clientes.</span>
+                  </div>
+                  {onNavigateToCustomers && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedOrder(null);
+                        onNavigateToCustomers();
+                      }}
+                      className={styles.modalDeliveredNavBtn}
+                    >
+                      Abrir Ficha do Cliente →
+                    </button>
+                  )}
+                </div>
+              )}
 
               {/* Seção: Itens & Personalização Solicitada */}
               <div>

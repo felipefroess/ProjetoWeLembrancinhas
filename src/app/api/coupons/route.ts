@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
         minOrderValue: body.minOrderValue,
         expiresAt: body.expiresAt,
         isActive: body.isActive,
+        firstPurchaseOnly: Boolean(body.firstPurchaseOnly),
       });
 
       if (!result.success) {
@@ -52,19 +53,24 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Caso padrão: Validação do cupom feita no carrinho
+    // Caso padrão: Validação do cupom feita no carrinho ou checkout
     const rawCode = (body.code || '').trim();
     const subtotal = Number(body.subtotal) || 0;
+    const phone = body.phone ? String(body.phone).trim() : undefined;
 
-    const validation = await validateCoupon(rawCode, subtotal);
+    const validation = await validateCoupon(rawCode, subtotal, phone);
     if (!validation.valid) {
       return NextResponse.json({
+        success: false,
         valid: false,
         message: validation.message,
       });
     }
 
-    return NextResponse.json(validation);
+    return NextResponse.json({
+      success: true,
+      ...validation,
+    });
   } catch (error) {
     console.error('Erro na API de cupons (POST):', error);
     return NextResponse.json(

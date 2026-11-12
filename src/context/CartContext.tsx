@@ -190,6 +190,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return { success: false, message: 'Digite o código do cupom.' };
     }
 
+    // 1. Verifica se o cupom já foi utilizado anteriormente neste aparelho
+    try {
+      const usedCoupons = JSON.parse(localStorage.getItem('we_used_coupons') || '[]');
+      if (Array.isArray(usedCoupons) && usedCoupons.includes(cleanCode)) {
+        return {
+          success: false,
+          message: 'Este cupom é exclusivo para a 1ª compra e já foi utilizado neste aparelho.',
+        };
+      }
+    } catch {
+      // Ignora erro de localStorage
+    }
+
     try {
       const res = await fetch('/api/coupons', {
         method: 'POST',
@@ -198,7 +211,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       });
       const data = await res.json();
 
-      if (data.valid && data.coupon) {
+      if ((data.valid || data.success) && data.coupon) {
         setAppliedCoupon(data.coupon);
         return { success: true, message: data.message || 'Cupom aplicado com sucesso!' };
       } else {

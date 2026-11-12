@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useCart } from '@/context/CartContext';
-import { X, Send, MapPin, Calendar, User, Phone, CheckCircle2, Truck, Loader2 } from 'lucide-react';
+import { X, Send, MapPin, Calendar, User, Phone, CheckCircle2, Truck, Loader2, AlertTriangle, Tag } from 'lucide-react';
 import { DeliveryMethod } from '@/types';
 import confetti from 'canvas-confetti';
 import styles from './CheckoutModal.module.css';
@@ -34,12 +34,19 @@ export function CheckoutModal() {
     subtotalAmount,
     finalTotal,
     discountAmount,
+    appliedCoupon,
+    applyCoupon,
+    removeCoupon,
     generateWhatsAppOrderUrl,
     clearCart,
   } = useCart();
 
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [couponWarning, setCouponWarning] = useState<string | null>(null);
+  const [couponInput, setCouponInput] = useState('');
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [couponFeedback, setCouponFeedback] = useState<{ message: string; isError: boolean } | null>(null);
   const [eventDate, setEventDate] = useState('');
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('retirada-pouso-alegre');
   const [shippingCep, setShippingCep] = useState('');
@@ -161,7 +168,117 @@ export function CheckoutModal() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleApplyCoupon = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const clean = couponInput.trim();
+    if (!clean) return;
+
+    setIsApplyingCoupon(true);
+    setCouponFeedback(null);
+
+    try {
+      const result = await applyCoupon(clean);
+      if (!result.success) {
+        setCouponFeedback({ message: result.message, isError: true });
+      } else {
+        setCouponFeedback({ message: result.message || 'Cupom aplicado!', isError: false });
+        setCouponInput('');
+        if (customerPhone) {
+          checkCouponForPhone(customerPhone);
+        }
+      }
+    } catch {
+      setCouponFeedback({ message: 'Erro ao validar cupom. Tente novamente.', isError: true });
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    removeCoupon();
+    setCouponFeedback(null);
+    setCouponWarning(null);
+  };
+
+  const checkCouponForPhone = async (phoneToTest: string) => {
+    if (!appliedCoupon) return;
+    const digits = phoneToTest.replace(/\D/g, '');
+    if (digits.length < 10) return;
+
+    try {
+      const res = await fetch('/api/coupons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: appliedCoupon.code,
+          subtotal: subtotalAmount,
+          phone: digits,
+        }),
+      });
+      const data = await res.json();
+      if (data.valid === false || data.success === false) {
+        const removedCode = appliedCoupon.code;
+        removeCoupon();
+        setCouponWarning(
+          data.message ||
+            `O cupom ${removedCode} foi removido pois este número de telefone já possui pedidos anteriores (válido apenas na 1ª compra).`
+        );
+      } else {
+        setCouponWarning(null);
+      }
+    } catch {
+      // Ignora falha de rede
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    // Se houver cupom aplicado, valida o telefone do cliente com o banco antes de enviar
+    if (appliedCoupon) {
+      const digits = customerPhone.replace(/\D/g, '');
+      if (digits.length >= 10) {
+        setIsSubmitting(true);
+        try {
+          const res = await fetch('/api/coupons', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              code: appliedCoupon.code,
+              subtotal: subtotalAmount,
+              phone: digits,
+            }),
+          });
+          const data = await res.json();
+          if (data.valid === false || data.success === false) {
+            const removedCode = appliedCoupon.code;
+            removeCoupon();
+            setCouponWarning(
+              data.message ||
+                `O cupom ${removedCode} foi removido pois este número de telefone já possui pedidos anteriores (válido apenas na 1ª compra).`
+            );
+            setIsSubmitting(false);
+            return;
+          }
+        } catch {
+          // Segue em caso de falha de conexão
+        } finally {
+          setIsSubmitting(false);
+        }
+      }
+    }
+
+    // Se um cupom foi utilizado, grava no localStorage deste aparelho para prevenir reuso local
+    if (appliedCoupon) {
+      try {
+        const used = JSON.parse(localStorage.getItem('we_used_coupons') || '[]');
+        if (Array.isArray(used) && !used.includes(appliedCoupon.code)) {
+          used.push(appliedCoupon.code);
+          localStorage.setItem('we_used_coupons', JSON.stringify(used));
+        }
+      } catch {}
+    }
     e.preventDefault();
 
     const url = generateWhatsAppOrderUrl({
@@ -293,6 +410,14 @@ export function CheckoutModal() {
               </div>
             </div>
 
+            {/* Alerta de Cupom (Ex: Cupom de 1ª compra já utilizado por este WhatsApp) */}
+            {couponWarning && (
+              <div className={styles.couponWarningBox}>
+                <AlertTriangle size={16} className={styles.couponWarningIcon} />
+                <span>{couponWarning}</span>
+              </div>
+            )}
+
             {/* Nome Completo */}
             <div>
               <label className={styles.fieldLabel}>
@@ -318,7 +443,11 @@ export function CheckoutModal() {
                   type="tel"
                   placeholder="(35) 99999-9999"
                   value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  onChange={(e) => {
+                    setCustomerPhone(e.target.value);
+                    if (couponWarning) setCouponWarning(null);
+                  }}
+                  onBlur={() => checkCouponForPhone(customerPhone)}
                   className={styles.formInput}
                 />
               </div>
@@ -523,7 +652,7 @@ export function CheckoutModal() {
                   <div className={styles.finalTotalRow}>
                     <span>Produtos ({totalUnits} un.)</span>
                     <span>
-                      {finalTotal.toLocaleString('pt-BR', {
+                      {subtotalAmount.toLocaleString('pt-BR', {
                         style: 'currency',
                         currency: 'BRL',
                       })}
@@ -554,11 +683,89 @@ export function CheckoutModal() {
                         : 'Informe o CEP'}
                     </span>
                   </div>
+
+                  {/* PARTE DO CUPOM DE DESCONTO EM BAIXO DE RETIRADA */}
+                  {appliedCoupon ? (
+                    <div className={styles.checkoutAppliedCouponRow}>
+                      <div className={styles.checkoutAppliedLeft}>
+                        <Tag size={13} className={styles.checkoutAppliedTagIcon} />
+                        <span className={styles.checkoutAppliedCode}>{appliedCoupon.code}</span>
+                        <span className={styles.checkoutAppliedDesc}>
+                          {appliedCoupon.type === 'percentage'
+                            ? `(-${appliedCoupon.value}%)`
+                            : `(-R$ ${appliedCoupon.value.toFixed(2).replace('.', ',')})`}
+                        </span>
+                      </div>
+                      <div className={styles.checkoutAppliedRight}>
+                        <span className={styles.checkoutDiscountAmount}>
+                          -{discountAmount.toLocaleString('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
+                          })}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleRemoveCoupon}
+                          className={styles.checkoutRemoveCouponBtn}
+                          title="Remover cupom"
+                        >
+                          <X size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={styles.checkoutCouponRow}>
+                      <div className={styles.checkoutCouponInputWrapper}>
+                        <Tag size={14} className={styles.checkoutCouponInputIcon} />
+                        <input
+                          type="text"
+                          placeholder="Ex: PRIMEIRACOMPRA"
+                          value={couponInput}
+                          onChange={(e) => {
+                            setCouponInput(e.target.value.toUpperCase());
+                            if (couponFeedback) setCouponFeedback(null);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleApplyCoupon();
+                            }
+                          }}
+                          className={styles.checkoutCouponInput}
+                          maxLength={25}
+                          autoCapitalize="characters"
+                          autoCorrect="off"
+                          spellCheck={false}
+                          disabled={isApplyingCoupon}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleApplyCoupon()}
+                        disabled={!couponInput.trim() || isApplyingCoupon}
+                        className={styles.checkoutCouponApplyBtn}
+                      >
+                        {isApplyingCoupon ? '...' : 'Aplicar'}
+                      </button>
+                    </div>
+                  )}
+
+                  {couponFeedback && (
+                    <div
+                      className={
+                        couponFeedback.isError
+                          ? styles.checkoutCouponError
+                          : styles.checkoutCouponSuccess
+                      }
+                    >
+                      {couponFeedback.message}
+                    </div>
+                  )}
                 </div>
 
                 <div className={styles.finalTotalMainRow}>
                   <span className={styles.finalTotalLabel}>
-                    {shippingPrice > 0 ? 'Total com frete' : 'Total do pedido'}
+                    {shippingPrice > 0 ? 'Total com frete' : discountAmount > 0 ? 'Total com desconto' : 'Total do pedido'}
                   </span>
                   <span className={styles.finalTotalValue}>
                     {orderTotalWithShipping.toLocaleString('pt-BR', {

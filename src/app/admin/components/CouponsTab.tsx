@@ -32,6 +32,7 @@ export interface CouponItem {
   minOrderValue?: number;
   expiresAt?: string | null;
   isActive: boolean;
+  firstPurchaseOnly?: boolean;
   createdAt?: string;
 }
 
@@ -62,6 +63,7 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
   const [formMinOrder, setFormMinOrder] = useState<number | ''>('');
   const [formDescription, setFormDescription] = useState('');
   const [formIsActive, setFormIsActive] = useState(true);
+  const [formFirstPurchaseOnly, setFormFirstPurchaseOnly] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   // Modal de Confirmação de Exclusão
@@ -211,6 +213,7 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
     setFormMinOrder('');
     setFormDescription('');
     setFormIsActive(true);
+    setFormFirstPurchaseOnly(false);
     setFormError(null);
     setIsModalOpen(true);
   };
@@ -226,6 +229,7 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
     setFormMinOrder(coupon.minOrderValue || '');
     setFormDescription(coupon.description || '');
     setFormIsActive(coupon.isActive);
+    setFormFirstPurchaseOnly(coupon.firstPurchaseOnly === true || coupon.code === 'PRIMEIRACOMPRA');
     setFormError(null);
     setIsModalOpen(true);
   };
@@ -296,6 +300,7 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
             minOrderValue: formMinOrder ? Number(formMinOrder) : 0,
             expiresAt: formHasExpiry ? formExpiresAt : null,
             isActive: formIsActive,
+            firstPurchaseOnly: formFirstPurchaseOnly,
           }),
         });
 
@@ -322,6 +327,7 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
             minOrderValue: formMinOrder ? Number(formMinOrder) : 0,
             expiresAt: formHasExpiry ? formExpiresAt : null,
             isActive: formIsActive,
+            firstPurchaseOnly: formFirstPurchaseOnly,
           }),
         });
 
@@ -608,6 +614,16 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                           : 'Sem valor mínimo de pedido'}
                       </span>
                     </div>
+
+                    {/* Regra de Primeira Compra */}
+                    {(coupon.firstPurchaseOnly || coupon.code === 'PRIMEIRACOMPRA') && (
+                      <div className={styles.couponDetailItem}>
+                        <ShieldCheck size={13} style={{ color: '#B45309' }} />
+                        <span className={styles.badgeFirstPurchase}>
+                          Exclusivo 1ª compra por cliente
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -829,6 +845,23 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                   className={styles.formInput}
                   maxLength={100}
                 />
+              </div>
+
+              {/* Regra de 1ª Compra */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.625rem', paddingTop: '0.25rem' }}>
+                <input
+                  type="checkbox"
+                  id="firstPurchaseOnly"
+                  checked={formFirstPurchaseOnly}
+                  onChange={(e) => setFormFirstPurchaseOnly(e.target.checked)}
+                  style={{ width: 16, height: 16, marginTop: 2, cursor: 'pointer' }}
+                />
+                <label htmlFor="firstPurchaseOnly" style={{ fontSize: '0.8125rem', color: '#4A3B32', cursor: 'pointer', fontWeight: 600 }}>
+                  Válido apenas na 1ª compra do cliente
+                  <span style={{ display: 'block', fontSize: '11px', color: '#8C7A6B', fontWeight: 400, marginTop: 2 }}>
+                    Bloqueia automaticamente compras subsequentes com este mesmo número de WhatsApp ou no mesmo aparelho.
+                  </span>
+                </label>
               </div>
 
               {/* Status Inicial */}

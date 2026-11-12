@@ -133,5 +133,6 @@ export interface AppliedCoupon {
   type: 'percentage' | 'fixed';
   value: number;
   description?: string;
+  firstPurchaseOnly?: boolean;
 }
 

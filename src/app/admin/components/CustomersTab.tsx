@@ -59,6 +59,7 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<LoyaltyFilter>('all');
+  const [selectedYear, setSelectedYear] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortOption>('most_orders');
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
   const [syncingOrders, setSyncingOrders] = useState(false);
@@ -151,14 +152,19 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
 
       const created = Number(data.createdCustomers) || 0;
       const added = Number(data.addedPurchases) || 0;
+      const updated = Number(data.updatedPurchases) || 0;
 
-      if (created === 0 && added === 0) {
+      if (created === 0 && added === 0 && updated === 0) {
         setSyncFeedback({
-          text: 'Tudo atualizado! Todos os pedidos já constam nas fichas dos clientes.',
+          text: 'Tudo atualizado! Todos os pedidos entregues já constam nas fichas dos clientes.',
         });
       } else {
+        const parts: string[] = [];
+        if (created > 0) parts.push(`${created} ficha(s) criada(s)`);
+        if (added > 0) parts.push(`${added} compra(s) vinculada(s)`);
+        if (updated > 0) parts.push(`${updated} compra(s) atualizada(s)`);
         setSyncFeedback({
-          text: `Sincronização concluída: ${created} ficha(s) criada(s) e ${added} compra(s) vinculada(s) a clientes existentes.`,
+          text: `Sincronização concluída: ${parts.join(', ')}.`,
         });
       }
     } catch {
@@ -170,6 +176,24 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
       setSyncingOrders(false);
     }
   };
+
+  // Identifica todos os anos com pedidos ou eventos registrados para permitir filtro por ano
+  const availableYears = useMemo(() => {
+    const years = new Set<string>();
+    customers.forEach((c) => {
+      c.purchases.forEach((p) => {
+        if (p.date && p.date.length >= 4) {
+          const yr = p.date.slice(0, 4);
+          if (/^\d{4}$/.test(yr)) years.add(yr);
+        }
+        if (p.notes) {
+          const matches = p.notes.match(/\b(20\d{2})\b/g);
+          if (matches) matches.forEach((m) => years.add(m));
+        }
+      });
+    });
+    return Array.from(years).sort((a, b) => b.localeCompare(a));
+  }, [customers]);
 
   const enrichedCustomers = useMemo(() => {
     return customers.map((c) => {
@@ -203,6 +227,16 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
       if (filter === 'loyal' && !c.isLoyal) return false;
       if (filter === 'vip' && !c.isVip) return false;
 
+      // Filtro por ano específico (permite encontrar clientes de anos anteriores com 1 clique)
+      if (selectedYear !== 'all') {
+        const hasPurchaseInYear = c.purchases.some((p) => {
+          const dateMatch = p.date && p.date.startsWith(selectedYear);
+          const notesMatch = p.notes && p.notes.includes(selectedYear);
+          return dateMatch || notesMatch;
+        });
+        if (!hasPurchaseInYear) return false;
+      }
+
       if (!q) return true;
       const matchCustomer =
         c.name.toLowerCase().includes(q) ||
@@ -212,7 +246,9 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
       const matchPurchase = c.purchases.some(
         (p) =>
           p.item.toLowerCase().includes(q) ||
-          (p.notes || '').toLowerCase().includes(q)
+          (p.notes || '').toLowerCase().includes(q) ||
+          (p.date || '').toLowerCase().includes(q) ||
+          formatDateBR(p.date).toLowerCase().includes(q)
       );
       return matchCustomer || matchPurchase;
     });
@@ -233,7 +269,7 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
       }
       return a.name.localeCompare(b.name, 'pt-BR');
     });
-  }, [enrichedCustomers, searchTerm, filter, sortBy]);
+  }, [enrichedCustomers, searchTerm, filter, selectedYear, sortBy]);
 
   const openNewCustomerModal = () => {
     setEditingCustomer(null);
@@ -598,6 +634,23 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
             </button>
           </div>
 
+          {availableYears.length > 0 && (
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className={styles.yearSelect}
+              aria-label="Filtrar por ano"
+              title="Filtrar clientes por ano de compra ou evento"
+            >
+              <option value="all">📅 Todos os Anos</option>
+              {availableYears.map((yr) => (
+                <option key={yr} value={yr}>
+                  Ano {yr}
+                </option>
+              ))}
+            </select>
+          )}
+
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
@@ -611,6 +664,22 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
           </select>
         </div>
       </div>
+
+      {/* Aviso de Filtro de Ano Ativo */}
+      {selectedYear !== 'all' && (
+        <div className={styles.yearFilterNotice}>
+          <span>
+            Mostrando clientes com pedidos ou eventos no ano <strong>{selectedYear}</strong> ({filteredAndSorted.length} cliente(s) encontrado(s))
+          </span>
+          <button
+            type="button"
+            onClick={() => setSelectedYear('all')}
+            className={styles.yearFilterClearBtn}
+          >
+            Limpar filtro de ano
+          </button>
+        </div>
+      )}
 
       {/* Listagem */}
       {loading ? (

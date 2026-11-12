@@ -252,7 +252,7 @@ export function CartDrawer() {
                     <Tag size={15} className={styles.couponInputIcon} />
                     <input
                       type="text"
-                      placeholder="Cupom de desconto"
+                      placeholder="Ex: PRIMEIRACOMPRA"
                       value={couponInput}
                       onChange={(e) => {
                         setCouponInput(e.target.value.toUpperCase());
