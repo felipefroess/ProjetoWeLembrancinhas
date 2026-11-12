@@ -315,13 +315,6 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
-.stepCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(109, 76, 61, 0.08);
-  border-color: #C89B6D;
-  background-color: #FFFFFF;
-}
-
 .stepIconWrap {
   position: relative;
   width: 2.75rem;

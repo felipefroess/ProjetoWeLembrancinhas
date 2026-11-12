@@ -1,25 +1,29 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { Header } from '@/components/Header';
-import { HeroBanner } from '@/components/HeroBanner';
-import { CategoryFilter } from '@/components/CategoryFilter';
-import { ProductCard } from '@/components/ProductCard';
-import { ProductModal } from '@/components/ProductModal';
-import { CartDrawer } from '@/components/CartDrawer';
-import { CheckoutModal } from '@/components/CheckoutModal';
-import { WhatsappButton } from '@/components/WhatsappButton';
-import { Footer } from '@/components/Footer';
-import { PRODUCTS } from '@/data/products';
-import { CATEGORIES } from '@/data/categories';
-import { sortCategoriesBySeasonalProximity, sortProductsBySeasonalProximity, getSeasonalTopProductId } from '@/lib/seasonalEvents';
-import { Category, CategoryId, Product } from '@/types';
-import { PackageSearch } from 'lucide-react';
-import styles from './Home.module.css';
+import React, { useState, useMemo, useEffect } from "react";
+import { Header } from "@/components/Header";
+import { HeroBanner } from "@/components/HeroBanner";
+import { CategoryFilter } from "@/components/CategoryFilter";
+import { ProductCard } from "@/components/ProductCard";
+import { ProductModal } from "@/components/ProductModal";
+import { CartDrawer } from "@/components/CartDrawer";
+import { CheckoutModal } from "@/components/CheckoutModal";
+import { WhatsappButton } from "@/components/WhatsappButton";
+import { Footer } from "@/components/Footer";
+import { PRODUCTS } from "@/data/products";
+import { CATEGORIES } from "@/data/categories";
+import {
+  sortCategoriesBySeasonalProximity,
+  sortProductsBySeasonalProximity,
+  getSeasonalTopProductId,
+} from "@/lib/seasonalEvents";
+import { Category, CategoryId, Product } from "@/types";
+import { PackageSearch } from "lucide-react";
+import styles from "./Home.module.css";
 
 export default function HomePage() {
-  const [selectedCategory, setSelectedCategory] = useState<CategoryId>('todos');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryId>("todos");
+  const [searchQuery, setSearchQuery] = useState("");
   const [productsList, setProductsList] = useState<Product[]>(PRODUCTS);
   const [categoriesList, setCategoriesList] = useState<Category[]>(CATEGORIES);
   const [clientDate, setClientDate] = useState<Date | null>(null);
@@ -31,7 +35,7 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchDynamicData() {
       try {
-        const res = await fetch('/api/products');
+        const res = await fetch("/api/products");
         const data = await res.json();
         if (data.success) {
           if (data.products && data.products.length > 0) {
@@ -42,7 +46,7 @@ export default function HomePage() {
           }
         }
       } catch (err) {
-        console.error('Erro ao buscar dados dinâmicos:', err);
+        console.error("Erro ao buscar dados dinâmicos:", err);
       }
     }
 
@@ -71,7 +75,7 @@ export default function HomePage() {
   const filteredProducts = useMemo(() => {
     const list = productsList.filter((product) => {
       const matchesCategory =
-        selectedCategory === 'todos' || product.category === selectedCategory;
+        selectedCategory === "todos" || product.category === selectedCategory;
 
       const query = searchQuery.toLowerCase().trim();
       const matchesSearch =
@@ -83,7 +87,7 @@ export default function HomePage() {
     });
 
     // Quando "Todos os Mimos" está selecionado, os produtos do evento mais próximo do calendário aparecem primeiro!
-    if (selectedCategory === 'todos') {
+    if (selectedCategory === "todos") {
       return sortProductsBySeasonalProximity(list, categoryNameMap, clientDate);
     }
 
@@ -95,13 +99,19 @@ export default function HomePage() {
     filteredProducts.length === 1
       ? styles.productsGridSingle
       : filteredProducts.length === 2
-      ? styles.productsGridDouble
-      : styles.productsGridMulti;
+        ? styles.productsGridDouble
+        : styles.productsGridMulti;
 
   return (
     <div className={styles.pageWrapper}>
       {/* Barra de Navegação */}
-      <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} products={productsList} categories={sortedCategories} onSelectCategory={setSelectedCategory} />
+      <Header
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        products={productsList}
+        categories={sortedCategories}
+        onSelectCategory={setSelectedCategory}
+      />
 
       {/* Hero Section */}
       <HeroBanner />
@@ -123,22 +133,26 @@ export default function HomePage() {
             <h2 className={styles.catalogTitle}>
               {searchQuery
                 ? `Resultados para "${searchQuery}"`
-                : selectedCategory === 'natal'
-                ? 'Catálogo Especial de Natal'
-                : selectedCategory === 'dia-dos-professores'
-                ? 'Catálogo Dia dos Professores'
-                : selectedCategory === 'cadernos'
-                ? 'Cadernos & Cadernetas Personalizadas'
-                : selectedCategory !== 'todos' && categoryNameMap.get(selectedCategory)
-                ? `Catálogo ${categoryNameMap.get(selectedCategory)}`
-                : 'Catálogo de Lembrancinhas'}
+                : selectedCategory === "natal"
+                  ? "Catálogo Especial de Natal"
+                  : selectedCategory === "dia-dos-professores"
+                    ? "Catálogo Dia dos Professores"
+                    : selectedCategory === "cadernos"
+                      ? "Cadernos & Cadernetas Personalizadas"
+                      : selectedCategory !== "todos" &&
+                          categoryNameMap.get(selectedCategory)
+                        ? `Catálogo ${categoryNameMap.get(selectedCategory)}`
+                        : "Catálogo de Lembrancinhas"}
             </h2>
             <p className={styles.catalogSubtitle}>
-              Clique em qualquer item para personalizar modelos, nomes e detalhes
+              Clique em qualquer item para personalizar
             </p>
           </div>
           <span className={styles.itemsCountBadge}>
-            {filteredProducts.length} {filteredProducts.length === 1 ? 'modelo encontrado' : 'modelos disponíveis'}
+            {filteredProducts.length}{" "}
+            {filteredProducts.length === 1
+              ? "modelo encontrado"
+              : "modelos disponíveis"}
           </span>
         </div>
 
@@ -146,7 +160,11 @@ export default function HomePage() {
         {filteredProducts.length > 0 ? (
           <div className={gridClass}>
             {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} isMostRequested={product.id === mostRequestedProductId} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                isMostRequested={product.id === mostRequestedProductId}
+              />
             ))}
           </div>
         ) : (
@@ -159,12 +177,14 @@ export default function HomePage() {
               Nenhuma lembrancinha encontrada
             </h3>
             <p className={styles.emptyStateText}>
-              Não encontramos nenhum produto com o termo &quot;{searchQuery}&quot;. Tente buscar por outros termos como talento, sonho de valsa ou lata.
+              Não encontramos nenhum produto com o termo &quot;{searchQuery}
+              &quot;. Tente buscar por outros termos como talento, sonho de
+              valsa ou lata.
             </p>
             <button
               onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('todos');
+                setSearchQuery("");
+                setSelectedCategory("todos");
               }}
               className={styles.clearFilterBtn}
             >
