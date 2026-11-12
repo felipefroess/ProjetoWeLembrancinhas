@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -34,7 +34,8 @@ import {
   ArrowUpRight,
   Calendar,
   Crop,
-  Users
+  Users,
+  RefreshCw
 } from 'lucide-react';
 import { Product, Category, ProductVariation, CustomFieldDefinition } from '@/types';
 import OrdersProductionTab from './components/OrdersProductionTab';
@@ -44,7 +45,8 @@ import CostCalculatorTab from './components/CostCalculatorTab';
 import CustomersTab from './components/CustomersTab';
 import { ImageCropModal } from './components/ImageCropModal';
 import { STORE_CONFIG } from '@/data/products';
-import { getAnalyticsForPeriod, AnalyticsPeriod } from '@/lib/analytics';
+import { getAnalyticsForPeriod, AnalyticsPeriod, TopProductStat } from '@/lib/analytics';
+import { getSupabase } from '@/lib/supabase';
 import styles from './Admin.module.css';
 
 export default function AdminDashboardPage() {
@@ -70,28 +72,78 @@ export default function AdminDashboardPage() {
   const [period, setPeriod] = useState<AnalyticsPeriod>('mes');
   const [realStats, setRealStats] = useState<any>(null);
   const [isDbConfigured, setIsDbConfigured] = useState<boolean>(false);
+  const [isRefreshingStats, setIsRefreshingStats] = useState<boolean>(false);
+  const [lastUpdated, setLastUpdated] = useState<string>('');
 
-  // Busca dados reais do banco Supabase quando disponível
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        const res = await fetch('/api/analytics/stats?period=' + period);
-        const data = await res.json();
-        if (data.configured) {
-          setIsDbConfigured(true);
-          if (data.hasRealData) {
-            setRealStats(data);
-          }
-        } else {
-          setIsDbConfigured(false);
-          setRealStats(null);
-        }
-      } catch (err) {
-        console.error('Erro ao buscar estatísticas do Supabase:', err);
+  const fetchStats = useCallback(async (showSpinner = false) => {
+    if (showSpinner) setIsRefreshingStats(true);
+    try {
+      const res = await fetch(`/api/analytics/stats?period=${period}`, { cache: 'no-store' });
+      const data = await res.json();
+      if (res.ok && data && !data.error) {
+        setIsDbConfigured(Boolean(data.configured));
+        setRealStats(data);
+        setLastUpdated(
+          new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        );
       }
+    } catch (err) {
+      console.error('Erro ao buscar estatísticas:', err);
+    } finally {
+      if (showSpinner) setIsRefreshingStats(false);
     }
-    fetchStats();
   }, [period]);
+
+  // Busca inicial e ao trocar de período ou entrar na aba dashboard
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats, mainTab]);
+
+  // Atualização ao vivo: polling a cada 5s na aba dashboard + foco da janela + Supabase Realtime
+  useEffect(() => {
+    if (mainTab !== 'dashboard') return;
+
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        fetchStats();
+      }
+    }, 5000);
+
+    const handleFocus = () => fetchStats();
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchStats();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    const supabase = getSupabase();
+    const channel = supabase
+      ? supabase
+          .channel(`dashboard-live-${period}`)
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+            fetchStats();
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'page_views' }, () => {
+            fetchStats();
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'product_clicks' }, () => {
+            fetchStats();
+          })
+          .subscribe()
+      : null;
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if (supabase && channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [mainTab, period, fetchStats]);
 
   // Filtros de busca na tabela do admin
   const [searchQuery, setSearchQuery] = useState('');
@@ -632,30 +684,50 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Métricas do Dashboard calculadas para o período ativo (ou reais do banco)
+  // Métricas do Dashboard calculadas para o período ativo com dados reais (zeradas quando não há registros)
   const baseAnalytics = getAnalyticsForPeriod(products, period);
   const analytics = realStats ? {
     ...baseAnalytics,
-    totalRevenue: realStats.totalRevenue ?? baseAnalytics.totalRevenue,
-    unitsSold: realStats.unitsSold ?? baseAnalytics.unitsSold,
-    visits: realStats.visits ?? baseAnalytics.visits,
-    ordersCount: realStats.ordersCount ?? baseAnalytics.ordersCount,
-    mostClickedProduct: realStats.mostClicked ? {
-      product: products.find((p) => p.id === realStats.mostClicked.productId) || {
-        id: realStats.mostClicked.productId,
-        name: realStats.mostClicked.name || 'Produto',
-        price: 15,
-        image: '/images/placeholder.jpg',
-        category: 'geral',
-        description: '',
-        unit: 'unidade',
-        leadTimeDays: 5,
-        minQuantity: 1,
-      },
-      clicks: realStats.mostClicked.clicks,
-      interestRate: '14.2%',
-      estimatedOrders: Math.max(1, Math.round(realStats.mostClicked.clicks * 0.18)),
-    } : baseAnalytics.mostClickedProduct,
+    totalRevenue: Number(realStats.totalRevenue) || 0,
+    unitsSold: Number(realStats.unitsSold) || 0,
+    visits: Number(realStats.visits) || 0,
+    ordersCount: Number(realStats.ordersCount) || 0,
+    growthRevenue: realStats.growthRevenue ?? null,
+    growthUnits: realStats.growthUnits ?? null,
+    growthVisits: realStats.growthVisits ?? null,
+    topSellingProducts: Array.isArray(realStats.topSellingProducts)
+      ? realStats.topSellingProducts.map((tp: TopProductStat) => {
+          const matched = products.find((p) => p.id === tp.id);
+          return {
+            ...tp,
+            name: matched?.name || tp.name,
+            category: matched?.category || tp.category,
+            image: matched?.image || tp.image || '/images/placeholder.jpg',
+            price: matched?.price ?? tp.price,
+          };
+        })
+      : [],
+    mostClickedProduct: realStats.mostClicked ? (() => {
+      const clicks = Number(realStats.mostClicked.clicks) || 0;
+      const soldUnits = Number(realStats.mostClicked.unitsSold) || 0;
+      const conversionPct = clicks > 0 ? ((soldUnits / clicks) * 100).toFixed(1) : '0.0';
+      return {
+        product: products.find((p) => p.id === realStats.mostClicked.productId) || {
+          id: realStats.mostClicked.productId,
+          name: realStats.mostClicked.name || 'Produto',
+          price: 0,
+          image: '/images/placeholder.jpg',
+          category: 'geral',
+          description: '',
+          unit: 'unidade',
+          leadTimeDays: 5,
+          minQuantity: 1,
+        },
+        clicks,
+        interestRate: `${conversionPct}% de conversão`,
+        estimatedOrders: soldUnits,
+      };
+    })() : null,
   } : baseAnalytics;
 
   const activeCategories = categories.filter((c) => c.id !== 'todos');
@@ -1054,35 +1126,48 @@ export default function AdminDashboardPage() {
               </p>
             </div>
 
-            {/* Seletor de Período: Semana, Mês ou Ano */}
-            <div className={styles.periodSelectorGroup}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexWrap: 'wrap' }}>
               <button
                 type="button"
-                onClick={() => setPeriod('semana')}
-                className={`${styles.periodBtn} ${period === 'semana' ? styles.periodBtnActive : ''}`}
-                title="Visualizar métricas desta semana"
+                onClick={() => fetchStats(true)}
+                className={styles.periodBtn}
+                title={lastUpdated ? `Última atualização às ${lastUpdated}` : 'Atualizar dados agora'}
+                style={{ gap: '0.375rem' }}
               >
-                <Calendar size={13} />
-                <span>Semana</span>
+                <RefreshCw size={13} className={isRefreshingStats ? 'animate-spin' : ''} />
+                <span>Ao vivo{lastUpdated ? ` • ${lastUpdated}` : ''}</span>
               </button>
-              <button
-                type="button"
-                onClick={() => setPeriod('mes')}
-                className={`${styles.periodBtn} ${period === 'mes' ? styles.periodBtnActive : ''}`}
-                title="Visualizar métricas deste mês"
-              >
-                <Calendar size={13} />
-                <span>Mês</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPeriod('ano')}
-                className={`${styles.periodBtn} ${period === 'ano' ? styles.periodBtnActive : ''}`}
-                title="Visualizar métricas deste ano"
-              >
-                <Calendar size={13} />
-                <span>Ano</span>
-              </button>
+
+              {/* Seletor de Período: Semana, Mês ou Ano */}
+              <div className={styles.periodSelectorGroup}>
+                <button
+                  type="button"
+                  onClick={() => setPeriod('semana')}
+                  className={`${styles.periodBtn} ${period === 'semana' ? styles.periodBtnActive : ''}`}
+                  title="Visualizar métricas desta semana"
+                >
+                  <Calendar size={13} />
+                  <span>Semana</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPeriod('mes')}
+                  className={`${styles.periodBtn} ${period === 'mes' ? styles.periodBtnActive : ''}`}
+                  title="Visualizar métricas deste mês"
+                >
+                  <Calendar size={13} />
+                  <span>Mês</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPeriod('ano')}
+                  className={`${styles.periodBtn} ${period === 'ano' ? styles.periodBtnActive : ''}`}
+                  title="Visualizar métricas deste ano"
+                >
+                  <Calendar size={13} />
+                  <span>Ano</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1104,9 +1189,11 @@ export default function AdminDashboardPage() {
               <div className={styles.kpiContent}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <span className={styles.kpiLabel}>Valor Total de Ganhos</span>
-                  <span className={styles.trendBadge} title="Crescimento vs período anterior">
-                    <ArrowUpRight size={11} /> {analytics.growthRevenue}
-                  </span>
+                  {analytics.growthRevenue && (
+                    <span className={styles.trendBadge} title="Crescimento vs período anterior">
+                      <ArrowUpRight size={11} /> {analytics.growthRevenue}
+                    </span>
+                  )}
                 </div>
                 <span className={styles.kpiValue}>
                   {analytics.totalRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
@@ -1123,12 +1210,14 @@ export default function AdminDashboardPage() {
               <div className={styles.kpiContent}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <span className={styles.kpiLabel}>Lembrancinhas Vendidas</span>
-                  <span className={styles.trendBadge} title="Crescimento vs período anterior">
-                    <ArrowUpRight size={11} /> {analytics.growthUnits}
-                  </span>
+                  {analytics.growthUnits && (
+                    <span className={styles.trendBadge} title="Crescimento vs período anterior">
+                      <ArrowUpRight size={11} /> {analytics.growthUnits}
+                    </span>
+                  )}
                 </div>
                 <span className={styles.kpiValue}>{analytics.unitsSold} un.</span>
-                <span className={styles.kpiSubtext}>Itens entregues {analytics.periodUnitLabel}</span>
+                <span className={styles.kpiSubtext}>Itens vendidos {analytics.periodUnitLabel}</span>
               </div>
               <div className={styles.kpiIconWrapper}>
                 <Gift size={22} />
@@ -1140,9 +1229,11 @@ export default function AdminDashboardPage() {
               <div className={styles.kpiContent}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <span className={styles.kpiLabel}>Visitas no Site</span>
-                  <span className={styles.trendBadge} title="Crescimento vs período anterior">
-                    <ArrowUpRight size={11} /> {analytics.growthVisits}
-                  </span>
+                  {analytics.growthVisits && (
+                    <span className={styles.trendBadge} title="Crescimento vs período anterior">
+                      <ArrowUpRight size={11} /> {analytics.growthVisits}
+                    </span>
+                  )}
                 </div>
                 <span className={styles.kpiValue}>{analytics.visits.toLocaleString('pt-BR')}</span>
                 <span className={styles.kpiSubtext}>Acessos {analytics.periodUnitLabel}</span>
@@ -1183,40 +1274,46 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className={styles.topSellersList}>
-                {analytics.topSellingProducts.map((p, idx) => (
-                  <div key={p.id} className={styles.topSellerRow}>
-                    <div 
-                      className={`${styles.rankBadge} ${
-                        idx === 0 ? styles.rank1 : idx === 1 ? styles.rank2 : idx === 2 ? styles.rank3 : styles.rankOther
-                      }`}
-                    >
-                      #{idx + 1}
-                    </div>
-
-                    <img src={p.image} alt={p.name} className={styles.topSellerThumb} />
-
-                    <div className={styles.topSellerInfo}>
-                      <div className={styles.topSellerName} title={p.name}>
-                        {p.name}
+                {analytics.topSellingProducts.length > 0 ? (
+                  analytics.topSellingProducts.map((p: TopProductStat, idx: number) => (
+                    <div key={p.id} className={styles.topSellerRow}>
+                      <div 
+                        className={`${styles.rankBadge} ${
+                          idx === 0 ? styles.rank1 : idx === 1 ? styles.rank2 : idx === 2 ? styles.rank3 : styles.rankOther
+                        }`}
+                      >
+                        #{idx + 1}
                       </div>
-                      <div className={styles.topSellerMeta}>
-                        <span>{p.category}</span>
-                        <span>•</span>
-                        <span>{p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/un</span>
-                      </div>
-                      <div className={styles.topSellerBarContainer}>
-                        <div className={styles.topSellerBarFill} style={{ width: `${Math.max(8, p.sharePercentage)}%` }} />
-                      </div>
-                    </div>
 
-                    <div className={styles.topSellerStats}>
-                      <span className={styles.topSellerUnits}>{p.unitsSold} vendidas</span>
-                      <span className={styles.topSellerRevenue}>
-                        {p.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                      </span>
+                      <img src={p.image} alt={p.name} className={styles.topSellerThumb} />
+
+                      <div className={styles.topSellerInfo}>
+                        <div className={styles.topSellerName} title={p.name}>
+                          {p.name}
+                        </div>
+                        <div className={styles.topSellerMeta}>
+                          <span>{p.category}</span>
+                          <span>•</span>
+                          <span>{p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/un</span>
+                        </div>
+                        <div className={styles.topSellerBarContainer}>
+                          <div className={styles.topSellerBarFill} style={{ width: `${Math.max(8, p.sharePercentage)}%` }} />
+                        </div>
+                      </div>
+
+                      <div className={styles.topSellerStats}>
+                        <span className={styles.topSellerUnits}>{p.unitsSold} vendidas</span>
+                        <span className={styles.topSellerRevenue}>
+                          {p.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p style={{ fontSize: '0.8125rem', color: '#8C7A6B', padding: '1rem 0', textAlign: 'center' }}>
+                    Nenhuma venda registrada neste período ainda. Quando um cliente finalizar um pedido, o ranking aparecerá aqui ao vivo.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -1268,13 +1365,15 @@ export default function AdminDashboardPage() {
                       <span className={styles.clickStatLabel}>Taxa de Interesse</span>
                     </div>
                     <div className={styles.clickStatItem}>
-                      <span className={styles.clickStatNumber}>~{analytics.mostClickedProduct.estimatedOrders}</span>
-                      <span className={styles.clickStatLabel}>Lembrancinhas</span>
+                      <span className={styles.clickStatNumber}>{analytics.mostClickedProduct.estimatedOrders}</span>
+                      <span className={styles.clickStatLabel}>Vendidas</span>
                     </div>
                   </div>
                 </div>
               ) : (
-                <p style={{ fontSize: '0.75rem', color: '#8C7A6B' }}>Nenhum produto analisado.</p>
+                <p style={{ fontSize: '0.8125rem', color: '#8C7A6B', padding: '1rem 0', textAlign: 'center' }}>
+                  Nenhum clique registrado neste período ainda.
+                </p>
               )}
 
               {/* Informações Operacionais Adicionais */}

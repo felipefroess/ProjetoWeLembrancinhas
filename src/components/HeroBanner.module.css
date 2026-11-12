@@ -113,6 +113,11 @@
   display: inline-block;
 }
 
+.plusSign {
+  position: relative;
+  top: -0.08em;
+}
+
 .bulletDot {
   display: inline-block;
   width: 5px;

@@ -1,13 +1,120 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
-import { AnalyticsPeriod } from '@/lib/analytics';
+import { AnalyticsPeriod, TopProductStat } from '@/lib/analytics';
+import { getAllProductionOrders } from '@/lib/ordersStore';
+
+function formatGrowth(current: number, previous: number): string | null {
+  if (previous <= 0) return null;
+  const pct = ((current - previous) / previous) * 100;
+  const sign = pct >= 0 ? '+' : '';
+  return `${sign}${pct.toFixed(1)}%`;
+}
+
+function aggregateOrders(
+  orders: any[],
+  clicksByProduct: Record<string, { count: number; name?: string; category?: string }>
+) {
+  const totalRevenue = orders.reduce((acc, o) => acc + (Number(o.total_amount) || 0), 0);
+  const unitsSold = orders.reduce((acc, o) => acc + (Number(o.total_units) || 0), 0);
+  const ordersCount = orders.length;
+
+  const salesByProduct: Record<
+    string,
+    { units: number; revenue: number; name: string; category: string; image: string; price: number }
+  > = {};
+
+  orders.forEach((o) => {
+    const items = Array.isArray(o.items) ? o.items : [];
+    items.forEach((item: any) => {
+      const pId = String(item.product?.id || item.productId || 'item');
+      const pName = item.product?.name || item.name || 'Lembrancinha';
+      const pCategory = item.product?.category || 'geral';
+      const pImage = item.product?.image || '/images/placeholder.jpg';
+      const pPrice = Number(item.product?.price) || 0;
+      const qty = Number(item.quantity) || 1;
+      const subtotal = Number(item.subtotal) || qty * pPrice;
+
+      if (!salesByProduct[pId]) {
+        salesByProduct[pId] = {
+          units: 0,
+          revenue: 0,
+          name: pName,
+          category: pCategory,
+          image: pImage,
+          price: pPrice,
+        };
+      }
+      salesByProduct[pId].units += qty;
+      salesByProduct[pId].revenue += subtotal;
+    });
+  });
+
+  const topSellingProducts: TopProductStat[] = Object.entries(salesByProduct)
+    .map(([id, data]) => ({
+      id,
+      name: data.name,
+      category: data.category,
+      image: data.image,
+      price: data.price > 0 ? data.price : data.units > 0 ? data.revenue / data.units : 0,
+      unitsSold: data.units,
+      revenue: data.revenue,
+      sharePercentage: unitsSold > 0 ? Math.round((data.units / unitsSold) * 100) : 0,
+      clicks: clicksByProduct[id]?.count || 0,
+    }))
+    .sort((a, b) => b.unitsSold - a.unitsSold)
+    .slice(0, 5);
+
+  return { totalRevenue, unitsSold, ordersCount, salesByProduct, topSellingProducts };
+}
 
 export async function GET(request: NextRequest) {
   try {
     const period = (request.nextUrl.searchParams.get('period') || 'mes') as AnalyticsPeriod;
 
+    const now = new Date();
+    const durationMs =
+      period === 'semana'
+        ? 7 * 24 * 60 * 60 * 1000
+        : period === 'ano'
+          ? 365 * 24 * 60 * 60 * 1000
+          : 30 * 24 * 60 * 60 * 1000;
+
+    const startDate = new Date(now.getTime() - durationMs);
+    const prevStartDate = new Date(startDate.getTime() - durationMs);
+    const isoStart = startDate.toISOString();
+    const prevIsoStart = prevStartDate.toISOString();
+
     if (!isSupabaseConfigured()) {
-      return NextResponse.json({ configured: false, hasRealData: false });
+      const { orders: allLocalOrders } = await getAllProductionOrders();
+      const currentOrders = allLocalOrders.filter(
+        (o) => new Date(o.created_at).getTime() >= startDate.getTime()
+      );
+      const prevOrders = allLocalOrders.filter((o) => {
+        const t = new Date(o.created_at).getTime();
+        return t >= prevStartDate.getTime() && t < startDate.getTime();
+      });
+
+      const { totalRevenue, unitsSold, ordersCount, salesByProduct, topSellingProducts } =
+        aggregateOrders(currentOrders, {});
+      const prevRevenue = prevOrders.reduce((acc, o) => acc + (Number(o.total_amount) || 0), 0);
+      const prevUnits = prevOrders.reduce((acc, o) => acc + (Number(o.total_units) || 0), 0);
+
+      return NextResponse.json({
+        configured: false,
+        hasRealData: ordersCount > 0,
+        period,
+        totalRevenue,
+        unitsSold,
+        visits: 0,
+        ordersCount,
+        growthRevenue: formatGrowth(totalRevenue, prevRevenue),
+        growthUnits: formatGrowth(unitsSold, prevUnits),
+        growthVisits: null,
+        mostClicked: null,
+        salesByProduct,
+        topSellingProducts,
+        clicksByProduct: {},
+      });
     }
 
     const supabase = getSupabaseAdmin();
@@ -15,34 +122,33 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ configured: false, hasRealData: false });
     }
 
-    // Define data de corte
-    const now = new Date();
-    let startDate: Date;
-    if (period === 'semana') {
-      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    } else if (period === 'ano') {
-      startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-    } else {
-      startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    }
-    const isoStart = startDate.toISOString();
+    // 1. Visitas (atual e período anterior)
+    const [{ count: visitsCount }, { count: prevVisitsCount }] = await Promise.all([
+      supabase
+        .from('page_views')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', isoStart),
+      supabase
+        .from('page_views')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', prevIsoStart)
+        .lt('created_at', isoStart),
+    ]);
 
-    // 1. Visitas
-    const { count: visitsCount } = await supabase
-      .from('page_views')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', isoStart);
-
-    // 2. Pedidos
-    const { data: orders } = await supabase
-      .from('orders')
-      .select('*')
-      .gte('created_at', isoStart)
-      .neq('status', 'cancelado');
-
-    const totalRevenue = (orders || []).reduce((acc, o) => acc + (Number(o.total_amount) || 0), 0);
-    const unitsSold = (orders || []).reduce((acc, o) => acc + (Number(o.total_units) || 0), 0);
-    const ordersCount = (orders || []).length;
+    // 2. Pedidos (atual e período anterior)
+    const [{ data: orders }, { data: prevOrders }] = await Promise.all([
+      supabase
+        .from('orders')
+        .select('*')
+        .gte('created_at', isoStart)
+        .neq('status', 'cancelado'),
+      supabase
+        .from('orders')
+        .select('total_amount, total_units')
+        .gte('created_at', prevIsoStart)
+        .lt('created_at', isoStart)
+        .neq('status', 'cancelado'),
+    ]);
 
     // 3. Cliques em produtos
     const { data: clicks } = await supabase
@@ -67,23 +173,13 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // 4. Produtos mais vendidos a partir dos itens dos pedidos
-    const salesByProduct: Record<string, { units: number; revenue: number; name: string }> = {};
-    (orders || []).forEach((o) => {
-      const items = Array.isArray(o.items) ? o.items : [];
-      items.forEach((item: any) => {
-        const pId = item.product?.id || item.productId || 'item';
-        const pName = item.product?.name || item.name || 'Lembrancinha';
-        const qty = Number(item.quantity) || 1;
-        const subtotal = Number(item.subtotal) || (qty * (Number(item.product?.price) || 0));
+    const { totalRevenue, unitsSold, ordersCount, salesByProduct, topSellingProducts } =
+      aggregateOrders(orders || [], clicksByProduct);
 
-        if (!salesByProduct[pId]) {
-          salesByProduct[pId] = { units: 0, revenue: 0, name: pName };
-        }
-        salesByProduct[pId].units += qty;
-        salesByProduct[pId].revenue += subtotal;
-      });
-    });
+    const prevRevenue = (prevOrders || []).reduce((acc, o) => acc + (Number(o.total_amount) || 0), 0);
+    const prevUnits = (prevOrders || []).reduce((acc, o) => acc + (Number(o.total_units) || 0), 0);
+
+    const mostClickedUnits = mostClickedId ? salesByProduct[mostClickedId]?.units || 0 : 0;
 
     const hasRealData = Boolean(
       (visitsCount && visitsCount > 0) ||
@@ -99,12 +195,19 @@ export async function GET(request: NextRequest) {
       unitsSold,
       visits: visitsCount || 0,
       ordersCount,
-      mostClicked: mostClickedId ? {
-        productId: mostClickedId,
-        clicks: maxClicks,
-        name: clicksByProduct[mostClickedId]?.name,
-      } : null,
+      growthRevenue: formatGrowth(totalRevenue, prevRevenue),
+      growthUnits: formatGrowth(unitsSold, prevUnits),
+      growthVisits: formatGrowth(visitsCount || 0, prevVisitsCount || 0),
+      mostClicked: mostClickedId
+        ? {
+            productId: mostClickedId,
+            clicks: maxClicks,
+            name: clicksByProduct[mostClickedId]?.name,
+            unitsSold: mostClickedUnits,
+          }
+        : null,
       salesByProduct,
+      topSellingProducts,
       clicksByProduct,
     });
   } catch (error) {

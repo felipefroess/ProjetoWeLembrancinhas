@@ -270,17 +270,251 @@
 .deliveryTextWrap {
   display: flex;
   flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.deliveryTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .deliveryOptionTitle {
   font-weight: 700;
-  font-size: 0.75rem;
-  display: block;
+  font-size: 0.8125rem;
+  color: #2D231E;
+}
+
+.freeBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  background-color: #EAF7EE;
+  color: #24683B;
+  border: 1px solid #C6EAD1;
+  white-space: nowrap;
+}
+
+.shippingBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  background-color: #F3ECE4;
+  color: #6D4C3D;
+  border: 1px solid #DACFBF;
+  white-space: nowrap;
 }
 
 .deliveryOptionDesc {
-  font-size: 11px;
-  color: #8C7A6B;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #78695E;
+}
+
+.shippingBox {
+  padding: 0.875rem;
+  border-radius: 0.75rem;
+  background-color: #FAF7F2;
+  border: 1px dashed #C89B6D;
+}
+
+.shippingHint {
+  margin: 0.4rem 0 0 0;
+  font-size: 0.72rem;
+  color: #78695E;
+  line-height: 1.4;
+}
+
+.briefShippingLine {
+  display: block;
+  font-size: 0.75rem;
+  color: #6D4C3D;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+.briefShippingFree {
+  display: block;
+  font-size: 0.75rem;
+  color: #24683B;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+.cepRow {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.calcCepBtn {
+  background-color: #6D4C3D;
+  color: #ffffff;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0 1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.calcCepBtn:hover:not(:disabled) {
+  background-color: #573B2E;
+}
+
+.calcCepBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.shippingError {
+  margin: 0.45rem 0 0 0;
+  font-size: 0.75rem;
+  color: #B42318;
+  font-weight: 600;
+}
+
+.shippingOptionsList {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.shippingOptionsTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4A3B32;
+}
+
+.shippingQuoteItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.65rem;
+  border: 1px solid #DACFBF;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.shippingQuoteItem:hover {
+  border-color: #C89B6D;
+}
+
+.shippingQuoteSelected {
+  composes: shippingQuoteItem;
+  border-color: #6D4C3D;
+  background-color: #F6EFE7;
+}
+
+.shippingQuoteLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.shippingQuoteName {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #2D231E;
+}
+
+.shippingQuoteDays {
+  display: block;
+  font-size: 0.72rem;
+  color: #78695E;
+}
+
+.shippingQuotePrice {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #24683B;
+  white-space: nowrap;
+}
+
+@keyframes spinAnim {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: spinAnim 0.8s linear infinite;
+}
+
+.finalTotalBox {
+  background-color: #FAF7F2;
+  border: 1px solid #DACFBF;
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.finalTotalBreakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px dashed #E8DFD5;
+}
+
+.finalTotalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: #78695E;
+}
+
+.finalFreeText {
+  color: #24683B;
+  font-weight: 700;
+}
+
+.finalTotalMainRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.finalTotalLabel {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #2D231E;
+}
+
+.finalTotalValue {
+  font-family: var(--font-jakarta, var(--font-sans, 'Plus Jakarta Sans', sans-serif));
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #6D4C3D;
 }
 
 .formTextarea {

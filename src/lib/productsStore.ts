@@ -110,6 +110,9 @@ export async function getAllProducts(): Promise<Product[]> {
                 if (!seedError) {
                   customProducts = localCustom;
                   await markSeedMeta({ productsSeeded: true });
+                } else {
+                  console.error('Erro ao migrar produtos para o Supabase, mantendo fallback local:', seedError);
+                  customProducts = localCustom;
                 }
               } else {
                 await markSeedMeta({ productsSeeded: true });
@@ -291,6 +294,9 @@ export async function getAllCategories(): Promise<Category[]> {
                 if (!seedError) {
                   customCategories = localCustom;
                   await markSeedMeta({ categoriesSeeded: true });
+                } else {
+                  console.error('Erro ao migrar categorias para o Supabase, mantendo fallback local:', seedError);
+                  customCategories = localCustom;
                 }
               } else {
                 await markSeedMeta({ categoriesSeeded: true });

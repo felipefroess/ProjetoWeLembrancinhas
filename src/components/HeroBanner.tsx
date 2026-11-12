@@ -21,7 +21,7 @@ export function HeroBanner() {
           </h1>
 
           <p className={styles.heroSubtitle}>
-            <span>+7 anos de empresa</span>
+            <span><span className={styles.plusSign}>+</span>7 anos de empresa</span>
             <span className={styles.bulletDot} aria-hidden="true" />
             <span>Produção 100% artesanal</span>
             <span className={styles.bulletDot} aria-hidden="true" />

@@ -184,7 +184,7 @@ export async function createProductionOrder(orderData: {
     try {
       const supabase = getSupabaseAdmin();
       if (supabase) {
-        await supabase.from('orders').insert({
+        const { error } = await supabase.from('orders').insert({
           customer_name: newOrder.customer_name,
           customer_phone: newOrder.customer_phone || null,
           event_date: newOrder.event_date || null,
@@ -196,6 +196,9 @@ export async function createProductionOrder(orderData: {
           status: newOrder.status,
           items: newOrder.items,
         });
+        if (error) {
+          console.error('Erro retornado pelo Supabase ao inserir pedido:', error);
+        }
       }
     } catch (err) {
       console.error('Erro ao sincronizar pedido criado com Supabase:', err);

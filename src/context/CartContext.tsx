@@ -260,6 +260,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       message += `   • Subtotal: *R$ ${item.subtotal.toFixed(2).replace('.', ',')}*\n\n`;
     });
 
+    const shippingValue =
+      orderData.deliveryMethod === 'entrega-correios' &&
+      orderData.shippingPrice &&
+      orderData.shippingPrice > 0
+        ? orderData.shippingPrice
+        : 0;
+    const totalWithShipping = finalTotal + shippingValue;
+
     message += `━━━━━━━━━━━━━━━━━━━━━\n`;
     if (appliedCoupon && discountAmount > 0) {
       const descText =
@@ -269,9 +277,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       message += `*SUBTOTAL:* R$ ${subtotalAmount.toFixed(2).replace('.', ',')}\n`;
       message += `*CUPOM APLICADO:* ${appliedCoupon.code} (${descText})\n`;
       message += `*DESCONTO:* -R$ ${discountAmount.toFixed(2).replace('.', ',')}\n`;
-      message += `*TOTAL ESTIMADO:* R$ ${finalTotal.toFixed(2).replace('.', ',')}\n`;
+    } else if (shippingValue > 0) {
+      message += `*PRODUTOS:* R$ ${finalTotal.toFixed(2).replace('.', ',')}\n`;
+    }
+
+    if (shippingValue > 0) {
+      const serviceLabel = [orderData.shippingCompany, orderData.shippingServiceName]
+        .filter(Boolean)
+        .join(' - ');
+      const daysLabel = orderData.shippingDeliveryDays
+        ? ` (${orderData.shippingDeliveryDays} dias úteis)`
+        : '';
+      message += `*FRETE (${serviceLabel || 'Melhor Envio'}):* R$ ${shippingValue.toFixed(2).replace('.', ',')}${daysLabel}\n`;
+      message += `*TOTAL COM FRETE:* R$ ${totalWithShipping.toFixed(2).replace('.', ',')}\n`;
     } else {
-      message += `*TOTAL ESTIMADO:* R$ ${subtotalAmount.toFixed(2).replace('.', ',')}\n`;
+      message += `*TOTAL ESTIMADO:* R$ ${finalTotal.toFixed(2).replace('.', ',')}\n`;
     }
     message += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
@@ -284,6 +304,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       message += `• *Data do Evento:* ${orderData.eventDate}\n`;
     }
     message += `• *Entrega/Retirada:* ${deliveryLabels[orderData.deliveryMethod] || orderData.deliveryMethod}\n`;
+    if (orderData.shippingCep) {
+      message += `• *CEP:* ${orderData.shippingCep}\n`;
+    }
     if (orderData.deliveryAddress) {
       message += `• *Endereço/Cidade:* ${orderData.deliveryAddress}\n`;
     }

@@ -99,6 +99,11 @@ export interface CustomerOrderData {
   deliveryMethod: DeliveryMethod;
   deliveryAddress?: string;
   generalNotes?: string;
+  shippingCep?: string;
+  shippingServiceName?: string;
+  shippingCompany?: string;
+  shippingPrice?: number;
+  shippingDeliveryDays?: number;
 }
 
 export type OrderStatus = 
