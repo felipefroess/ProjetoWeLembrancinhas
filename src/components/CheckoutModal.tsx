@@ -273,15 +273,13 @@ export function CheckoutModal() {
               <div>
                 <span className={styles.briefLabel}>Itens selecionados</span>
                 <span className={styles.briefCount}>{items.length} produto(s) • {totalUnits} un.</span>
-                {deliveryMethod === 'entrega-correios' ? (
+                {deliveryMethod === 'entrega-correios' && (
                   <span className={styles.briefShippingLine}>
                     Frete:{' '}
                     {selectedShippingOption
                       ? `${selectedShippingOption.companyName} ${selectedShippingOption.name} (${selectedShippingOption.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })})`
                       : 'Informe o CEP abaixo'}
                   </span>
-                ) : (
-                  <span className={styles.briefShippingFree}>Retirada gratuita (sem frete)</span>
                 )}
               </div>
               <div style={{ textAlign: 'right' }}>
