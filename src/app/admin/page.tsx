@@ -669,11 +669,11 @@ export default function AdminDashboardPage() {
       {/* Barra Lateral de Navegação (Sidebar) */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarBrand}>
-          <div className={styles.brandBadge}>Wê</div>
-          <div className={styles.sidebarBrandText}>
-            <span className={styles.sidebarBrandTitle}>Wê Lembrancinhas</span>
-            <span className={styles.adminTag}>Painel Administrativo</span>
-          </div>
+          <Link href="/" className={styles.sidebarLogoLockup} title="Ir para a loja">
+            <span className={styles.sidebarLogoScript}>Wê</span>
+            <span className={styles.sidebarLogoSerif}>Lembrancinhas</span>
+          </Link>
+          <span className={styles.adminTag}>Painel Administrativo</span>
         </div>
 
         <div className={styles.sidebarSectionLabel}>Menu Principal</div>

@@ -56,6 +56,13 @@ a {
   text-decoration: none;
 }
 
+a:focus,
+a:focus-visible,
+button:focus,
+button:focus-visible {
+  outline: none;
+}
+
 @keyframes slideLeft {
   from {
     transform: translateX(100%);

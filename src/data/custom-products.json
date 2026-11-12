@@ -16,7 +16,8 @@
     "customizationSettings": {
       "allowChildName": true,
       "childNameLabel": "Nome na Lembrancinha",
-      "childNamePlaceholder": "Ex: Lucas, Davi, Enzo...",
+      "childNamePlaceholder": "Ex: Davi",
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial...",
       "allowRibbonColors": false,
       "ribbonColors": [],
       "allowNotes": true,
@@ -33,8 +34,7 @@
             "Outros"
           ]
         }
-      ],
-      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
+      ]
     },
     "popular": false
   },
@@ -53,7 +53,7 @@
     ],
     "variations": [
       {
-        "id": "var_1794416305426_0",
+        "id": "var_1794457544897_0",
         "name": "Modelo 1",
         "image": "/uploads/1794274822116-saveclip.app_561757077_18177293875347767_1852012969418825078_n.jpg",
         "images": [
@@ -61,7 +61,7 @@
         ]
       },
       {
-        "id": "var_1794416305426_1",
+        "id": "var_1794457544897_1",
         "name": "Modelo 2",
         "image": "/uploads/1794274832811-saveclip.app_559554486_18177293884347767_1237520079746612932_n.jpg",
         "images": [
@@ -72,10 +72,20 @@
     "customizationSettings": {
       "allowChildName": true,
       "childNameLabel": "Nome na Lembrancinha",
+      "childNamePlaceholder": "Ex: João Miguel",
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial...",
       "allowRibbonColors": false,
       "ribbonColors": [],
       "allowNotes": true,
-      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
+      "customFields": [
+        {
+          "id": "field_1794457497600",
+          "label": "Nome da professora",
+          "type": "text",
+          "required": true,
+          "placeholder": "Ex: Professora Karina"
+        }
+      ]
     },
     "popular": false
   },
@@ -97,7 +107,7 @@
     ],
     "variations": [
       {
-        "id": "var_1794416286910_0",
+        "id": "var_1794456872367_0",
         "name": "Chocolate Talento",
         "image": "/images/professores/lembrancinha-talento.jpg",
         "images": [
@@ -106,7 +116,7 @@
         "description": "Com mini Talento Avelãs (\"Para você que tem muito Talento\")"
       },
       {
-        "id": "var_1794416286910_1",
+        "id": "var_1794456872367_1",
         "name": "Sonho de Valsa",
         "image": "/images/professores/lembrancinha-sonho-de-valsa.jpg",
         "images": [
@@ -123,14 +133,15 @@
     "customizationSettings": {
       "allowChildName": true,
       "childNameLabel": "Nome na Lembrancinha",
+      "childNamePlaceholder": "Ex: Professor Leandro",
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial...",
       "allowRibbonColors": true,
       "ribbonColors": [
         "Laço Rosa com Tag",
         "Laço Verde com Tag",
         "Laço Dourado com Tag"
       ],
-      "allowNotes": true,
-      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
+      "allowNotes": true
     }
   },
   {
@@ -157,7 +168,7 @@
     "customizationSettings": {
       "allowChildName": true,
       "childNameLabel": "Nome na Lembrancinha",
-      "childNamePlaceholder": "Ex: Luís, Felipe, João...",
+      "childNamePlaceholder": "Ex: Luís",
       "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial...",
       "allowRibbonColors": true,
       "ribbonColors": [
@@ -189,7 +200,7 @@
     ],
     "variations": [
       {
-        "id": "var_1794440252152_0",
+        "id": "var_1794456911805_0",
         "name": "Modelo 1",
         "image": "/images/cadernos/caderno-azul-fechado.jpg",
         "images": [
@@ -198,7 +209,7 @@
         "description": "Modelo conta com capa dura em azul marinho com elástico e personalizado com o nome"
       },
       {
-        "id": "var_1794440252152_1",
+        "id": "var_1794456911805_1",
         "name": "Modelo 2",
         "image": "/uploads/1794333437976-saveclip.app_538768100_18172355338347767_2299544466431525219_n.jpg",
         "images": [
@@ -207,7 +218,7 @@
         "description": "Modelo conta com a capa dura e acabamento holográfico, flores campestres, tassel roxo e passante de borboleta dourada."
       },
       {
-        "id": "var_1794440252152_2",
+        "id": "var_1794456911805_2",
         "name": "Modelo 3",
         "image": "/uploads/1794333488324-saveclip.app_539454379_18173392714347767_7517392955588664362_n.jpg",
         "images": [
@@ -217,7 +228,7 @@
         "description": "Modelo conta com a capa dura e holográfica floral, nome e inicial, e elástico com passante dourado."
       },
       {
-        "id": "var_1794440252152_3",
+        "id": "var_1794456911805_3",
         "name": "Modelo 4",
         "image": "/uploads/1794333556658-saveclip.app_521541070_18169066933347767_8499588843540459767_n.jpg",
         "images": [
@@ -229,6 +240,8 @@
     "customizationSettings": {
       "allowChildName": true,
       "childNameLabel": "Nome na Lembrancinha",
+      "childNamePlaceholder": "Ex: Davi",
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial...",
       "allowRibbonColors": false,
       "ribbonColors": [],
       "allowNotes": true,
@@ -240,8 +253,7 @@
           "required": true,
           "placeholder": "Ex: Azul, Rosa, Roxo..."
         }
-      ],
-      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
+      ]
     }
   },
   {
@@ -313,12 +325,12 @@
       "/uploads/1794319788254-saveclip.app_502405449_18164158609347767_4785126441019407278_n.jpg"
     ],
     "customizationSettings": {
-      "allowChildName": true,
+      "allowChildName": false,
       "childNameLabel": "Nome na Lembrancinha",
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial...",
       "allowRibbonColors": false,
       "ribbonColors": [],
-      "allowNotes": true,
-      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
+      "allowNotes": true
     },
     "popular": false
   },
@@ -540,7 +552,7 @@
     ],
     "variations": [
       {
-        "id": "var_1794407706970_0",
+        "id": "var_1794457278774_0",
         "name": "Modelo 1",
         "image": "/uploads/1794407368494-saveclip.app_859801689_18218060917347767_3784566472842721051_n.jpg",
         "images": [
@@ -548,7 +560,7 @@
         ]
       },
       {
-        "id": "var_1794407706970_1",
+        "id": "var_1794457278774_1",
         "name": "Modelo 2",
         "image": "/uploads/1794407375645-saveclip.app_858263650_18218060965347767_7417340956182341151_n.jpg",
         "images": [
@@ -556,7 +568,7 @@
         ]
       },
       {
-        "id": "var_1794407706970_2",
+        "id": "var_1794457278774_2",
         "name": "Modelo 3",
         "image": "/uploads/1794407383078-saveclip.app_858263658_18218060863347767_196120946507788477_n.jpg",
         "images": [
@@ -574,6 +586,9 @@
     "customizationSettings": {
       "allowChildName": true,
       "childNameLabel": "Nome na Lembrancinha",
+      "childNamePlaceholder": "Ex: Davi",
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial...",
+      "variationsNote": "OBS: As fotos para a personalização das lembrancinhas devem ser enviadas pelo nosso WhatsApp após o fechamento do pedido!",
       "allowRibbonColors": true,
       "ribbonColors": [
         "Laço Dourado",
@@ -591,10 +606,10 @@
           "required": true,
           "placeholder": "Ex: Palmeiras, Flamengo, Corinthians..."
         }
-      ],
-      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
+      ]
     },
-    "popular": true
+    "popular": true,
+    "variationsNote": "OBS: As fotos para a personalização das lembrancinhas devem ser enviadas pelo nosso WhatsApp após o fechamento do pedido!"
   },
   {
     "id": "lembrancinha-super-mario-personalizada-7540",
@@ -612,15 +627,16 @@
     "customizationSettings": {
       "allowChildName": true,
       "childNameLabel": "Nome na Lembrancinha",
+      "childNamePlaceholder": "Ex: Davi",
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial...",
       "allowRibbonColors": false,
       "ribbonColors": [],
-      "allowNotes": true,
-      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
+      "allowNotes": true
     },
     "popular": true,
     "variations": [
       {
-        "id": "var_1794417622202_0",
+        "id": "var_1794457002025_0",
         "name": "Mário",
         "image": "/uploads/1794416586504-recorte-1794416586485.jpg",
         "images": [
@@ -629,7 +645,7 @@
         ]
       },
       {
-        "id": "var_1794417622202_1",
+        "id": "var_1794457002025_1",
         "name": "Hulk",
         "image": "/uploads/1794416607996-recorte-1794416607988.jpg",
         "images": [
@@ -638,7 +654,7 @@
         ]
       },
       {
-        "id": "var_1794417622202_2",
+        "id": "var_1794457002025_2",
         "name": "Léo o Caminhão",
         "image": "/uploads/1794417620183-gemini_generated_image_magdxqmagdxqmagd.jfif",
         "images": [
@@ -662,7 +678,7 @@
     ],
     "variations": [
       {
-        "id": "var_1794417299005_0",
+        "id": "var_1794457010872_0",
         "name": "Azul",
         "image": "/uploads/1794417285879-recorte-1794417285857.jpg",
         "images": [
@@ -670,7 +686,7 @@
         ]
       },
       {
-        "id": "var_1794417299005_1",
+        "id": "var_1794457010872_1",
         "name": "Rosa",
         "image": "/uploads/1794417297379-recorte-1794417297344.jpg",
         "images": [
@@ -681,10 +697,11 @@
     "customizationSettings": {
       "allowChildName": true,
       "childNameLabel": "Nome na Lembrancinha",
+      "childNamePlaceholder": "Ex: Davi",
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial...",
       "allowRibbonColors": false,
       "ribbonColors": [],
-      "allowNotes": true,
-      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
+      "allowNotes": true
     },
     "popular": true
   },
@@ -727,19 +744,26 @@
     "customizationSettings": {
       "allowChildName": false,
       "childNameLabel": "Nome na Lembrancinha",
+      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial...",
       "allowRibbonColors": false,
       "ribbonColors": [],
       "allowNotes": true,
       "customFields": [
         {
           "id": "field_1794422438901",
-          "label": "Pedir tema",
+          "label": "Nome na lembrancinha",
+          "type": "text",
+          "required": true,
+          "placeholder": "Ex: Samuel"
+        },
+        {
+          "id": "field_1794457328251",
+          "label": "Tema",
           "type": "text",
           "required": true,
           "placeholder": "Ex: Astronauta, desenho..."
         }
-      ],
-      "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
+      ]
     },
     "popular": true
   }

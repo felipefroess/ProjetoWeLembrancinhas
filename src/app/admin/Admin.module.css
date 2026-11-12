@@ -28,27 +28,45 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 0.625rem;
+  gap: 0.65rem;
   padding-bottom: 1.25rem;
   margin-bottom: 1.25rem;
   border-bottom: 1px solid #F0E8DE;
 }
 
-.sidebarBrandText {
-  display: flex;
+.sidebarLogoLockup {
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
   text-align: center;
-  gap: 0.35rem;
+  transition: opacity 0.2s ease;
+  outline: none;
 }
 
-.sidebarBrandTitle {
-  font-family: var(--font-sans);
+.sidebarLogoLockup:hover {
+  opacity: 0.85;
+}
+
+.sidebarLogoScript {
+  font-family: var(--font-logo-script);
+  font-style: normal;
+  font-weight: 600;
+  color: #6D4C3D;
+  font-size: 2.125rem;
+  line-height: 0.92;
+  user-select: none;
+}
+
+.sidebarLogoSerif {
+  font-family: var(--font-logo-serif);
   font-size: 1.0625rem;
-  font-weight: 700;
-  color: #2D231E;
-  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  color: #050403;
+  user-select: none;
 }
 
 .sidebarSectionLabel {

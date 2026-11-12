@@ -47,16 +47,47 @@
 .brandHeader {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   margin-bottom: 0.75rem;
 }
 
-.brandName {
-  font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
-  font-style: italic;
-  font-weight: 700;
-  color: #ffffff;
-  font-size: 1.25rem;
+.brandLink {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  text-align: center;
+  transition: opacity 0.2s ease;
+  outline: none;
+}
+
+.brandLink:focus,
+.brandLink:focus-visible {
+  outline: none;
+}
+
+.brandLink:hover {
+  opacity: 0.85;
+}
+
+.logoText {
+  font-family: var(--font-logo-script);
+  font-style: normal;
+  font-weight: 600;
+  color: #88785d;
+  font-size: 2rem;
+  line-height: 0.92;
+  user-select: none;
+}
+
+.brandTitle {
+  font-family: var(--font-logo-serif);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  color: #c5c4c2;
+  user-select: none;
 }
 
 .aboutDescription {
@@ -67,15 +98,32 @@
 }
 
 .locationNote {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.75rem;
   color: #D8CDC4;
+  text-decoration: none;
+  outline: none;
+  transition: color 0.2s ease;
+}
+
+.locationNote:hover {
+  color: #ffffff;
+}
+
+.locationNote:hover span {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.locationNote:focus,
+.locationNote:focus-visible {
+  outline: none;
 }
 
 .pinIcon {
-  color: #D4AF37;
+  color: #88785d;
   flex-shrink: 0;
 }
 
@@ -99,11 +147,12 @@
 }
 
 .footerLink {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   color: #D8CDC4;
   text-decoration: none;
+  outline: none;
   transition: color 0.2s ease;
 }
 
@@ -111,8 +160,13 @@
   color: #ffffff;
 }
 
+.footerLink:focus,
+.footerLink:focus-visible {
+  outline: none;
+}
+
 .linkIcon {
-  color: #D4AF37;
+  color: #88785d;
   flex-shrink: 0;
 }
 
@@ -146,12 +200,18 @@
   font-size: 0.6875rem;
   color: rgba(232, 223, 213, 0.4);
   text-decoration: none;
+  outline: none;
   transition: all 0.2s ease;
   user-select: none;
 }
 
 .discreetAdminLink:hover {
   color: rgba(232, 223, 213, 0.85);
+}
+
+.discreetAdminLink:focus,
+.discreetAdminLink:focus-visible {
+  outline: none;
 }
 
 .adminIcon {
