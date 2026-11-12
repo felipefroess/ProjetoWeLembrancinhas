@@ -685,82 +685,85 @@ export function CheckoutModal() {
                   </div>
 
                   {/* PARTE DO CUPOM DE DESCONTO EM BAIXO DE RETIRADA */}
-                  {appliedCoupon ? (
-                    <div className={styles.checkoutAppliedCouponRow}>
-                      <div className={styles.checkoutAppliedLeft}>
-                        <Tag size={13} className={styles.checkoutAppliedTagIcon} />
-                        <span className={styles.checkoutAppliedCode}>{appliedCoupon.code}</span>
-                        <span className={styles.checkoutAppliedDesc}>
-                          {appliedCoupon.type === 'percentage'
-                            ? `(-${appliedCoupon.value}%)`
-                            : `(-R$ ${appliedCoupon.value.toFixed(2).replace('.', ',')})`}
-                        </span>
+                  <div className={styles.checkoutCouponContainer}>
+                    <span className={styles.checkoutCouponLabel}>Cupom de desconto</span>
+                    {appliedCoupon ? (
+                      <div className={styles.checkoutAppliedCouponRow}>
+                        <div className={styles.checkoutAppliedLeft}>
+                          <Tag size={13} className={styles.checkoutAppliedTagIcon} />
+                          <span className={styles.checkoutAppliedCode}>{appliedCoupon.code}</span>
+                          <span className={styles.checkoutAppliedDesc}>
+                            {appliedCoupon.type === 'percentage'
+                              ? `(-${appliedCoupon.value}%)`
+                              : `(-R$ ${appliedCoupon.value.toFixed(2).replace('.', ',')})`}
+                          </span>
+                        </div>
+                        <div className={styles.checkoutAppliedRight}>
+                          <span className={styles.checkoutDiscountAmount}>
+                            -{discountAmount.toLocaleString('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL',
+                            })}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleRemoveCoupon}
+                            className={styles.checkoutRemoveCouponBtn}
+                            title="Remover cupom"
+                          >
+                            <X size={13} />
+                          </button>
+                        </div>
                       </div>
-                      <div className={styles.checkoutAppliedRight}>
-                        <span className={styles.checkoutDiscountAmount}>
-                          -{discountAmount.toLocaleString('pt-BR', {
-                            style: 'currency',
-                            currency: 'BRL',
-                          })}
-                        </span>
+                    ) : (
+                      <div className={styles.checkoutCouponRow}>
+                        <div className={styles.checkoutCouponInputWrapper}>
+                          <Tag size={14} className={styles.checkoutCouponInputIcon} />
+                          <input
+                            type="text"
+                            placeholder="Ex: PRIMEIRACOMPRA"
+                            value={couponInput}
+                            onChange={(e) => {
+                              setCouponInput(e.target.value.toUpperCase());
+                              if (couponFeedback) setCouponFeedback(null);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleApplyCoupon();
+                              }
+                            }}
+                            className={styles.checkoutCouponInput}
+                            maxLength={25}
+                            autoCapitalize="characters"
+                            autoCorrect="off"
+                            spellCheck={false}
+                            disabled={isApplyingCoupon}
+                          />
+                        </div>
                         <button
                           type="button"
-                          onClick={handleRemoveCoupon}
-                          className={styles.checkoutRemoveCouponBtn}
-                          title="Remover cupom"
+                          onClick={() => handleApplyCoupon()}
+                          disabled={!couponInput.trim() || isApplyingCoupon}
+                          className={styles.checkoutCouponApplyBtn}
                         >
-                          <X size={13} />
+                          {isApplyingCoupon ? '...' : 'Aplicar'}
                         </button>
                       </div>
-                    </div>
-                  ) : (
-                    <div className={styles.checkoutCouponRow}>
-                      <div className={styles.checkoutCouponInputWrapper}>
-                        <Tag size={14} className={styles.checkoutCouponInputIcon} />
-                        <input
-                          type="text"
-                          placeholder="Ex: PRIMEIRACOMPRA"
-                          value={couponInput}
-                          onChange={(e) => {
-                            setCouponInput(e.target.value.toUpperCase());
-                            if (couponFeedback) setCouponFeedback(null);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              handleApplyCoupon();
-                            }
-                          }}
-                          className={styles.checkoutCouponInput}
-                          maxLength={25}
-                          autoCapitalize="characters"
-                          autoCorrect="off"
-                          spellCheck={false}
-                          disabled={isApplyingCoupon}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleApplyCoupon()}
-                        disabled={!couponInput.trim() || isApplyingCoupon}
-                        className={styles.checkoutCouponApplyBtn}
-                      >
-                        {isApplyingCoupon ? '...' : 'Aplicar'}
-                      </button>
-                    </div>
-                  )}
+                    )}
 
-                  {couponFeedback && (
-                    <div
-                      className={
-                        couponFeedback.isError
-                          ? styles.checkoutCouponError
-                          : styles.checkoutCouponSuccess
-                      }
-                    >
-                      {couponFeedback.message}
-                    </div>
-                  )}
+                    {couponFeedback && (
+                      <div
+                        className={
+                          couponFeedback.isError
+                            ? styles.checkoutCouponError
+                            : styles.checkoutCouponSuccess
+                        }
+                      >
+                        {couponFeedback.message}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className={styles.finalTotalMainRow}>
