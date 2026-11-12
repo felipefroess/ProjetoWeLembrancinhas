@@ -438,7 +438,7 @@ export function ProductModal() {
                           className={isCurrent ? styles.thumbnailButtonActive : styles.thumbnailButton}
                           title="Ver outra foto do produto"
                         >
-                          <img src={img} alt="Foto adicional" />
+                          <img src={img} alt="Foto adicional" loading="lazy" decoding="async" />
                         </button>
                       );
                     })}

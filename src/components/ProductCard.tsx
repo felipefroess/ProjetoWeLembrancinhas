@@ -92,7 +92,7 @@ export function ProductCard({ product, isMostRequested }: ProductCardProps) {
                     className={styles.variationThumb}
                     title={v.name}
                   >
-                    <img src={v.image} alt={v.name} />
+                    <img src={v.image} alt={v.name} loading="lazy" decoding="async" width={36} height={36} />
                   </div>
                 ))}
               </div>

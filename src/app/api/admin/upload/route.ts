@@ -3,6 +3,7 @@ import { isAuthenticated } from '@/lib/auth';
 import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import fs from 'fs/promises';
 import path from 'path';
+import sharp from 'sharp';
 
 const STORAGE_BUCKET = 'product-images';
 
@@ -21,11 +22,38 @@ export async function POST(request: Request) {
     }
 
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const rawBuffer = Buffer.from(bytes);
+
+    // Otimização automática e profissional para alta definição (1200px máx) preservando nitidez impecável
+    let buffer = rawBuffer;
+    let contentType = file.type || 'image/jpeg';
+    let cleanExt = path.extname(file.name).toLowerCase() || '.jpg';
+
+    try {
+      const isPng = file.type === 'image/png' || cleanExt === '.png';
+      const pipeline = sharp(rawBuffer).resize(1200, 1200, {
+        fit: 'inside',
+        withoutEnlargement: true,
+        kernel: 'lanczos3',
+      });
+
+      if (isPng) {
+        buffer = await pipeline.png({ quality: 88, compressionLevel: 8 }).toBuffer();
+        contentType = 'image/png';
+        cleanExt = '.png';
+      } else {
+        buffer = await pipeline.jpeg({ quality: 86, mozjpeg: true }).toBuffer();
+        contentType = 'image/jpeg';
+        cleanExt = '.jpg';
+      }
+    } catch (err) {
+      console.warn('Aviso: Sharp ignorado no upload, usando buffer original:', err);
+      buffer = rawBuffer;
+    }
 
     // Sanitiza o nome do arquivo e adiciona timestamp
-    const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_').toLowerCase();
-    const uniqueFileName = `${Date.now()}-${cleanFileName}`;
+    const baseName = path.basename(file.name, path.extname(file.name)).replace(/[^a-zA-Z0-9.-]/g, '_').toLowerCase();
+    const uniqueFileName = `${Date.now()}-${baseName}${cleanExt}`;
 
     // Em produção / quando Supabase está configurado, salva no Supabase Storage (persistente)
     if (isSupabaseConfigured()) {
@@ -44,13 +72,13 @@ export async function POST(request: Request) {
           await supabase.storage.createBucket(STORAGE_BUCKET, { public: true });
         }
       } catch {
-        // Segue tentando o upload normalmente (bucket pode já ter sido criado pelo schema.sql)
+        // Segue tentando o upload normalmente
       }
 
       const { error: uploadError } = await supabase.storage
         .from(STORAGE_BUCKET)
         .upload(uniqueFileName, buffer, {
-          contentType: file.type || 'image/jpeg',
+          contentType,
           upsert: false,
         });
 
