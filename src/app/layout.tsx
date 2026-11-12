@@ -41,14 +41,14 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://welembrancinhas.com.br"),
   icons: {
     icon: [
-      { url: '/icon.svg', type: 'image/svg+xml' },
-      { url: '/icon.png', sizes: '512x512', type: 'image/png' },
-      { url: '/favicon.ico' },
+      { url: '/icon.png?v=2', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon.ico?v=2' },
     ],
     apple: [
-      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/apple-icon.png?v=2', sizes: '180x180', type: 'image/png' },
     ],
   },
   title: "Wê Lembrancinhas | Papelaria Afetiva & Personalizados",
@@ -67,7 +67,24 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Wê Lembrancinhas | Papelaria Afetiva & Personalizados",
     description: "Lembrancinhas personalizadas para aniversários, batizados e momentos inesquecíveis.",
+    url: "https://welembrancinhas.com.br",
+    siteName: "Wê Lembrancinhas",
+    locale: "pt_BR",
     type: "website",
+    images: [
+      {
+        url: "/icon.png?v=2",
+        width: 512,
+        height: 512,
+        alt: "Wê Lembrancinhas",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "Wê Lembrancinhas | Papelaria Afetiva & Personalizados",
+    description: "Lembrancinhas personalizadas para aniversários, batizados e momentos inesquecíveis.",
+    images: ["/icon.png?v=2"],
   },
 };
 
