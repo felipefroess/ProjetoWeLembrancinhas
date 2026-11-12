@@ -30,11 +30,43 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files & secrets (never commit passwords, tokens, or keys)
+.env
 .env*
 
-# vercel
+# keys, certificates & credentials
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+*credentials*.json
+*service-account*.json
+*serviceAccount*.json
+.secrets/
+secrets/
+secrets.*
+*.secrets.*
+.htpasswd
+.netrc
+.npmrc
+
+# local databases & dumps (keep supabase/schema.sql tracked)
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.bak
+
+# vercel & supabase local
 .vercel
+.supabase/
 
 # typescript
 *.tsbuildinfo

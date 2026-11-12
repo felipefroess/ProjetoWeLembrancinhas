@@ -8,6 +8,8 @@
   --font-roboto: 'Roboto', sans-serif;
   --font-jakarta: 'Plus Jakarta Sans', sans-serif;
   --font-playfair: 'Playfair Display', Georgia, serif;
+  --font-logo-script: var(--font-dancing), 'Dancing Script', cursive;
+  --font-logo-serif: var(--font-lora), 'Lora', Georgia, serif;
   --color-brand-primary: #6D4C3D;
   --color-brand-accent: #C89B6D;
   --color-brand-gold: #D4AF37;

@@ -333,14 +333,14 @@ export function Header({
         <div className={styles.headerRow}>
           {/* Logo e Nome da Loja */}
           <div className={styles.logoWrapper}>
-            <div className={styles.logoCircle}>
+            <a
+              href="#"
+              className={styles.brandLink}
+              aria-label="Wê Lembrancinhas - Ir para o topo"
+            >
               <span className={styles.logoText}>Wê</span>
-            </div>
-            <div>
-              <a href="#" className={styles.brandLink}>
-                <span className={styles.brandTitle}>Lembrancinhas</span>
-              </a>
-            </div>
+              <span className={styles.brandTitle}>Lembrancinhas</span>
+            </a>
           </div>
 
           {/* Campo de Busca (Desktop) */}

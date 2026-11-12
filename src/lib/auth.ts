@@ -2,20 +2,24 @@ import crypto from 'crypto';
 import { cookies } from 'next/headers';
 
 const COOKIE_NAME = 'we_admin_session';
-const DEFAULT_SECRET = 'we-lembrancinhas-fallback-secret-2026';
 
-function getSecretKey(): string {
-  return process.env.ADMIN_SECRET_KEY || DEFAULT_SECRET;
+function getSecretKey(): string | null {
+  return process.env.ADMIN_SECRET_KEY || null;
 }
 
 export function createSessionToken(username: string): string {
+  const secret = getSecretKey();
+  if (!secret) {
+    throw new Error('ADMIN_SECRET_KEY não configurada nas variáveis de ambiente.');
+  }
+
   const payload = JSON.stringify({
     user: username,
     timestamp: Date.now(),
   });
   const encodedPayload = Buffer.from(payload).toString('base64url');
   const signature = crypto
-    .createHmac('sha256', getSecretKey())
+    .createHmac('sha256', secret)
     .update(encodedPayload)
     .digest('base64url');
 
@@ -23,13 +27,14 @@ export function createSessionToken(username: string): string {
 }
 
 export function verifySessionToken(token: string | undefined): boolean {
-  if (!token || !token.includes('.')) return false;
+  const secret = getSecretKey();
+  if (!secret || !token || !token.includes('.')) return false;
 
   const [encodedPayload, signature] = token.split('.');
   if (!encodedPayload || !signature) return false;
 
   const expectedSignature = crypto
-    .createHmac('sha256', getSecretKey())
+    .createHmac('sha256', secret)
     .update(encodedPayload)
     .digest('base64url');
 

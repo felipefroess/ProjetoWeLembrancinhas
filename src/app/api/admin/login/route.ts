@@ -5,8 +5,16 @@ export async function POST(request: Request) {
   try {
     const { username, password } = await request.json();
 
-    const expectedUser = process.env.ADMIN_USER || 'admin';
-    const expectedPassword = process.env.ADMIN_PASSWORD || 'welembrancinhas2026';
+    const expectedUser = process.env.ADMIN_USER;
+    const expectedPassword = process.env.ADMIN_PASSWORD;
+
+    if (!expectedUser || !expectedPassword) {
+      console.error('Variáveis ADMIN_USER ou ADMIN_PASSWORD não configuradas.');
+      return NextResponse.json(
+        { success: false, error: 'Configuração de autenticação do servidor ausente' },
+        { status: 500 }
+      );
+    }
 
     if (username === expectedUser && password === expectedPassword) {
       await setSessionCookie(username);

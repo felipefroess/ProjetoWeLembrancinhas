@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
+import { Cormorant_Garamond, Plus_Jakarta_Sans, Playfair_Display, Dancing_Script, Lora } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { StoreSettingsProvider } from "@/context/StoreSettingsContext";
@@ -23,6 +23,20 @@ const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
+});
+
+const dancingScript = Dancing_Script({
+  variable: "--font-dancing",
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  display: "swap",
+});
+
+const lora = Lora({
+  variable: "--font-lora",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
@@ -63,7 +77,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${cormorant.variable} ${jakarta.variable} ${playfair.variable}`}>
+    <html lang="pt-BR" className={`${cormorant.variable} ${jakarta.variable} ${playfair.variable} ${dancingScript.variable} ${lora.variable}`}>
       <body>
         <StoreSettingsProvider>
           <CartProvider>

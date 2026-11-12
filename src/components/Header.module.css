@@ -72,49 +72,50 @@
 .logoWrapper {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-}
-
-.logoCircle {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 9999px;
-  background-color: #EFE6DC;
-  border: 2px solid rgba(212, 175, 55, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-  position: relative;
-  cursor: pointer;
-}
-
-.logoText {
-  font-family: var(--font-sans);
-  font-style: italic;
-  font-weight: 700;
-  color: #6D4C3D;
-  font-size: 1.125rem;
-  user-select: none;
+  flex-shrink: 0;
 }
 
 .brandLink {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-decoration: none;
+  text-align: center;
+  transition: opacity 0.2s ease;
+}
+
+.brandLink:hover {
+  opacity: 0.85;
+}
+
+.logoText {
+  font-family: var(--font-logo-script);
+  font-style: normal;
+  font-weight: 600;
+  color: #6D4C3D;
+  font-size: 1.85rem;
+  line-height: 0.92;
+  user-select: none;
 }
 
 .brandTitle {
-  font-family: var(--font-sans);
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  color: #3E2E25;
+  font-family: var(--font-logo-serif);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  color: #050403;
+  user-select: none;
 }
 
 @media (min-width: 640px) {
+  .logoText {
+    font-size: 2.125rem;
+  }
+
   .brandTitle {
-    font-size: 1.5rem;
+    font-size: 1.0625rem;
   }
 }
 
