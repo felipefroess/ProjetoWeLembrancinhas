@@ -234,3 +234,34 @@ BEGIN
   END IF;
 END
 $$;
+
+-- ------------------------------------------------------------------------
+-- 8. TABELA DE FICHAS DE CLIENTES & HISTÓRICO DE COMPRAS
+-- ------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.customers (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    phone TEXT NOT NULL DEFAULT '',
+    instagram TEXT NOT NULL DEFAULT '',
+    notes TEXT NOT NULL DEFAULT '',
+    purchases JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_customers_name ON public.customers (name);
+
+ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'customers' AND policyname = 'Permitir leitura de clientes') THEN
+    CREATE POLICY "Permitir leitura de clientes" ON public.customers FOR SELECT USING (true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'customers' AND policyname = 'Permitir escrita de clientes') THEN
+    CREATE POLICY "Permitir escrita de clientes" ON public.customers FOR ALL USING (true) WITH CHECK (true);
+  END IF;
+END
+$$;
+
+GRANT ALL ON TABLE public.customers TO anon, authenticated, service_role;

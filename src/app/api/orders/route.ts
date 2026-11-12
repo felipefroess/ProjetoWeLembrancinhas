@@ -5,6 +5,7 @@ import {
   updateProductionOrderStatus, 
   deleteProductionOrder 
 } from '@/lib/ordersStore';
+import { syncOrderToCustomerCard } from '@/lib/customersStore';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { OrderStatus } from '@/types';
 
@@ -58,6 +59,13 @@ export async function POST(request: Request) {
       items: items || [],
       status: status as OrderStatus,
     });
+
+    // Registra ou atualiza automaticamente a ficha do cliente (por telefone ou nome)
+    try {
+      await syncOrderToCustomerCard(created);
+    } catch (syncError) {
+      console.error('Aviso: falha ao sincronizar pedido na ficha do cliente:', syncError);
+    }
 
     return NextResponse.json({ 
       success: true, 

@@ -33,13 +33,15 @@ import {
   Trophy,
   ArrowUpRight,
   Calendar,
-  Crop
+  Crop,
+  Users
 } from 'lucide-react';
 import { Product, Category, ProductVariation, CustomFieldDefinition } from '@/types';
 import OrdersProductionTab from './components/OrdersProductionTab';
 import CouponsTab from './components/CouponsTab';
 import StoreSettingsTab from './components/StoreSettingsTab';
 import CostCalculatorTab from './components/CostCalculatorTab';
+import CustomersTab from './components/CustomersTab';
 import { ImageCropModal } from './components/ImageCropModal';
 import { STORE_CONFIG } from '@/data/products';
 import { getAnalyticsForPeriod, AnalyticsPeriod } from '@/lib/analytics';
@@ -56,9 +58,10 @@ export default function AdminDashboardPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
 
   // Aba Principal do Admin (Dashboard ou Produtos)
-  const [mainTab, setMainTab] = useState<'pedidos' | 'produtos' | 'ajustes' | 'cupons' | 'dashboard' | 'calculadora'>('pedidos');
+  const [mainTab, setMainTab] = useState<'pedidos' | 'clientes' | 'produtos' | 'ajustes' | 'cupons' | 'dashboard' | 'calculadora'>('pedidos');
   const [isCalculatorModalOpen, setIsCalculatorModalOpen] = useState(false);
   const [ordersCount, setOrdersCount] = useState<number>(0);
+  const [customersCount, setCustomersCount] = useState<number>(0);
   const [couponsCount, setCouponsCount] = useState<number>(0);
   const [isStoreOnline, setIsStoreOnline] = useState<boolean>(true);
   const [updatingStoreStatus, setUpdatingStoreStatus] = useState<boolean>(false);
@@ -160,6 +163,14 @@ export default function AdminDashboardPage() {
           const ordersData = await ordersRes.json();
           if (ordersData.orders) {
             setOrdersCount(ordersData.orders.length);
+          }
+        } catch {}
+
+        try {
+          const customersRes = await fetch('/api/admin/customers');
+          const customersData = await customersRes.json();
+          if (Array.isArray(customersData.customers)) {
+            setCustomersCount(customersData.customers.length);
           }
         } catch {}
 
@@ -719,6 +730,16 @@ export default function AdminDashboardPage() {
 
           <button
             type="button"
+            onClick={() => setMainTab('clientes')}
+            className={`${styles.sidebarNavItem} ${mainTab === 'clientes' ? styles.sidebarNavItemActive : ''}`}
+          >
+            <Users size={18} />
+            <span>Fichas de Clientes</span>
+            {customersCount > 0 && <span className={styles.counterPill}>{customersCount}</span>}
+          </button>
+
+          <button
+            type="button"
             onClick={() => setMainTab('dashboard')}
             className={`${styles.sidebarNavItem} ${mainTab === 'dashboard' ? styles.sidebarNavItemActive : ''}`}
           >
@@ -822,6 +843,15 @@ export default function AdminDashboardPage() {
 
               <button
                 type="button"
+                onClick={() => setMainTab('clientes')}
+                className={`${styles.mobileTabBtn} ${mainTab === 'clientes' ? styles.mobileTabBtnActive : ''}`}
+              >
+                <Users size={14} />
+                <span>Clientes ({customersCount})</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setMainTab('dashboard')}
                 className={`${styles.mobileTabBtn} ${mainTab === 'dashboard' ? styles.mobileTabBtnActive : ''}`}
               >
@@ -840,7 +870,7 @@ export default function AdminDashboardPage() {
             </div>
             <div className={styles.desktopTabTitle}>
               <h2 className={styles.topBarHeading}>
-                {mainTab === 'pedidos' ? 'Fila de Produção & Pedidos' : mainTab === 'produtos' ? 'Gerenciamento de Produtos' : mainTab === 'ajustes' ? 'Ajustes & Configurações da Loja' : mainTab === 'cupons' ? 'Cupons de Desconto & Promoções' : mainTab === 'dashboard' ? 'Dashboard & Métricas' : 'Calculadora de Custos & Preço Sugerido'}
+                {mainTab === 'pedidos' ? 'Fila de Produção & Pedidos' : mainTab === 'clientes' ? 'Fichas de Clientes & Fidelidade' : mainTab === 'produtos' ? 'Gerenciamento de Produtos' : mainTab === 'ajustes' ? 'Ajustes & Configurações da Loja' : mainTab === 'cupons' ? 'Cupons de Desconto & Promoções' : mainTab === 'dashboard' ? 'Dashboard & Métricas' : 'Calculadora de Custos & Preço Sugerido'}
               </h2>
             </div>
           </div>
@@ -1290,6 +1320,11 @@ export default function AdminDashboardPage() {
               setMainTab('produtos');
               setIsModalOpen(true);
             }} />
+          )}
+
+          {/* Aba 7: Fichas de Clientes & Fidelidade */}
+          {mainTab === 'clientes' && (
+            <CustomersTab onCustomersCountChange={setCustomersCount} />
           )}
         </main>
       </div>
