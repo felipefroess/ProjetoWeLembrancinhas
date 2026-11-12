@@ -3,8 +3,10 @@ import { getAllProducts, getAllCategories } from '@/lib/productsStore';
 
 export async function GET() {
   try {
-    const products = await getAllProducts();
-    const categories = await getAllCategories();
+    const [products, categories] = await Promise.all([
+      getAllProducts(),
+      getAllCategories(),
+    ]);
     return NextResponse.json({ success: true, products, categories });
   } catch (error) {
     console.error('Erro na rota /api/products:', error);

@@ -203,36 +203,26 @@ export default function AdminDashboardPage() {
           return;
         }
 
-        const prodRes = await fetch('/api/products');
-        const prodData = await prodRes.json();
-        if (prodData.success) {
-          setProducts(prodData.products || []);
-          setCategories(prodData.categories || []);
+        const [prodResult, ordersResult, customersResult, statusResult] = await Promise.allSettled([
+          fetch('/api/products').then((r) => r.json()),
+          fetch('/api/orders').then((r) => r.json()),
+          fetch('/api/admin/customers').then((r) => r.json()),
+          fetch('/api/store-status').then((r) => r.json()),
+        ]);
+
+        if (prodResult.status === 'fulfilled' && prodResult.value?.success) {
+          setProducts(prodResult.value.products || []);
+          setCategories(prodResult.value.categories || []);
         }
-
-        try {
-          const ordersRes = await fetch('/api/orders');
-          const ordersData = await ordersRes.json();
-          if (ordersData.orders) {
-            setOrdersCount(ordersData.orders.length);
-          }
-        } catch {}
-
-        try {
-          const customersRes = await fetch('/api/admin/customers');
-          const customersData = await customersRes.json();
-          if (Array.isArray(customersData.customers)) {
-            setCustomersCount(customersData.customers.length);
-          }
-        } catch {}
-
-        try {
-          const statusRes = await fetch('/api/store-status');
-          const statusData = await statusRes.json();
-          if (typeof statusData.isOnline === 'boolean') {
-            setIsStoreOnline(statusData.isOnline);
-          }
-        } catch {}
+        if (ordersResult.status === 'fulfilled' && ordersResult.value?.orders) {
+          setOrdersCount(ordersResult.value.orders.length);
+        }
+        if (customersResult.status === 'fulfilled' && Array.isArray(customersResult.value?.customers)) {
+          setCustomersCount(customersResult.value.customers.length);
+        }
+        if (statusResult.status === 'fulfilled' && typeof statusResult.value?.isOnline === 'boolean') {
+          setIsStoreOnline(statusResult.value.isOnline);
+        }
       } catch (err) {
         console.error('Erro ao inicializar painel:', err);
       } finally {

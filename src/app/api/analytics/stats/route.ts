@@ -122,8 +122,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ configured: false, hasRealData: false });
     }
 
-    // 1. Visitas (atual e período anterior)
-    const [{ count: visitsCount }, { count: prevVisitsCount }] = await Promise.all([
+    // Executa todas as consultas de métricas no Supabase em paralelo
+    const [
+      { count: visitsCount },
+      { count: prevVisitsCount },
+      { data: orders },
+      { data: prevOrders },
+      { data: clicks },
+    ] = await Promise.all([
       supabase
         .from('page_views')
         .select('*', { count: 'exact', head: true })
@@ -133,10 +139,6 @@ export async function GET(request: NextRequest) {
         .select('*', { count: 'exact', head: true })
         .gte('created_at', prevIsoStart)
         .lt('created_at', isoStart),
-    ]);
-
-    // 2. Pedidos (atual e período anterior)
-    const [{ data: orders }, { data: prevOrders }] = await Promise.all([
       supabase
         .from('orders')
         .select('*')
@@ -148,13 +150,11 @@ export async function GET(request: NextRequest) {
         .gte('created_at', prevIsoStart)
         .lt('created_at', isoStart)
         .neq('status', 'cancelado'),
+      supabase
+        .from('product_clicks')
+        .select('product_id, product_name, category')
+        .gte('created_at', isoStart),
     ]);
-
-    // 3. Cliques em produtos
-    const { data: clicks } = await supabase
-      .from('product_clicks')
-      .select('product_id, product_name, category')
-      .gte('created_at', isoStart);
 
     const clicksByProduct: Record<string, { count: number; name?: string; category?: string }> = {};
     (clicks || []).forEach((c) => {
