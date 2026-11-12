@@ -9,7 +9,7 @@ export async function GET() {
     return NextResponse.json({ success: false, error: 'Não autorizado' }, { status: 401 });
   }
 
-  const products = getAllProducts();
+  const products = await getAllProducts();
   return NextResponse.json({ success: true, products });
 }
 
@@ -29,14 +29,14 @@ export async function POST(request: Request) {
 
     // Se o usuário digitou uma categoria nova, garante que ela é registrada
     if (body.newCategoryName) {
-      saveCategory({
+      await saveCategory({
         id: product.category,
         name: body.newCategoryName,
         description: `Produtos da categoria ${body.newCategoryName}`,
       });
     }
 
-    const saved = saveProduct(product);
+    const saved = await saveProduct(product);
     return NextResponse.json({ success: true, product: saved });
   } catch (error) {
     console.error('Erro ao salvar produto:', error);
@@ -58,7 +58,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: 'ID do produto não informado' }, { status: 400 });
     }
 
-    const deleted = deleteProduct(id);
+    const deleted = await deleteProduct(id);
     return NextResponse.json({ success: true, deleted });
   } catch (error) {
     console.error('Erro ao excluir produto:', error);

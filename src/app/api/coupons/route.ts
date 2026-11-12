@@ -10,7 +10,7 @@ import {
 // GET: Retornar lista de todos os cupons cadastrados
 export async function GET() {
   try {
-    const coupons = getAllCoupons();
+    const coupons = await getAllCoupons();
     return NextResponse.json({ success: true, coupons });
   } catch (error) {
     console.error('Erro na API de cupons (GET):', error);
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     // Se a requisição veio do painel Admin para criar cupom
     if (body.action === 'create') {
-      const result = createCoupon({
+      const result = await createCoupon({
         code: body.code,
         type: body.type,
         value: body.value,
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     const rawCode = (body.code || '').trim();
     const subtotal = Number(body.subtotal) || 0;
 
-    const validation = validateCoupon(rawCode, subtotal);
+    const validation = await validateCoupon(rawCode, subtotal);
     if (!validation.valid) {
       return NextResponse.json({
         valid: false,
@@ -87,7 +87,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const result = updateCoupon(id, updates);
+    const result = await updateCoupon(id, updates);
     if (!result.success) {
       return NextResponse.json(
         { success: false, error: result.error || 'Erro ao atualizar cupom.' },
@@ -127,7 +127,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const result = deleteCoupon(id);
+    const result = await deleteCoupon(id);
     if (!result.success) {
       return NextResponse.json(
         { success: false, error: result.error || 'Erro ao excluir cupom.' },

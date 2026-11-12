@@ -4,7 +4,7 @@ import { getStoreSettings, updateStoreSettings } from '@/lib/storeSettingsStore'
 // GET: Retornar as configurações atuais da loja
 export async function GET() {
   try {
-    const settings = getStoreSettings();
+    const settings = await getStoreSettings();
     return NextResponse.json({ success: true, settings });
   } catch (error) {
     console.error('Erro na API de store-settings (GET):', error);
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { applyLeadTimeToAllProducts, ...updates } = body;
 
-    const result = updateStoreSettings(updates, Boolean(applyLeadTimeToAllProducts));
+    const result = await updateStoreSettings(updates, Boolean(applyLeadTimeToAllProducts));
 
     if (!result.success) {
       return NextResponse.json(

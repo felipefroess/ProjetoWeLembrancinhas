@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { getSeedMeta, markSeedMeta } from '@/lib/seedMeta';
 
 export interface AdminCoupon {
   id: string;
@@ -15,10 +17,7 @@ export interface AdminCoupon {
 
 const DATA_FILE = path.join(process.cwd(), 'src', 'data', 'coupons.json');
 
-/**
- * Lê os cupons do arquivo JSON garantindo IDs e campos obrigatórios
- */
-export function getAllCoupons(): AdminCoupon[] {
+function readLocalCoupons(): AdminCoupon[] {
   try {
     if (!fs.existsSync(DATA_FILE)) {
       return [];
@@ -30,11 +29,10 @@ export function getAllCoupons(): AdminCoupon[] {
 
     let hasChanges = false;
     const normalized: AdminCoupon[] = items.map((item, index) => {
-      let updated = false;
       const id = item.id || `cupom_${item.code?.toLowerCase() || index}_${Date.now()}`;
-      if (!item.id) updated = true;
+      if (!item.id) hasChanges = true;
 
-      const coupon: AdminCoupon = {
+      return {
         id,
         code: (item.code || '').trim().toUpperCase(),
         type: item.type === 'fixed' ? 'fixed' : 'percentage',
@@ -45,39 +43,104 @@ export function getAllCoupons(): AdminCoupon[] {
         isActive: item.isActive !== false,
         createdAt: item.createdAt || new Date().toISOString(),
       };
-
-      if (updated) hasChanges = true;
-      return coupon;
     });
 
     if (hasChanges) {
-      fs.writeFileSync(DATA_FILE, JSON.stringify(normalized, null, 2), 'utf8');
+      saveLocalCoupons(normalized);
     }
 
     return normalized;
   } catch (error) {
-    console.error('Erro ao ler cupons:', error);
+    console.error('Erro ao ler cupons locais:', error);
     return [];
   }
 }
 
-/**
- * Salva a lista de cupons no arquivo JSON
- */
-export function saveCoupons(coupons: AdminCoupon[]): boolean {
+function saveLocalCoupons(coupons: AdminCoupon[]): boolean {
   try {
+    const dir = path.dirname(DATA_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
     fs.writeFileSync(DATA_FILE, JSON.stringify(coupons, null, 2), 'utf8');
     return true;
-  } catch (error) {
-    console.error('Erro ao salvar cupons:', error);
+  } catch {
     return false;
   }
+}
+
+function mapRowToCoupon(row: any): AdminCoupon {
+  return {
+    id: String(row.id),
+    code: String(row.code || '').trim().toUpperCase(),
+    type: row.type === 'fixed' ? 'fixed' : 'percentage',
+    value: Number(row.value) || 0,
+    description: row.description || '',
+    minOrderValue: Number(row.min_order_value) || 0,
+    expiresAt: row.expires_at || null,
+    isActive: row.is_active !== false,
+    createdAt: row.created_at || new Date().toISOString(),
+  };
+}
+
+/**
+ * Lê os cupons do Supabase (com auto-seed inicial e fallback local)
+ */
+export async function getAllCoupons(): Promise<AdminCoupon[]> {
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      try {
+        const { data: rows, error } = await supabase
+          .from('coupons')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && rows) {
+          if (rows.length === 0) {
+            const meta = await getSeedMeta();
+            if (!meta.couponsSeeded) {
+              const localCoupons = readLocalCoupons();
+              if (localCoupons.length > 0) {
+                const payload = localCoupons.map((c) => ({
+                  id: c.id,
+                  code: c.code,
+                  type: c.type,
+                  value: c.value,
+                  description: c.description || '',
+                  min_order_value: c.minOrderValue || 0,
+                  expires_at: c.expiresAt || null,
+                  is_active: c.isActive,
+                  created_at: c.createdAt,
+                }));
+                const { error: seedError } = await supabase
+                  .from('coupons')
+                  .upsert(payload, { onConflict: 'id' });
+                if (!seedError) {
+                  await markSeedMeta({ couponsSeeded: true });
+                  return localCoupons;
+                }
+              } else {
+                await markSeedMeta({ couponsSeeded: true });
+              }
+            }
+          }
+
+          return rows.map(mapRowToCoupon);
+        }
+      } catch (err) {
+        console.error('Erro ao buscar cupons no Supabase, usando fallback local:', err);
+      }
+    }
+  }
+
+  return readLocalCoupons();
 }
 
 /**
  * Cria um novo cupom
  */
-export function createCoupon(data: {
+export async function createCoupon(data: {
   code: string;
   type: 'percentage' | 'fixed';
   value: number;
@@ -85,7 +148,7 @@ export function createCoupon(data: {
   minOrderValue?: number;
   expiresAt?: string | null;
   isActive?: boolean;
-}): { success: boolean; coupon?: AdminCoupon; error?: string } {
+}): Promise<{ success: boolean; coupon?: AdminCoupon; error?: string }> {
   const cleanCode = (data.code || '').trim().toUpperCase();
 
   if (!cleanCode) {
@@ -104,7 +167,7 @@ export function createCoupon(data: {
     return { success: false, error: 'A porcentagem de desconto não pode ser superior a 100%.' };
   }
 
-  const existing = getAllCoupons();
+  const existing = await getAllCoupons();
   if (existing.some((c) => c.code === cleanCode)) {
     return { success: false, error: `Já existe um cupom com o código "${cleanCode}".` };
   }
@@ -121,9 +184,32 @@ export function createCoupon(data: {
     createdAt: new Date().toISOString(),
   };
 
-  const updatedList = [newCoupon, ...existing];
-  const saved = saveCoupons(updatedList);
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      const { error } = await supabase.from('coupons').insert({
+        id: newCoupon.id,
+        code: newCoupon.code,
+        type: newCoupon.type,
+        value: newCoupon.value,
+        description: newCoupon.description || '',
+        min_order_value: newCoupon.minOrderValue || 0,
+        expires_at: newCoupon.expiresAt || null,
+        is_active: newCoupon.isActive,
+        created_at: newCoupon.createdAt,
+      });
 
+      if (error) {
+        console.error('Erro ao criar cupom no Supabase:', error);
+        return { success: false, error: 'Falha ao salvar cupom no Supabase.' };
+      }
+
+      saveLocalCoupons([newCoupon, ...existing]);
+      return { success: true, coupon: newCoupon };
+    }
+  }
+
+  const saved = saveLocalCoupons([newCoupon, ...existing]);
   if (!saved) {
     return { success: false, error: 'Falha ao salvar no banco de cupons.' };
   }
@@ -134,37 +220,67 @@ export function createCoupon(data: {
 /**
  * Atualiza um cupom existente
  */
-export function updateCoupon(
+export async function updateCoupon(
   id: string,
   updates: Partial<Omit<AdminCoupon, 'id' | 'createdAt'>>
-): { success: boolean; coupon?: AdminCoupon; error?: string } {
-  const existing = getAllCoupons();
+): Promise<{ success: boolean; coupon?: AdminCoupon; error?: string }> {
+  const existing = await getAllCoupons();
   const index = existing.findIndex((c) => c.id === id);
 
   if (index === -1) {
     return { success: false, error: 'Cupom não encontrado.' };
   }
 
-  if (updates.code) {
-    const cleanCode = updates.code.trim().toUpperCase();
-    if (cleanCode !== existing[index].code && existing.some((c) => c.code === cleanCode && c.id !== id)) {
+  const normalizedUpdates = { ...updates };
+  if (normalizedUpdates.code) {
+    const cleanCode = normalizedUpdates.code.trim().toUpperCase();
+    if (
+      cleanCode !== existing[index].code &&
+      existing.some((c) => c.code === cleanCode && c.id !== id)
+    ) {
       return { success: false, error: `Já existe outro cupom com o código "${cleanCode}".` };
     }
-    updates.code = cleanCode;
+    normalizedUpdates.code = cleanCode;
   }
 
-  if (updates.type === 'percentage' && updates.value && updates.value > 100) {
+  if (normalizedUpdates.type === 'percentage' && normalizedUpdates.value && normalizedUpdates.value > 100) {
     return { success: false, error: 'A porcentagem de desconto não pode ser superior a 100%.' };
   }
 
   const updatedCoupon: AdminCoupon = {
     ...existing[index],
-    ...updates,
+    ...normalizedUpdates,
   };
 
-  existing[index] = updatedCoupon;
-  const saved = saveCoupons(existing);
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      const { error } = await supabase
+        .from('coupons')
+        .update({
+          code: updatedCoupon.code,
+          type: updatedCoupon.type,
+          value: updatedCoupon.value,
+          description: updatedCoupon.description || '',
+          min_order_value: updatedCoupon.minOrderValue || 0,
+          expires_at: updatedCoupon.expiresAt || null,
+          is_active: updatedCoupon.isActive,
+        })
+        .eq('id', id);
 
+      if (error) {
+        console.error('Erro ao atualizar cupom no Supabase:', error);
+        return { success: false, error: 'Falha ao salvar alterações no Supabase.' };
+      }
+
+      existing[index] = updatedCoupon;
+      saveLocalCoupons(existing);
+      return { success: true, coupon: updatedCoupon };
+    }
+  }
+
+  existing[index] = updatedCoupon;
+  const saved = saveLocalCoupons(existing);
   if (!saved) {
     return { success: false, error: 'Falha ao salvar alterações.' };
   }
@@ -175,15 +291,28 @@ export function updateCoupon(
 /**
  * Deleta um cupom por ID
  */
-export function deleteCoupon(id: string): { success: boolean; error?: string } {
-  const existing = getAllCoupons();
+export async function deleteCoupon(id: string): Promise<{ success: boolean; error?: string }> {
+  const existing = await getAllCoupons();
   const filtered = existing.filter((c) => c.id !== id);
 
   if (filtered.length === existing.length) {
     return { success: false, error: 'Cupom não encontrado para exclusão.' };
   }
 
-  const saved = saveCoupons(filtered);
+  if (isSupabaseConfigured()) {
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      const { error } = await supabase.from('coupons').delete().eq('id', id);
+      if (error) {
+        console.error('Erro ao excluir cupom no Supabase:', error);
+        return { success: false, error: 'Falha ao excluir cupom no Supabase.' };
+      }
+      saveLocalCoupons(filtered);
+      return { success: true };
+    }
+  }
+
+  const saved = saveLocalCoupons(filtered);
   if (!saved) {
     return { success: false, error: 'Falha ao excluir cupom.' };
   }
@@ -194,10 +323,10 @@ export function deleteCoupon(id: string): { success: boolean; error?: string } {
 /**
  * Valida o cupom para uso no checkout / carrinho
  */
-export function validateCoupon(
+export async function validateCoupon(
   rawCode: string,
   subtotal: number
-): {
+): Promise<{
   valid: boolean;
   message: string;
   coupon?: {
@@ -207,13 +336,13 @@ export function validateCoupon(
     description: string;
   };
   discountAmount?: number;
-} {
+}> {
   const code = (rawCode || '').trim().toUpperCase();
   if (!code) {
     return { valid: false, message: 'Digite o código do cupom.' };
   }
 
-  const coupons = getAllCoupons();
+  const coupons = await getAllCoupons();
   const matched = coupons.find((c) => c.code === code);
 
   if (!matched) {
@@ -224,11 +353,9 @@ export function validateCoupon(
     return { valid: false, message: 'Este cupom não está mais ativo.' };
   }
 
-  // Verifica data de expiração se houver
   if (matched.expiresAt) {
     const expDate = new Date(matched.expiresAt);
     if (matched.expiresAt.length === 10) {
-      // Se for formato YYYY-MM-DD, considera até as 23:59:59 do dia
       expDate.setHours(23, 59, 59, 999);
     }
     if (Date.now() > expDate.getTime()) {
@@ -240,7 +367,6 @@ export function validateCoupon(
     }
   }
 
-  // Verifica valor mínimo de compra
   if (matched.minOrderValue && subtotal < matched.minOrderValue) {
     const minFormatted = matched.minOrderValue.toLocaleString('pt-BR', {
       style: 'currency',
@@ -252,7 +378,6 @@ export function validateCoupon(
     };
   }
 
-  // Calcula desconto
   let discountAmount = 0;
   if (matched.type === 'percentage') {
     discountAmount = Number(((subtotal * matched.value) / 100).toFixed(2));
