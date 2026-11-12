@@ -31,6 +31,8 @@ export function ProductModal() {
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null);
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
+  const [missingFields, setMissingFields] = useState<Record<string, boolean>>({});
+  const fieldRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // Estados e referências para controle de Zoom interativo
   const [scale, setScale] = useState(1);
@@ -49,6 +51,7 @@ export function ProductModal() {
       setRibbonColor(defaultRibbon);
       setNotes('');
       setCustomFieldValues({});
+      setMissingFields({});
       const initialVariation = product.variations?.[0] || null;
       setSelectedVariation(initialVariation);
       const initialImg = initialVariation?.images?.[0] || initialVariation?.image || product.image;
@@ -220,22 +223,81 @@ export function ProductModal() {
     }
   };
 
+  const clearFieldError = (key: string) => {
+    setMissingFields((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
+  const renderRequiredPing = (key: string) => {
+    if (!missingFields[key]) return null;
+    return (
+      <div className={styles.requiredPingBadge} role="alert">
+        <span className={styles.pingDotWrap}>
+          <span className={styles.pingDotRing} />
+          <span className={styles.pingDotCore} />
+        </span>
+        <span>Informação obrigatória</span>
+      </div>
+    );
+  };
+
   const handleConfirm = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validação dos campos extras personalizados obrigatórios
+    const errors: Record<string, boolean> = {};
+    let firstMissingKey: string | null = null;
+
+    const markMissing = (key: string) => {
+      errors[key] = true;
+      if (!firstMissingKey) {
+        firstMissingKey = key;
+      }
+    };
+
+    if (
+      product.customizationSettings?.allowChildName !== false &&
+      product.customizationSettings?.childNameRequired !== false &&
+      !childName.trim()
+    ) {
+      markMissing('childName');
+    }
+
+    const ribbonList =
+      product.customizationSettings?.ribbonColors && product.customizationSettings.ribbonColors.length > 0
+        ? product.customizationSettings.ribbonColors
+        : product.availableRibbonColors;
+    const shouldShowRibbon =
+      product.customizationSettings?.allowRibbonColors ?? Boolean(ribbonList && ribbonList.length > 0);
+    const isRibbonReq = Boolean(product.customizationSettings?.ribbonColorRequired);
+    if (shouldShowRibbon && ribbonList && ribbonList.length > 0 && isRibbonReq && !ribbonColor.trim()) {
+      markMissing('ribbonColor');
+    }
+
     if (product.customizationSettings?.customFields) {
       for (const field of product.customizationSettings.customFields) {
         if (field.required !== false) {
           const fieldKey = field.label && field.label.trim() ? field.label.trim() : field.id;
           const val = customFieldValues[fieldKey];
           if (!val || !val.trim()) {
-            alert(`Por favor, ${field.type === 'select' ? 'selecione uma opção para' : 'preencha o campo'} "${field.label}".`);
-            return;
+            markMissing(`custom_${field.id}`);
           }
         }
       }
     }
+
+    if (firstMissingKey) {
+      setMissingFields(errors);
+      const targetKey = firstMissingKey;
+      requestAnimationFrame(() => {
+        fieldRefs.current[targetKey]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+      return;
+    }
+
     addToCart(product, quantity, {
       variation: selectedVariation ? selectedVariation.name : undefined,
       childName: childName.trim() || undefined,
@@ -485,7 +547,8 @@ export function ProductModal() {
                 <div className={styles.fieldsContainer}>
                   {/* Nome na Lembrancinha (exibido se allowChildName !== false) */}
                   {(product.customizationSettings?.allowChildName !== false) && (
-                    <div>
+                    <div ref={(el) => { fieldRefs.current['childName'] = el; }}>
+                      {renderRequiredPing('childName')}
                       <label className={styles.formLabel}>
                         {product.customizationSettings?.childNameLabel || 'Nome na Lembrancinha'}{' '}
                         {product.customizationSettings?.childNameRequired !== false ? (
@@ -496,15 +559,17 @@ export function ProductModal() {
                       </label>
                       <input
                         type="text"
-                        required={product.customizationSettings?.childNameRequired !== false}
                         placeholder={
                           product.customizationSettings?.childNamePlaceholder && product.customizationSettings.childNamePlaceholder.trim()
                             ? product.customizationSettings.childNamePlaceholder.trim()
                             : "Ex: Professora Leandra, Luís..."
                         }
                         value={childName}
-                        onChange={(e) => setChildName(e.target.value)}
-                        className={styles.formInput}
+                        onChange={(e) => {
+                          setChildName(e.target.value);
+                          if (e.target.value.trim()) clearFieldError('childName');
+                        }}
+                        className={`${styles.formInput} ${missingFields['childName'] ? styles.inputError : ''}`}
                       />
                     </div>
                   )}
@@ -521,7 +586,8 @@ export function ProductModal() {
                     const isRibbonReq = Boolean(product.customizationSettings?.ribbonColorRequired);
 
                     return (
-                      <div>
+                      <div ref={(el) => { fieldRefs.current['ribbonColor'] = el; }}>
+                        {renderRequiredPing('ribbonColor')}
                         <label className={styles.formLabel}>
                           Cor dos Laços / Fitas{' '}
                           {isRibbonReq ? (
@@ -532,9 +598,11 @@ export function ProductModal() {
                         </label>
                         <select
                           value={ribbonColor}
-                          required={isRibbonReq}
-                          onChange={(e) => setRibbonColor(e.target.value)}
-                          className={styles.formInput}
+                          onChange={(e) => {
+                            setRibbonColor(e.target.value);
+                            if (e.target.value.trim()) clearFieldError('ribbonColor');
+                          }}
+                          className={`${styles.formInput} ${styles.formSelect} ${missingFields['ribbonColor'] ? styles.inputError : ''}`}
                         >
                           {isRibbonReq && <option value="">Selecione a cor do laço...</option>}
                           {ribbonList.map((color) => (
@@ -554,9 +622,12 @@ export function ProductModal() {
                     const inputPlaceholder = field.placeholder && field.placeholder.trim()
                       ? field.placeholder.trim()
                       : (field.label ? `Ex: ${field.label}...` : 'Digite aqui...');
+                    const fieldErrKey = `custom_${field.id}`;
+                    const hasErr = Boolean(missingFields[fieldErrKey]);
 
                     return (
-                      <div key={field.id}>
+                      <div key={field.id} ref={(el) => { fieldRefs.current[fieldErrKey] = el; }}>
+                        {renderRequiredPing(fieldErrKey)}
                         <label className={styles.formLabel}>
                           {field.label}{' '}
                           {isReq ? (
@@ -568,18 +639,24 @@ export function ProductModal() {
                         {field.type === 'textarea' ? (
                           <textarea
                             rows={2}
-                            required={isReq}
                             placeholder={inputPlaceholder}
                             value={customFieldValues[fieldKey] || ''}
-                            onChange={(e) => setCustomFieldValues((prev) => ({ ...prev, [fieldKey]: e.target.value }))}
-                            className={styles.formTextarea}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              setCustomFieldValues((prev) => ({ ...prev, [fieldKey]: v }));
+                              if (v.trim()) clearFieldError(fieldErrKey);
+                            }}
+                            className={`${styles.formTextarea} ${hasErr ? styles.inputError : ''}`}
                           />
                         ) : field.type === 'select' ? (
                           <select
-                            required={isReq}
                             value={customFieldValues[fieldKey] || ''}
-                            onChange={(e) => setCustomFieldValues((prev) => ({ ...prev, [fieldKey]: e.target.value }))}
-                            className={styles.formSelect}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              setCustomFieldValues((prev) => ({ ...prev, [fieldKey]: v }));
+                              if (v.trim()) clearFieldError(fieldErrKey);
+                            }}
+                            className={`${styles.formSelect} ${hasErr ? styles.inputError : ''}`}
                           >
                             <option value="">
                               {field.placeholder?.trim() || `Selecione ${field.label || 'uma opção'}...`}
@@ -593,11 +670,14 @@ export function ProductModal() {
                         ) : (
                           <input
                             type="text"
-                            required={isReq}
                             placeholder={inputPlaceholder}
                             value={customFieldValues[fieldKey] || ''}
-                            onChange={(e) => setCustomFieldValues((prev) => ({ ...prev, [fieldKey]: e.target.value }))}
-                            className={styles.formInput}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              setCustomFieldValues((prev) => ({ ...prev, [fieldKey]: v }));
+                              if (v.trim()) clearFieldError(fieldErrKey);
+                            }}
+                            className={`${styles.formInput} ${hasErr ? styles.inputError : ''}`}
                           />
                         )}
                       </div>
