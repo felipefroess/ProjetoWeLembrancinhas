@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 42" width="52" height="42" fill="none">
+  <defs>
+    <!-- Sombra suave para destacar a touca sobre o botão -->
+    <filter id="toucaDropShadow" x="-25%" y="-25%" width="160%" height="160%">
+      <feDropShadow dx="0.5" dy="1.5" stdDeviation="1.2" flood-color="#000000" flood-opacity="0.22"/>
+    </filter>
+
+    <!-- Gradiente realista de veludo vermelho natalino -->
+    <linearGradient id="veludoVermelho" x1="20%" y1="10%" x2="80%" y2="90%">
+      <stop offset="0%" stop-color="#FF383B"/>
+      <stop offset="25%" stop-color="#E5191D"/>
+      <stop offset="70%" stop-color="#B30E12"/>
+      <stop offset="100%" stop-color="#730709"/>
+    </linearGradient>
+
+    <!-- Brilho no topo do gorro -->
+    <linearGradient id="brilhoGorro" x1="25%" y1="5%" x2="55%" y2="70%">
+      <stop offset="0%" stop-color="#FFA4A6" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#E5191D" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Gradiente da pelúcia branca inferior -->
+    <linearGradient id="peluciaBranca" x1="20%" y1="0%" x2="40%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#F2F2F5"/>
+      <stop offset="100%" stop-color="#D1D1D8"/>
+    </linearGradient>
+
+    <!-- Sombra de volume no pompom -->
+    <radialGradient id="pompomVolume" cx="35%" cy="32%" r="68%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="55%" stop-color="#F5F5F7"/>
+      <stop offset="85%" stop-color="#D4D4DC"/>
+      <stop offset="100%" stop-color="#AEAEB8"/>
+    </radialGradient>
+  </defs>
+
+  <g filter="url(#toucaDropShadow)">
+    <!-- Corpo vermelho da touca caída para a direita -->
+    <path d="M 9 25 C 11 16, 17 6, 25 3 C 31 0.5, 38 3, 40 10 C 42 14, 44 21, 43 27 C 41 27, 38 24, 37 20 C 36 15, 33 10, 27 9 C 22 8, 17 15, 15 25 Z" 
+          fill="url(#veludoVermelho)"/>
+
+    <!-- Reflexo de luz na curva superior -->
+    <path d="M 15 18 C 19 10, 24 5, 29 4 C 32 3.5, 35 5, 36 8 C 32 6, 27 7, 22 12 C 18 16, 16 20, 15 23 Z" 
+          fill="url(#brilhoGorro)"/>
+
+    <!-- Pompom macio na ponta caída -->
+    <circle cx="43" cy="29" r="5.2" fill="url(#pompomVolume)"/>
+
+    <!-- Borda de pelúcia branca (inclinada ~-14deg para encaixar perfeitamente no botão) -->
+    <g transform="rotate(-14 18 26)">
+      <rect x="4" y="22" width="27" height="9.5" rx="4.75" fill="url(#peluciaBranca)"/>
+      <!-- Nuance de volume fofinho -->
+      <ellipse cx="17.5" cy="25" rx="11" ry="2.6" fill="#FFFFFF" opacity="0.8"/>
+    </g>
+  </g>
+</svg>

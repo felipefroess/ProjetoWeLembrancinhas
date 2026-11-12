@@ -11,7 +11,8 @@ import {
   ChevronLeft, 
   ChevronRight, 
   ZoomIn, 
-  RotateCcw 
+  RotateCcw,
+  Camera 
 } from 'lucide-react';
 import styles from './ProductModal.module.css';
 
@@ -221,6 +222,20 @@ export function ProductModal() {
 
   const handleConfirm = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validação dos campos extras personalizados obrigatórios
+    if (product.customizationSettings?.customFields) {
+      for (const field of product.customizationSettings.customFields) {
+        if (field.required !== false) {
+          const fieldKey = field.label && field.label.trim() ? field.label.trim() : field.id;
+          const val = customFieldValues[fieldKey];
+          if (!val || !val.trim()) {
+            alert(`Por favor, ${field.type === 'select' ? 'selecione uma opção para' : 'preencha o campo'} "${field.label}".`);
+            return;
+          }
+        }
+      }
+    }
     addToCart(product, quantity, {
       variation: selectedVariation ? selectedVariation.name : undefined,
       childName: childName.trim() || undefined,
@@ -376,7 +391,9 @@ export function ProductModal() {
                 </h4>
 
                 <p className={styles.productDescription}>
-                  {product.description}
+                  {(selectedVariation?.description && selectedVariation.description.trim())
+                    ? selectedVariation.description.trim()
+                    : product.description}
                 </p>
 
                 <div className={styles.metaRow}>
@@ -455,10 +472,11 @@ export function ProductModal() {
                       })}
                     </div>
 
-                    {selectedVariation?.description && (
-                      <p className={styles.variationDescNote}>
-                        {selectedVariation.description}
-                      </p>
+                    {(product.variationsNote || product.customizationSettings?.variationsNote) && (
+                      <div className={styles.variationsNoticeBox}>
+                        <Camera size={14} className={styles.variationsNoticeIcon} />
+                        <span>{product.variationsNote || product.customizationSettings?.variationsNote}</span>
+                      </div>
                     )}
                   </div>
                 )}
@@ -479,7 +497,11 @@ export function ProductModal() {
                       <input
                         type="text"
                         required={product.customizationSettings?.childNameRequired !== false}
-                        placeholder="Ex: Professora Leandra, Luís..."
+                        placeholder={
+                          product.customizationSettings?.childNamePlaceholder && product.customizationSettings.childNamePlaceholder.trim()
+                            ? product.customizationSettings.childNamePlaceholder.trim()
+                            : "Ex: Professora Leandra, Luís..."
+                        }
                         value={childName}
                         onChange={(e) => setChildName(e.target.value)}
                         className={styles.formInput}
@@ -552,6 +574,22 @@ export function ProductModal() {
                             onChange={(e) => setCustomFieldValues((prev) => ({ ...prev, [fieldKey]: e.target.value }))}
                             className={styles.formTextarea}
                           />
+                        ) : field.type === 'select' ? (
+                          <select
+                            required={isReq}
+                            value={customFieldValues[fieldKey] || ''}
+                            onChange={(e) => setCustomFieldValues((prev) => ({ ...prev, [fieldKey]: e.target.value }))}
+                            className={styles.formSelect}
+                          >
+                            <option value="">
+                              {field.placeholder?.trim() || `Selecione ${field.label || 'uma opção'}...`}
+                            </option>
+                            {field.options && field.options.map((opt) => (
+                              <option key={opt} value={opt}>
+                                {opt}
+                              </option>
+                            ))}
+                          </select>
                         ) : (
                           <input
                             type="text"
@@ -574,7 +612,11 @@ export function ProductModal() {
                       </label>
                       <textarea
                         rows={2}
-                        placeholder="Ex: Tons pastéis, glitter prateado, frase específica..."
+                        placeholder={
+                          product.customizationSettings?.notesPlaceholder && product.customizationSettings.notesPlaceholder.trim()
+                            ? product.customizationSettings.notesPlaceholder.trim()
+                            : "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial..."
+                        }
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         className={styles.formTextarea}
