@@ -22,18 +22,20 @@ export function ProductCard({ product, isMostRequested }: ProductCardProps) {
     setSelectedVariation(null);
   }, [product.image]);
 
+  const rawProductPrice = typeof product.price === 'number' ? product.price : parseFloat(String(product.price || 0)) || 0;
+
   const variationPrices = (product.variations || [])
-    .map((v) => v.price)
-    .filter((p): p is number => typeof p === 'number' && p > 0);
+    .map((v) => (typeof v.price === 'number' ? v.price : parseFloat(String(v.price || 0))))
+    .filter((p): p is number => typeof p === 'number' && !isNaN(p) && p > 0);
   
-  const minPrice = variationPrices.length > 0 ? Math.min(product.price, ...variationPrices) : product.price;
-  const hasVaryingPrices = variationPrices.length > 0 && (Math.min(...variationPrices) !== Math.max(...variationPrices, product.price));
+  const minPrice = variationPrices.length > 0 ? Math.min(rawProductPrice, ...variationPrices) : rawProductPrice;
+  const hasVaryingPrices = variationPrices.length > 0 && (Math.min(...variationPrices) !== Math.max(...variationPrices, rawProductPrice));
 
   const displayPrice = selectedVariation && typeof selectedVariation.price === 'number' && selectedVariation.price > 0
     ? selectedVariation.price
     : minPrice;
 
-  const formattedPrice = displayPrice.toLocaleString('pt-BR', {
+  const formattedPrice = (Number(displayPrice) || 0).toLocaleString('pt-BR', {
     style: 'currency',
     currency: 'BRL',
   });
@@ -41,7 +43,7 @@ export function ProductCard({ product, isMostRequested }: ProductCardProps) {
   const displayDescription =
     selectedVariation && selectedVariation.description && selectedVariation.description.trim()
       ? selectedVariation.description.trim()
-      : product.description;
+      : (product.description || '');
 
   const handleSelectVariation = (e: React.MouseEvent, v: ProductVariation) => {
     e.stopPropagation();

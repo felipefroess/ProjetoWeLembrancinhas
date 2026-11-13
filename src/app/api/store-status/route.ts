@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
 import { getStoreStatus, updateStoreStatus } from '@/lib/storeSettingsStore';
 
 export async function GET(request: Request) {
@@ -24,12 +23,6 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const updated = await updateStoreStatus(Boolean(body.isOnline));
-
-    try {
-      revalidatePath('/api/store-status');
-      revalidatePath('/', 'page');
-      revalidatePath('/admin', 'page');
-    } catch {}
 
     return NextResponse.json({ success: true, isOnline: updated.isOnline });
   } catch (error) {

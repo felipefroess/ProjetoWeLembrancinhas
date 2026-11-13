@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
 import { getStoreSettings, updateStoreSettings } from '@/lib/storeSettingsStore';
 
 // GET: Retornar as configurações atuais da loja
@@ -40,12 +39,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    try {
-      revalidatePath('/api/store-settings');
-      revalidatePath('/', 'page');
-      revalidatePath('/admin', 'page');
-    } catch {}
 
     return NextResponse.json({
       success: true,

@@ -26,15 +26,16 @@ interface HeaderProps {
 }
 
 function formatProductPrice(product: Product): string {
+  const rawPrice = typeof product.price === 'number' ? product.price : parseFloat(String(product.price || 0)) || 0;
   const variationPrices = product.variations
-    ?.map((v) => v.price)
-    .filter((p): p is number => typeof p === 'number' && p > 0);
+    ?.map((v) => (typeof v.price === 'number' ? v.price : parseFloat(String(v.price || 0))))
+    .filter((p): p is number => typeof p === 'number' && !isNaN(p) && p > 0);
   const hasVariations = variationPrices && variationPrices.length > 0;
-  const minPrice = hasVariations ? Math.min(...variationPrices) : product.price;
+  const minPrice = hasVariations ? Math.min(...variationPrices) : rawPrice;
   const formatted = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
-  }).format(minPrice);
+  }).format(Number(minPrice) || 0);
   return hasVariations && variationPrices.length > 1 ? `A partir de ${formatted}` : formatted;
 }
 
