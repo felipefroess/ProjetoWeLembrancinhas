@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { sql, isDbConfigured } from '@/server/db/client';
 import { getSeedMeta, markSeedMeta } from '@/lib/seedMeta';
 import { hasCustomerCompletedOrders } from '@/lib/ordersStore';
 
@@ -77,7 +77,10 @@ function saveLocalCoupons(coupons: AdminCoupon[]): boolean {
 
 function mapRowToCoupon(row: any): AdminCoupon {
   const cleanCode = String(row.code || '').trim().toUpperCase();
-  const isFirstPurchase = row.first_purchase_only === true || row.firstPurchaseOnly === true || cleanCode === 'PRIMEIRACOMPRA';
+  const isFirstPurchase =
+    row.first_purchase_only === true ||
+    row.firstPurchaseOnly === true ||
+    cleanCode === 'PRIMEIRACOMPRA';
 
   return {
     id: String(row.id),
@@ -94,53 +97,49 @@ function mapRowToCoupon(row: any): AdminCoupon {
 }
 
 /**
- * Lê os cupons do Supabase (com auto-seed inicial e fallback local)
+ * Lê os cupons do Neon (com auto-seed inicial e fallback local)
  */
 export async function getAllCoupons(): Promise<AdminCoupon[]> {
-  if (isSupabaseConfigured()) {
-    const supabase = getSupabaseAdmin();
-    if (supabase) {
-      try {
-        const { data: rows, error } = await supabase
-          .from('coupons')
-          .select('*')
-          .order('created_at', { ascending: false });
+  if (isDbConfigured()) {
+    try {
+      const rows = await sql<any>`
+        SELECT 
+          id, code, type, value, description, min_order_value, 
+          expires_at, is_active, first_purchase_only, created_at
+        FROM public.coupons
+        ORDER BY created_at DESC
+      `;
 
-        if (!error && rows) {
-          if (rows.length === 0) {
-            const meta = await getSeedMeta();
-            if (!meta.couponsSeeded) {
-              const localCoupons = readLocalCoupons();
-              if (localCoupons.length > 0) {
-                const payload = localCoupons.map((c) => ({
-                  id: c.id,
-                  code: c.code,
-                  type: c.type,
-                  value: c.value,
-                  description: c.description || '',
-                  min_order_value: c.minOrderValue || 0,
-                  expires_at: c.expiresAt || null,
-                  is_active: c.isActive,
-                  created_at: c.createdAt,
-                }));
-                const { error: seedError } = await supabase
-                  .from('coupons')
-                  .upsert(payload, { onConflict: 'id' });
-                if (!seedError) {
-                  await markSeedMeta({ couponsSeeded: true });
-                  return localCoupons;
-                }
-              } else {
-                await markSeedMeta({ couponsSeeded: true });
-              }
+      if (rows.length === 0) {
+        const meta = await getSeedMeta();
+        if (!meta.couponsSeeded) {
+          const localCoupons = readLocalCoupons();
+          if (localCoupons.length > 0) {
+            for (const c of localCoupons) {
+              await sql`
+                INSERT INTO public.coupons (
+                  id, code, type, value, description, min_order_value,
+                  expires_at, is_active, first_purchase_only, created_at
+                ) VALUES (
+                  ${c.id}, ${c.code}, ${c.type}, ${c.value}, ${c.description || ''},
+                  ${c.minOrderValue || 0}, ${c.expiresAt || null}, ${c.isActive},
+                  ${c.firstPurchaseOnly || false}, ${c.createdAt}
+                )
+                ON CONFLICT (id) DO UPDATE
+                SET code = EXCLUDED.code, value = EXCLUDED.value, is_active = EXCLUDED.is_active
+              `;
             }
+            await markSeedMeta({ couponsSeeded: true });
+            return localCoupons;
+          } else {
+            await markSeedMeta({ couponsSeeded: true });
           }
-
-          return rows.map(mapRowToCoupon);
         }
-      } catch (err) {
-        console.error('Erro ao buscar cupons no Supabase, usando fallback local:', err);
       }
+
+      return rows.map(mapRowToCoupon);
+    } catch (err) {
+      console.error('Erro ao buscar cupons no Neon, usando fallback local:', err);
     }
   }
 
@@ -148,7 +147,7 @@ export async function getAllCoupons(): Promise<AdminCoupon[]> {
 }
 
 /**
- * Cria um novo cupom
+ * Cria um novo cupom no Neon
  */
 export async function createCoupon(data: {
   code: string;
@@ -198,38 +197,24 @@ export async function createCoupon(data: {
     createdAt: new Date().toISOString(),
   };
 
-  if (isSupabaseConfigured()) {
-    const supabase = getSupabaseAdmin();
-    if (supabase) {
-      const payload: any = {
-        id: newCoupon.id,
-        code: newCoupon.code,
-        type: newCoupon.type,
-        value: newCoupon.value,
-        description: newCoupon.description || '',
-        min_order_value: newCoupon.minOrderValue || 0,
-        expires_at: newCoupon.expiresAt || null,
-        is_active: newCoupon.isActive,
-        created_at: newCoupon.createdAt,
-      };
-      if (newCoupon.firstPurchaseOnly !== undefined) {
-        payload.first_purchase_only = newCoupon.firstPurchaseOnly;
-      }
-
-      let { error } = await supabase.from('coupons').insert(payload);
-      if (error && error.message && error.message.includes('first_purchase_only')) {
-        delete payload.first_purchase_only;
-        const retry = await supabase.from('coupons').insert(payload);
-        error = retry.error;
-      }
-
-      if (error) {
-        console.error('Erro ao criar cupom no Supabase:', error);
-        return { success: false, error: 'Falha ao salvar cupom no Supabase.' };
-      }
+  if (isDbConfigured()) {
+    try {
+      await sql`
+        INSERT INTO public.coupons (
+          id, code, type, value, description, min_order_value,
+          expires_at, is_active, first_purchase_only, created_at
+        ) VALUES (
+          ${newCoupon.id}, ${newCoupon.code}, ${newCoupon.type}, ${newCoupon.value},
+          ${newCoupon.description || ''}, ${newCoupon.minOrderValue || 0}, ${newCoupon.expiresAt || null},
+          ${newCoupon.isActive}, ${newCoupon.firstPurchaseOnly || false}, ${newCoupon.createdAt}
+        )
+      `;
 
       saveLocalCoupons([newCoupon, ...existing]);
       return { success: true, coupon: newCoupon };
+    } catch (error) {
+      console.error('Erro ao criar cupom no Neon:', error);
+      return { success: false, error: 'Falha ao salvar cupom no Neon.' };
     }
   }
 
@@ -242,7 +227,7 @@ export async function createCoupon(data: {
 }
 
 /**
- * Atualiza um cupom existente
+ * Atualiza um cupom existente no Neon
  */
 export async function updateCoupon(
   id: string,
@@ -276,41 +261,28 @@ export async function updateCoupon(
     ...normalizedUpdates,
   };
 
-  if (isSupabaseConfigured()) {
-    const supabase = getSupabaseAdmin();
-    if (supabase) {
-      const updatePayload: any = {
-        code: updatedCoupon.code,
-        type: updatedCoupon.type,
-        value: updatedCoupon.value,
-        description: updatedCoupon.description || '',
-        min_order_value: updatedCoupon.minOrderValue || 0,
-        expires_at: updatedCoupon.expiresAt || null,
-        is_active: updatedCoupon.isActive,
-      };
-      if (updatedCoupon.firstPurchaseOnly !== undefined) {
-        updatePayload.first_purchase_only = updatedCoupon.firstPurchaseOnly;
-      }
-
-      let { error } = await supabase
-        .from('coupons')
-        .update(updatePayload)
-        .eq('id', id);
-
-      if (error && error.message && error.message.includes('first_purchase_only')) {
-        delete updatePayload.first_purchase_only;
-        const retry = await supabase.from('coupons').update(updatePayload).eq('id', id);
-        error = retry.error;
-      }
-
-      if (error) {
-        console.error('Erro ao atualizar cupom no Supabase:', error);
-        return { success: false, error: 'Falha ao salvar alterações no Supabase.' };
-      }
+  if (isDbConfigured()) {
+    try {
+      await sql`
+        UPDATE public.coupons
+        SET
+          code = ${updatedCoupon.code},
+          type = ${updatedCoupon.type},
+          value = ${updatedCoupon.value},
+          description = ${updatedCoupon.description || ''},
+          min_order_value = ${updatedCoupon.minOrderValue || 0},
+          expires_at = ${updatedCoupon.expiresAt || null},
+          is_active = ${updatedCoupon.isActive},
+          first_purchase_only = ${updatedCoupon.firstPurchaseOnly || false}
+        WHERE id = ${id}
+      `;
 
       existing[index] = updatedCoupon;
       saveLocalCoupons(existing);
       return { success: true, coupon: updatedCoupon };
+    } catch (error) {
+      console.error('Erro ao atualizar cupom no Neon:', error);
+      return { success: false, error: 'Falha ao salvar alterações no Neon.' };
     }
   }
 
@@ -324,7 +296,7 @@ export async function updateCoupon(
 }
 
 /**
- * Deleta um cupom por ID
+ * Deleta um cupom por ID no Neon
  */
 export async function deleteCoupon(id: string): Promise<{ success: boolean; error?: string }> {
   const existing = await getAllCoupons();
@@ -334,16 +306,14 @@ export async function deleteCoupon(id: string): Promise<{ success: boolean; erro
     return { success: false, error: 'Cupom não encontrado para exclusão.' };
   }
 
-  if (isSupabaseConfigured()) {
-    const supabase = getSupabaseAdmin();
-    if (supabase) {
-      const { error } = await supabase.from('coupons').delete().eq('id', id);
-      if (error) {
-        console.error('Erro ao excluir cupom no Supabase:', error);
-        return { success: false, error: 'Falha ao excluir cupom no Supabase.' };
-      }
+  if (isDbConfigured()) {
+    try {
+      await sql`DELETE FROM public.coupons WHERE id = ${id}`;
       saveLocalCoupons(filtered);
       return { success: true };
+    } catch (error) {
+      console.error('Erro ao excluir cupom no Neon:', error);
+      return { success: false, error: 'Falha ao excluir cupom no Neon.' };
     }
   }
 
@@ -392,7 +362,6 @@ export async function validateCoupon(
 
   const isFirstPurchaseCoupon = matched.firstPurchaseOnly === true || matched.code === 'PRIMEIRACOMPRA';
 
-  // Se for cupom de primeira compra e o telefone foi informado, verifica histórico no banco
   if (isFirstPurchaseCoupon && phone) {
     const hasPrevious = await hasCustomerCompletedOrders(phone);
     if (hasPrevious) {

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { StoreSettings, DEFAULT_SETTINGS } from '@/types/storeSettings';
-import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { sql, isDbConfigured } from '@/server/db/client';
 import { getSeedMeta, markSeedMeta } from '@/lib/seedMeta';
 import { updateAllCustomProductsLeadTime } from '@/lib/productsStore';
 
@@ -76,42 +76,34 @@ function writeLocalStatus(data: { isOnline: boolean }): void {
 }
 
 /**
- * Lê as configurações da loja (Supabase com auto-seed inicial + fallback local)
+ * Lê as configurações da loja no Neon (com auto-seed inicial e fallback local)
  */
 export async function getStoreSettings(): Promise<StoreSettings> {
-  if (isSupabaseConfigured()) {
-    const supabase = getSupabaseAdmin();
-    if (supabase) {
-      try {
-        const { data: row, error } = await supabase
-          .from('store_settings')
-          .select('data')
-          .eq('id', SETTINGS_ROW_ID)
-          .maybeSingle();
+  if (isDbConfigured()) {
+    try {
+      const rows = await sql<{ data: Partial<StoreSettings> }>`
+        SELECT data FROM public.store_settings WHERE id = ${SETTINGS_ROW_ID} LIMIT 1
+      `;
 
-        if (!error) {
-          if (row?.data) {
-            return mergeSettings(row.data as Partial<StoreSettings>);
-          }
-
-          const meta = await getSeedMeta();
-          const local = readLocalSettings();
-          if (!meta.settingsSeeded) {
-            await supabase.from('store_settings').upsert(
-              {
-                id: SETTINGS_ROW_ID,
-                data: local,
-                updated_at: new Date().toISOString(),
-              },
-              { onConflict: 'id' }
-            );
-            await markSeedMeta({ settingsSeeded: true });
-          }
-          return local;
-        }
-      } catch (err) {
-        console.error('Erro ao buscar ajustes da loja no Supabase, usando fallback local:', err);
+      if (rows.length > 0 && rows[0]?.data) {
+        return mergeSettings(rows[0].data);
       }
+
+      const meta = await getSeedMeta();
+      const local = readLocalSettings();
+      if (!meta.settingsSeeded) {
+        const nowIso = new Date().toISOString();
+        await sql`
+          INSERT INTO public.store_settings (id, data, updated_at)
+          VALUES (${SETTINGS_ROW_ID}, ${JSON.stringify(local)}::jsonb, ${nowIso})
+          ON CONFLICT (id) DO UPDATE
+          SET data = ${JSON.stringify(local)}::jsonb, updated_at = ${nowIso}
+        `;
+        await markSeedMeta({ settingsSeeded: true });
+      }
+      return local;
+    } catch (err) {
+      console.error('Erro ao buscar ajustes da loja no Neon, usando fallback local:', err);
     }
   }
 
@@ -119,7 +111,7 @@ export async function getStoreSettings(): Promise<StoreSettings> {
 }
 
 /**
- * Salva as configurações da loja e opcionalmente aplica o novo prazo de produção em lote
+ * Salva as configurações da loja no Neon e opcionalmente atualiza os prazos em lote
  */
 export async function updateStoreSettings(
   updates: Partial<StoreSettings>,
@@ -158,26 +150,24 @@ export async function updateStoreSettings(
       },
     };
 
-    if (isSupabaseConfigured()) {
-      const supabase = getSupabaseAdmin();
-      if (supabase) {
-        const { error } = await supabase.from('store_settings').upsert(
-          {
-            id: SETTINGS_ROW_ID,
-            data: updatedSettings,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'id' }
-        );
+    if (isDbConfigured()) {
+      const nowIso = new Date().toISOString();
+      const payload = JSON.stringify(updatedSettings);
 
-        if (error) {
-          console.error('Erro ao salvar ajustes no Supabase:', error);
-          return {
-            success: false,
-            settings: current,
-            error: 'Erro ao gravar configurações no Supabase.',
-          };
-        }
+      try {
+        await sql`
+          INSERT INTO public.store_settings (id, data, updated_at)
+          VALUES (${SETTINGS_ROW_ID}, ${payload}::jsonb, ${nowIso})
+          ON CONFLICT (id) DO UPDATE
+          SET data = ${payload}::jsonb, updated_at = ${nowIso}
+        `;
+      } catch (error) {
+        console.error('Erro ao salvar ajustes no Neon:', error);
+        return {
+          success: false,
+          settings: current,
+          error: 'Erro ao gravar configurações no Neon.',
+        };
       }
     }
 
@@ -199,42 +189,34 @@ export async function updateStoreSettings(
 }
 
 /**
- * Lê o status Online/Offline da loja (Supabase + fallback local)
+ * Lê o status Online/Offline da loja no Neon
  */
 export async function getStoreStatus(): Promise<{ isOnline: boolean }> {
-  if (isSupabaseConfigured()) {
-    const supabase = getSupabaseAdmin();
-    if (supabase) {
-      try {
-        const { data: row, error } = await supabase
-          .from('store_settings')
-          .select('data')
-          .eq('id', STATUS_ROW_ID)
-          .maybeSingle();
+  if (isDbConfigured()) {
+    try {
+      const rows = await sql<{ data: { isOnline?: boolean } }>`
+        SELECT data FROM public.store_settings WHERE id = ${STATUS_ROW_ID} LIMIT 1
+      `;
 
-        if (!error) {
-          if (row?.data && typeof (row.data as { isOnline?: boolean }).isOnline === 'boolean') {
-            return { isOnline: Boolean((row.data as { isOnline: boolean }).isOnline) };
-          }
-
-          const meta = await getSeedMeta();
-          const local = readLocalStatus();
-          if (!meta.statusSeeded) {
-            await supabase.from('store_settings').upsert(
-              {
-                id: STATUS_ROW_ID,
-                data: local,
-                updated_at: new Date().toISOString(),
-              },
-              { onConflict: 'id' }
-            );
-            await markSeedMeta({ statusSeeded: true });
-          }
-          return local;
-        }
-      } catch (err) {
-        console.error('Erro ao buscar status da loja no Supabase:', err);
+      if (rows.length > 0 && rows[0]?.data && typeof rows[0].data.isOnline === 'boolean') {
+        return { isOnline: Boolean(rows[0].data.isOnline) };
       }
+
+      const meta = await getSeedMeta();
+      const local = readLocalStatus();
+      if (!meta.statusSeeded) {
+        const nowIso = new Date().toISOString();
+        await sql`
+          INSERT INTO public.store_settings (id, data, updated_at)
+          VALUES (${STATUS_ROW_ID}, ${JSON.stringify(local)}::jsonb, ${nowIso})
+          ON CONFLICT (id) DO UPDATE
+          SET data = ${JSON.stringify(local)}::jsonb, updated_at = ${nowIso}
+        `;
+        await markSeedMeta({ statusSeeded: true });
+      }
+      return local;
+    } catch (err) {
+      console.error('Erro ao buscar status da loja no Neon:', err);
     }
   }
 
@@ -242,27 +224,23 @@ export async function getStoreStatus(): Promise<{ isOnline: boolean }> {
 }
 
 /**
- * Atualiza o status Online/Offline da loja
+ * Atualiza o status Online/Offline da loja no Neon
  */
 export async function updateStoreStatus(isOnline: boolean): Promise<{ isOnline: boolean }> {
   const payload = { isOnline: Boolean(isOnline) };
 
-  if (isSupabaseConfigured()) {
-    const supabase = getSupabaseAdmin();
-    if (supabase) {
-      const { error } = await supabase.from('store_settings').upsert(
-        {
-          id: STATUS_ROW_ID,
-          data: payload,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'id' }
-      );
-
-      if (error) {
-        console.error('Erro ao atualizar status da loja no Supabase:', error);
-        throw new Error('Erro ao atualizar status da loja no Supabase.');
-      }
+  if (isDbConfigured()) {
+    try {
+      const nowIso = new Date().toISOString();
+      await sql`
+        INSERT INTO public.store_settings (id, data, updated_at)
+        VALUES (${STATUS_ROW_ID}, ${JSON.stringify(payload)}::jsonb, ${nowIso})
+        ON CONFLICT (id) DO UPDATE
+        SET data = ${JSON.stringify(payload)}::jsonb, updated_at = ${nowIso}
+      `;
+    } catch (error) {
+      console.error('Erro ao atualizar status da loja no Neon:', error);
+      throw new Error('Erro ao atualizar status da loja no Neon.');
     }
   }
 

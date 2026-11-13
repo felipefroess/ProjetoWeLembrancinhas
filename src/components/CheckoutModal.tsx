@@ -326,7 +326,7 @@ export function CheckoutModal() {
     // Limpa o carrinho de imediato para novas compras
     clearCart();
 
-    // Registra o pedido no banco de dados Supabase de forma assíncrona
+    // Registra o pedido no banco de dados de forma assíncrona
     const shippingSummary = selectedShippingOption
       ? `Frete: ${selectedShippingOption.companyName} ${selectedShippingOption.name} (R$ ${selectedShippingOption.price.toFixed(2).replace('.', ',')}) - CEP ${shippingCep}`
       : deliveryMethod === 'entrega-correios' && shippingCep

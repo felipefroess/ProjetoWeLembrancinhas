@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { ProductionOrder, OrderStatus } from '@/types';
-import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { sql, isDbConfigured } from '@/server/db/client';
 
 const ORDERS_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'orders.json');
 const DELETED_ORDERS_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'deleted-orders.json');
@@ -89,43 +89,33 @@ function writeLocalOrders(orders: ProductionOrder[]): void {
 }
 
 /**
- * Tenta sincronizar pedidos que foram criados localmente para o Supabase
+ * Tenta sincronizar pedidos que foram criados localmente para o Neon
  */
-async function syncUnsyncedOrdersToSupabase(orders: ProductionOrder[]): Promise<void> {
-  if (!isSupabaseConfigured() || orders.length === 0) return;
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return;
+async function syncUnsyncedOrdersToNeon(orders: ProductionOrder[]): Promise<void> {
+  if (!isDbConfigured() || orders.length === 0) return;
 
   for (const ord of orders) {
     try {
-      const payload: any = {
-        customer_name: ord.customer_name,
-        customer_phone: ord.customer_phone || null,
-        event_date: ord.event_date || null,
-        delivery_method: ord.delivery_method,
-        delivery_address: ord.delivery_address || null,
-        general_notes: ord.general_notes || null,
-        total_units: ord.total_units,
-        total_amount: ord.total_amount,
-        status: ord.status,
-        items: ord.items,
-      };
-
-      // Se o ID já for UUID válido, preserva no banco
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ord.id);
-      if (isUuid) {
-        payload.id = ord.id;
-      }
+      const orderId = isUuid ? ord.id : crypto.randomUUID();
+      const itemsJson = JSON.stringify(ord.items || []);
+      const nowIso = ord.created_at || new Date().toISOString();
 
-      const { data, error } = await supabase
-        .from('orders')
-        .insert(payload)
-        .select('id')
-        .maybeSingle();
-
-      if (!error && data?.id && data.id !== ord.id) {
-        ord.id = String(data.id);
-      }
+      await sql`
+        INSERT INTO public.orders (
+          id, customer_name, customer_phone, event_date, delivery_method,
+          delivery_address, general_notes, total_units, total_amount,
+          coupon_code, discount_amount, subtotal_amount, status, items,
+          created_at, updated_at
+        ) VALUES (
+          ${orderId}::uuid, ${ord.customer_name}, ${ord.customer_phone || null}, ${ord.event_date || null},
+          ${ord.delivery_method}, ${ord.delivery_address || null}, ${ord.general_notes || null},
+          ${Number(ord.total_units) || 0}, ${Number(ord.total_amount) || 0},
+          ${ord.coupon_code || null}, ${ord.discount_amount || null}, ${ord.subtotal_amount || null},
+          ${ord.status}, ${itemsJson}::jsonb, ${nowIso}, ${nowIso}
+        )
+        ON CONFLICT (id) DO NOTHING
+      `;
     } catch {
       // Ignora falha silenciosa para não travar a aplicação
     }
@@ -133,84 +123,82 @@ async function syncUnsyncedOrdersToSupabase(orders: ProductionOrder[]): Promise<
 }
 
 /**
- * Busca todos os pedidos com redundância dupla (Supabase + Local),
- * espelhando automaticamente os dados para nunca perder pedidos.
+ * Busca todos os pedidos no Neon (com fallback e espelhamento local)
  */
-export async function getAllProductionOrders(): Promise<{ orders: ProductionOrder[]; source: 'supabase' | 'local' }> {
+export async function getAllProductionOrders(): Promise<{ orders: ProductionOrder[]; source: 'neon' | 'local' }> {
   const deletedIds = readDeletedOrderIds();
   const localOrders = readLocalOrders().filter(
     (o) => !deletedIds.has(String(o.id)) && o.status !== ('cancelado' as any)
   );
 
-  if (isSupabaseConfigured()) {
+  if (isDbConfigured()) {
     try {
-      const supabase = getSupabaseAdmin();
-      if (supabase) {
-        const { data: dbOrders, error } = await supabase
-          .from('orders')
-          .select('*')
-          .neq('status', 'cancelado')
-          .order('created_at', { ascending: false });
+      const dbOrders = await sql<any>`
+        SELECT 
+          id, customer_name, customer_phone, event_date, delivery_method,
+          delivery_address, general_notes, total_units, total_amount,
+          coupon_code, discount_amount, subtotal_amount, status, items,
+          created_at, updated_at
+        FROM public.orders
+        WHERE status != 'cancelado'
+        ORDER BY created_at DESC
+      `;
 
-        if (!error && Array.isArray(dbOrders)) {
-          const normalizedDbOrders: ProductionOrder[] = dbOrders
-            .filter((o) => !deletedIds.has(String(o.id)) && o.status !== 'cancelado')
-            .map((o) => ({
-              id: String(o.id),
-              customer_name: o.customer_name || 'Cliente',
-              customer_phone: o.customer_phone || '',
-              event_date: o.event_date || '',
-              delivery_method: o.delivery_method || 'retirada-pouso-alegre',
-              delivery_address: o.delivery_address || '',
-              general_notes: o.general_notes || '',
-              total_units: Number(o.total_units) || 0,
-              total_amount: Number(o.total_amount) || 0,
-              coupon_code: o.coupon_code || undefined,
-              discount_amount: o.discount_amount ? Number(o.discount_amount) : undefined,
-              subtotal_amount: o.subtotal_amount ? Number(o.subtotal_amount) : undefined,
-              status: normalizeStatus(o.status),
-              items: Array.isArray(o.items) ? o.items : [],
-              created_at: o.created_at || new Date().toISOString(),
-              updated_at: o.updated_at || undefined,
-            }));
+      if (Array.isArray(dbOrders)) {
+        const normalizedDbOrders: ProductionOrder[] = dbOrders
+          .filter((o) => !deletedIds.has(String(o.id)) && o.status !== 'cancelado')
+          .map((o) => ({
+            id: String(o.id),
+            customer_name: o.customer_name || 'Cliente',
+            customer_phone: o.customer_phone || '',
+            event_date: o.event_date || '',
+            delivery_method: o.delivery_method || 'retirada-pouso-alegre',
+            delivery_address: o.delivery_address || '',
+            general_notes: o.general_notes || '',
+            total_units: Number(o.total_units) || 0,
+            total_amount: Number(o.total_amount) || 0,
+            coupon_code: o.coupon_code || undefined,
+            discount_amount: o.discount_amount ? Number(o.discount_amount) : undefined,
+            subtotal_amount: o.subtotal_amount ? Number(o.subtotal_amount) : undefined,
+            status: normalizeStatus(o.status),
+            items: Array.isArray(o.items) ? o.items : [],
+            created_at: o.created_at || new Date().toISOString(),
+            updated_at: o.updated_at || undefined,
+          }));
 
-          // Mescla pedidos locais que ainda não existam no Supabase
-          const dbIds = new Set(normalizedDbOrders.map((o) => String(o.id)));
-          const unsyncedLocal = localOrders.filter((local) => {
-            if (dbIds.has(String(local.id))) return false;
-            const localTime = new Date(local.created_at).getTime();
-            const hasMatchingDb = normalizedDbOrders.some((db) => {
-              const dbTime = new Date(db.created_at).getTime();
-              return (
-                db.customer_name === local.customer_name &&
-                Math.abs(db.total_amount - local.total_amount) < 0.01 &&
-                Math.abs(dbTime - localTime) < 15000
-              );
-            });
-            return !hasMatchingDb;
+        // Mescla pedidos locais que ainda não existam no Neon
+        const dbIds = new Set(normalizedDbOrders.map((o) => String(o.id)));
+        const unsyncedLocal = localOrders.filter((local) => {
+          if (dbIds.has(String(local.id))) return false;
+          const localTime = new Date(local.created_at).getTime();
+          const hasMatchingDb = normalizedDbOrders.some((db) => {
+            const dbTime = new Date(db.created_at).getTime();
+            return (
+              db.customer_name === local.customer_name &&
+              Math.abs(db.total_amount - local.total_amount) < 0.01 &&
+              Math.abs(dbTime - localTime) < 15000
+            );
           });
+          return !hasMatchingDb;
+        });
 
-          const merged = [...unsyncedLocal, ...normalizedDbOrders].sort(
-            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-          );
+        const merged = [...unsyncedLocal, ...normalizedDbOrders].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
 
-          // Espelho local: mantém orders.json sempre sincronizado com o Supabase
-          writeLocalOrders(merged);
+        writeLocalOrders(merged);
 
-          // Se houver pedidos locais não salvos no Supabase, sincroniza em segundo plano
-          if (unsyncedLocal.length > 0) {
-            syncUnsyncedOrdersToSupabase(unsyncedLocal).catch(() => {});
-          }
-
-          return { orders: merged, source: 'supabase' };
+        if (unsyncedLocal.length > 0) {
+          syncUnsyncedOrdersToNeon(unsyncedLocal).catch(() => {});
         }
+
+        return { orders: merged, source: 'neon' };
       }
     } catch (err) {
-      console.error('Falha ao consultar pedidos no Supabase, usando arquivo local como fallback:', err);
+      console.error('Falha ao consultar pedidos no Neon, usando arquivo local como fallback:', err);
     }
   }
 
-  // Ordena por data de criação descrescente (fallback local)
   const sorted = [...localOrders].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
@@ -219,7 +207,7 @@ export async function getAllProductionOrders(): Promise<{ orders: ProductionOrde
 }
 
 /**
- * Salva um novo pedido com UUID seguro no arquivo local e no Supabase
+ * Salva um novo pedido com UUID seguro no Neon e espelho local
  */
 export async function createProductionOrder(orderData: {
   customerName: string;
@@ -257,44 +245,33 @@ export async function createProductionOrder(orderData: {
     created_at: nowIso,
   };
 
-  // Se Supabase estiver configurado, salva no banco com o mesmo UUID
-  if (isSupabaseConfigured()) {
+  if (isDbConfigured()) {
     try {
-      const supabase = getSupabaseAdmin();
-      if (supabase) {
-        const { data: inserted, error } = await supabase
-          .from('orders')
-          .insert({
-            id: newOrder.id,
-            customer_name: newOrder.customer_name,
-            customer_phone: newOrder.customer_phone || null,
-            event_date: newOrder.event_date || null,
-            delivery_method: newOrder.delivery_method,
-            delivery_address: newOrder.delivery_address || null,
-            general_notes: newOrder.general_notes || null,
-            total_units: newOrder.total_units,
-            total_amount: newOrder.total_amount,
-            coupon_code: newOrder.coupon_code || null,
-            discount_amount: newOrder.discount_amount || null,
-            subtotal_amount: newOrder.subtotal_amount || null,
-            status: newOrder.status,
-            items: newOrder.items,
-          })
-          .select('id')
-          .maybeSingle();
+      const itemsJson = JSON.stringify(newOrder.items);
+      const inserted = await sql<{ id: string }>`
+        INSERT INTO public.orders (
+          id, customer_name, customer_phone, event_date, delivery_method,
+          delivery_address, general_notes, total_units, total_amount,
+          coupon_code, discount_amount, subtotal_amount, status, items,
+          created_at, updated_at
+        ) VALUES (
+          ${newOrder.id}::uuid, ${newOrder.customer_name}, ${newOrder.customer_phone || null},
+          ${newOrder.event_date || null}, ${newOrder.delivery_method}, ${newOrder.delivery_address || null},
+          ${newOrder.general_notes || null}, ${newOrder.total_units}, ${newOrder.total_amount},
+          ${newOrder.coupon_code || null}, ${newOrder.discount_amount || null}, ${newOrder.subtotal_amount || null},
+          ${newOrder.status}, ${itemsJson}::jsonb, ${nowIso}, ${nowIso}
+        )
+        RETURNING id
+      `;
 
-        if (error) {
-          console.error('Erro retornado pelo Supabase ao inserir pedido:', error);
-        } else if (inserted?.id) {
-          newOrder.id = String(inserted.id);
-        }
+      if (inserted && inserted[0]?.id) {
+        newOrder.id = String(inserted[0].id);
       }
     } catch (err) {
-      console.error('Erro ao sincronizar pedido criado com Supabase:', err);
+      console.error('Erro ao salvar pedido no Neon:', err);
     }
   }
 
-  // Salva no arquivo local imediatamente (evita duplicações)
   const currentOrders = readLocalOrders().filter((o) => String(o.id) !== String(newOrder.id));
   currentOrders.unshift(newOrder);
   writeLocalOrders(currentOrders);
@@ -303,7 +280,7 @@ export async function createProductionOrder(orderData: {
 }
 
 /**
- * Atualiza o status e/ou notas de produção de um pedido
+ * Atualiza o status e/ou notas de produção de um pedido no Neon
  */
 export async function updateProductionOrderStatus(
   orderId: string,
@@ -328,49 +305,48 @@ export async function updateProductionOrderStatus(
     writeLocalOrders(currentOrders);
   }
 
-  // Sincroniza atualização com o Supabase se configurado
-  if (isSupabaseConfigured()) {
+  if (isDbConfigured()) {
     try {
-      const supabase = getSupabaseAdmin();
-      if (supabase) {
-        const updatePayload: any = {
-          status: normalized,
-          updated_at: nowIso,
-        };
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
+      if (isUuid) {
+        let rows: any[] = [];
         if (generalNotes !== undefined) {
-          updatePayload.general_notes = generalNotes;
+          rows = await sql`
+            UPDATE public.orders
+            SET status = ${normalized}, general_notes = ${generalNotes}, updated_at = ${nowIso}
+            WHERE id = ${orderId}::uuid
+            RETURNING *
+          `;
+        } else {
+          rows = await sql`
+            UPDATE public.orders
+            SET status = ${normalized}, updated_at = ${nowIso}
+            WHERE id = ${orderId}::uuid
+            RETURNING *
+          `;
         }
 
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
-        if (isUuid) {
-          const { data, error } = await supabase
-            .from('orders')
-            .update(updatePayload)
-            .eq('id', orderId)
-            .select('*')
-            .maybeSingle();
-
-          if (!error && data) {
-            updatedOrder = {
-              id: String(data.id),
-              customer_name: data.customer_name,
-              customer_phone: data.customer_phone || '',
-              event_date: data.event_date || '',
-              delivery_method: data.delivery_method || 'retirada-pouso-alegre',
-              delivery_address: data.delivery_address || '',
-              general_notes: data.general_notes || '',
-              total_units: Number(data.total_units) || 0,
-              total_amount: Number(data.total_amount) || 0,
-              status: normalizeStatus(data.status),
-              items: Array.isArray(data.items) ? data.items : [],
-              created_at: data.created_at || nowIso,
-              updated_at: data.updated_at || nowIso,
-            };
-          }
+        if (rows.length > 0) {
+          const data = rows[0];
+          updatedOrder = {
+            id: String(data.id),
+            customer_name: data.customer_name,
+            customer_phone: data.customer_phone || '',
+            event_date: data.event_date || '',
+            delivery_method: data.delivery_method || 'retirada-pouso-alegre',
+            delivery_address: data.delivery_address || '',
+            general_notes: data.general_notes || '',
+            total_units: Number(data.total_units) || 0,
+            total_amount: Number(data.total_amount) || 0,
+            status: normalizeStatus(data.status),
+            items: Array.isArray(data.items) ? data.items : [],
+            created_at: data.created_at || nowIso,
+            updated_at: data.updated_at || nowIso,
+          };
         }
       }
     } catch (err) {
-      console.error('Erro ao sincronizar status do pedido no Supabase:', err);
+      console.error('Erro ao sincronizar status do pedido no Neon:', err);
     }
   }
 
@@ -378,50 +354,36 @@ export async function updateProductionOrderStatus(
 }
 
 /**
- * Remove permanentemente um pedido do painel, do arquivo local e do Supabase
+ * Remove permanentemente um pedido do painel, do arquivo local e do Neon
  */
 export async function deleteProductionOrder(orderId: string): Promise<boolean> {
-  // 1. Registra o ID como excluído permanentemente
   addDeletedOrderId(orderId);
 
-  // 2. Remove do arquivo local
   const currentOrders = readLocalOrders();
   const filtered = currentOrders.filter((o) => String(o.id) !== String(orderId));
   if (filtered.length !== currentOrders.length) {
     writeLocalOrders(filtered);
   }
 
-  // 3. Marca como cancelado e tenta deletar no Supabase
-  if (isSupabaseConfigured()) {
+  if (isDbConfigured()) {
     try {
-      const supabase = getSupabaseAdmin();
-      if (supabase) {
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
-        if (isUuid) {
-          // Marca como cancelado
-          await supabase
-            .from('orders')
-            .update({ 
-              status: 'cancelado',
-              updated_at: new Date().toISOString() 
-            })
-            .eq('id', orderId);
-
-          // Tenta também a remoção física
-          await supabase.from('orders').delete().eq('id', orderId);
-        }
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
+      if (isUuid) {
+        await sql`
+          UPDATE public.orders
+          SET status = 'cancelado', updated_at = NOW()
+          WHERE id = ${orderId}::uuid
+        `;
+        await sql`DELETE FROM public.orders WHERE id = ${orderId}::uuid`;
       }
     } catch (err) {
-      console.error('Erro ao deletar pedido no Supabase:', err);
+      console.error('Erro ao deletar pedido no Neon:', err);
     }
   }
 
   return true;
 }
 
-/**
- * Normaliza número de telefone para comparação segura de dígitos (ignora máscaras e DDI 55)
- */
 export function cleanPhoneNumber(phone?: string): string {
   if (!phone) return '';
   const digits = phone.replace(/\D/g, '');
@@ -431,9 +393,6 @@ export function cleanPhoneNumber(phone?: string): string {
   return digits;
 }
 
-/**
- * Verifica se um número de telefone/WhatsApp já possui pedidos anteriores no sistema
- */
 export async function hasCustomerCompletedOrders(phone: string): Promise<boolean> {
   const cleanTarget = cleanPhoneNumber(phone);
   if (!cleanTarget || cleanTarget.length < 8) return false;

@@ -101,3 +101,4 @@ Para hospedar o site de forma 100% gratuita, com certificado SSL e domínio pró
 
 - **Desenvolvedor:** Felipe Fróes
 - **Cliente / Artesã:** Wenilze Fróes — **Wê Lembrancinhas** (Pouso Alegre - MG / Paraisópolis - MG)
+# felipe_we_lembrancinhas

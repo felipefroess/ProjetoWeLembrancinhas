@@ -33,6 +33,7 @@ yarn-error.log*
 # env files & secrets (never commit passwords, tokens, or keys)
 .env
 .env*
+!.env.example
 
 # keys, certificates & credentials
 *.pem
@@ -73,3 +74,4 @@ secrets.*
 next-env.d.ts
 
 tunnel-*.txt
+.neon

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { sql, isDbConfigured } from '@/server/db/client';
 import type { ProductionOrder } from '@/types';
 
 export interface CustomerPurchase {
@@ -91,55 +91,49 @@ function writeLocalCustomers(customers: CustomerRecord[]): void {
 }
 
 export async function listCustomers(): Promise<CustomerRecord[]> {
-  if (isSupabaseConfigured()) {
-    const supabase = getSupabaseAdmin();
-    if (supabase) {
-      try {
-        const { data: rows, error } = await supabase
-          .from('customers')
-          .select('*')
-          .order('updated_at', { ascending: false });
+  if (isDbConfigured()) {
+    try {
+      const rows = await sql<any>`
+        SELECT id, name, phone, instagram, notes, purchases, created_at, updated_at
+        FROM public.customers
+        ORDER BY updated_at DESC
+      `;
 
-        if (!error && rows) {
-          const remote = rows.map(normalizeCustomer);
-          const local = readLocalCustomers();
+      if (rows) {
+        const remote = rows.map(normalizeCustomer);
+        const local = readLocalCustomers();
 
-          // Identifica registros locais que ainda não existam no Supabase
-          const remoteIds = new Set(remote.map((r) => r.id));
-          const unsynced = local.filter((l) => !remoteIds.has(l.id));
+        const remoteIds = new Set(remote.map((r) => r.id));
+        const unsynced = local.filter((l) => !remoteIds.has(l.id));
 
-          if (unsynced.length > 0) {
-            // Sincroniza em segundo plano para o Supabase
-            (async () => {
-              for (const u of unsynced) {
-                try {
-                  await supabase.from('customers').upsert(
-                    {
-                      id: u.id,
-                      name: u.name,
-                      phone: u.phone || '',
-                      instagram: u.instagram || '',
-                      notes: u.notes || '',
-                      purchases: u.purchases,
-                      created_at: u.createdAt,
-                      updated_at: u.updatedAt,
-                    },
-                    { onConflict: 'id' }
-                  );
-                } catch (e) {
-                  console.error('Erro ao sincronizar cliente local para Supabase:', e);
-                }
+        if (unsynced.length > 0) {
+          (async () => {
+            for (const u of unsynced) {
+              try {
+                const purchasesJson = JSON.stringify(u.purchases);
+                await sql`
+                  INSERT INTO public.customers (
+                    id, name, phone, instagram, notes, purchases, created_at, updated_at
+                  ) VALUES (
+                    ${u.id}, ${u.name}, ${u.phone || ''}, ${u.instagram || ''},
+                    ${u.notes || ''}, ${purchasesJson}::jsonb, ${u.createdAt}, ${u.updatedAt}
+                  )
+                  ON CONFLICT (id) DO UPDATE
+                  SET name = EXCLUDED.name, purchases = EXCLUDED.purchases, updated_at = EXCLUDED.updated_at
+                `;
+              } catch (e) {
+                console.error('Erro ao sincronizar cliente local para Neon:', e);
               }
-            })();
-          }
-
-          const merged = [...unsynced, ...remote];
-          writeLocalCustomers(merged);
-          return merged;
+            }
+          })();
         }
-      } catch (err) {
-        console.error('Erro ao buscar fichas de clientes no Supabase:', err);
+
+        const merged = [...unsynced, ...remote];
+        writeLocalCustomers(merged);
+        return merged;
       }
+    } catch (err) {
+      console.error('Erro ao buscar fichas de clientes no Neon:', err);
     }
   }
 
@@ -147,34 +141,30 @@ export async function listCustomers(): Promise<CustomerRecord[]> {
 }
 
 async function saveCustomerRecord(record: CustomerRecord): Promise<CustomerRecord> {
-  if (isSupabaseConfigured()) {
-    const supabase = getSupabaseAdmin();
-    if (supabase) {
-      try {
-        const { error } = await supabase.from('customers').upsert(
-          {
-            id: record.id,
-            name: record.name,
-            phone: record.phone || '',
-            instagram: record.instagram || '',
-            notes: record.notes || '',
-            purchases: record.purchases,
-            created_at: record.createdAt,
-            updated_at: record.updatedAt,
-          },
-          { onConflict: 'id' }
-        );
-
-        if (error) {
-          console.error('Aviso ao salvar ficha do cliente no Supabase:', error);
-        }
-      } catch (err) {
-        console.error('Falha de rede com Supabase ao salvar cliente:', err);
-      }
+  if (isDbConfigured()) {
+    try {
+      const purchasesJson = JSON.stringify(record.purchases);
+      await sql`
+        INSERT INTO public.customers (
+          id, name, phone, instagram, notes, purchases, created_at, updated_at
+        ) VALUES (
+          ${record.id}, ${record.name}, ${record.phone || ''}, ${record.instagram || ''},
+          ${record.notes || ''}, ${purchasesJson}::jsonb, ${record.createdAt}, ${record.updatedAt}
+        )
+        ON CONFLICT (id) DO UPDATE
+        SET
+          name = EXCLUDED.name,
+          phone = EXCLUDED.phone,
+          instagram = EXCLUDED.instagram,
+          notes = EXCLUDED.notes,
+          purchases = EXCLUDED.purchases,
+          updated_at = EXCLUDED.updated_at
+      `;
+    } catch (err) {
+      console.error('Erro ao salvar ficha do cliente no Neon:', err);
     }
   }
 
-  // Grava sempre no arquivo local como garantia de redundância eterna
   const local = readLocalCustomers();
   const idx = local.findIndex((c) => c.id === record.id);
   if (idx >= 0) {
@@ -378,22 +368,12 @@ export async function deletePurchaseFromCustomer(
 }
 
 export async function deleteCustomer(customerId: string): Promise<{ success: boolean; error?: string }> {
-  if (isSupabaseConfigured()) {
-    const supabase = getSupabaseAdmin();
-    if (supabase) {
-      const { error } = await supabase.from('customers').delete().eq('id', customerId);
-      if (error) {
-        const isMissingTable =
-          error.code === '42P01' ||
-          error.code === 'PGRST205' ||
-          error.message?.includes('customers');
-        if (isMissingTable) {
-          console.warn('Tabela customers ausente no Supabase; excluindo apenas no JSON local.');
-        } else {
-          console.error('Erro ao excluir ficha do cliente no Supabase:', error);
-          return { success: false, error: `Falha ao excluir no Supabase: ${error.message}` };
-        }
-      }
+  if (isDbConfigured()) {
+    try {
+      await sql`DELETE FROM public.customers WHERE id = ${customerId}`;
+    } catch (error: any) {
+      console.error('Erro ao excluir ficha do cliente no Neon:', error);
+      return { success: false, error: `Falha ao excluir no Neon: ${error?.message}` };
     }
   }
 
@@ -429,7 +409,7 @@ function formatBrazilDateYMD(iso?: string): string {
       return dt.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
     }
   } catch {
-    // Fallback abaixo
+    // Fallback
   }
   return (iso || new Date().toISOString()).slice(0, 10);
 }
@@ -535,29 +515,6 @@ function findMatchingCustomer(
   return undefined;
 }
 
-function isOrderAlreadyInCustomer(
-  customer: CustomerRecord,
-  order: ProductionOrder,
-  candidatePurchase: CustomerPurchase
-): boolean {
-  const targetOrderId = String(order.id);
-  const candidateItemNorm = normalizeNameForMatch(candidatePurchase.item);
-
-  return customer.purchases.some((p) => {
-    if (p.orderId && p.orderId === targetOrderId) {
-      return true;
-    }
-    const sameDate = p.date === candidatePurchase.date;
-    const sameAmount = Math.abs((Number(p.amount) || 0) - candidatePurchase.amount) < 0.01;
-    const sameItem = normalizeNameForMatch(p.item) === candidateItemNorm;
-    return sameDate && sameAmount && sameItem;
-  });
-}
-
-/**
- * Registra automaticamente um pedido na ficha do cliente (agrupando por telefone ou nome).
- * Se o cliente ainda não tiver ficha, cria uma nova automaticamente.
- */
 export async function syncOrderToCustomerCard(order: ProductionOrder): Promise<{
   action: 'created_customer' | 'added_purchase' | 'updated_purchase' | 'skipped';
   customer?: CustomerRecord;
@@ -574,7 +531,6 @@ export async function syncOrderToCustomerCard(order: ProductionOrder): Promise<{
   const nowIso = new Date().toISOString();
 
   if (matched) {
-    // Procura se essa compra já está cadastrada na ficha (pelo orderId ou combinação de data/valor/item)
     const existingIndex = matched.purchases.findIndex((p) => {
       if (p.orderId && p.orderId === String(order.id)) return true;
       const sameDate = p.date === purchase.date;
@@ -627,10 +583,6 @@ export async function syncOrderToCustomerCard(order: ProductionOrder): Promise<{
   return { action: 'created_customer', customer: saved };
 }
 
-/**
- * Sincroniza em lote uma lista de pedidos existentes para as fichas de clientes,
- * agrupando pelo mesmo telefone ou nome e atualizando compras já registradas.
- */
 export async function syncOrdersBatchToCustomers(orders: ProductionOrder[]): Promise<{
   customers: CustomerRecord[];
   createdCustomers: number;
@@ -645,7 +597,6 @@ export async function syncOrdersBatchToCustomers(orders: ProductionOrder[]): Pro
   let updatedPurchases = 0;
   let skippedOrders = 0;
 
-  // Processa do mais antigo para o mais recente para manter ordem consistente
   const chronological = [...orders].sort((a, b) => {
     const tA = new Date(a.created_at || 0).getTime();
     const tB = new Date(b.created_at || 0).getTime();

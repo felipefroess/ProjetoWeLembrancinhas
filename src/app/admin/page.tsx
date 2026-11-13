@@ -47,7 +47,6 @@ import CustomersTab from './components/CustomersTab';
 import { ImageCropModal } from './components/ImageCropModal';
 import { STORE_CONFIG } from '@/data/products';
 import { getAnalyticsForPeriod, AnalyticsPeriod, TopProductStat } from '@/lib/analytics';
-import { getSupabase } from '@/lib/supabase';
 import styles from './Admin.module.css';
 
 export default function AdminDashboardPage() {
@@ -100,7 +99,7 @@ export default function AdminDashboardPage() {
     fetchStats();
   }, [fetchStats, mainTab]);
 
-  // Atualização ao vivo: polling a cada 5s na aba dashboard + foco da janela + Supabase Realtime
+  // Atualização ao vivo: polling a cada 5s na aba dashboard + foco da janela / visibilidade
   useEffect(() => {
     if (mainTab !== 'dashboard') return;
 
@@ -120,29 +119,10 @@ export default function AdminDashboardPage() {
     window.addEventListener('focus', handleFocus);
     document.addEventListener('visibilitychange', handleVisibility);
 
-    const supabase = getSupabase();
-    const channel = supabase
-      ? supabase
-          .channel(`dashboard-live-${period}`)
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
-            fetchStats();
-          })
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'page_views' }, () => {
-            fetchStats();
-          })
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'product_clicks' }, () => {
-            fetchStats();
-          })
-          .subscribe()
-      : null;
-
     return () => {
       clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibility);
-      if (supabase && channel) {
-        supabase.removeChannel(channel);
-      }
     };
   }, [mainTab, period, fetchStats]);
 
@@ -1137,7 +1117,7 @@ export default function AdminDashboardPage() {
                 <h2 className={styles.dashboardHeading}>Dashboard de Desempenho & Vendas</h2>
                 {isDbConfigured ? (
                   <span className={styles.databaseStatusBadge + ' ' + styles.databaseStatusBadgeConnected}>
-                    <ShieldCheck size={12} /> Supabase Ativo (Dados Reais)
+                    <ShieldCheck size={12} /> PostgreSQL Neon Ativo (Dados Reais)
                   </span>
                 ) : (
                   <span className={styles.databaseStatusBadge + ' ' + styles.databaseStatusBadgeDemo}>
@@ -1198,9 +1178,9 @@ export default function AdminDashboardPage() {
           {!isDbConfigured && (
             <div className={styles.databaseNoticeBanner}>
               <div>
-                <div className={styles.databaseNoticeTitle}>Banco de Dados Supabase Pronto para Ativação</div>
+                <div className={styles.databaseNoticeTitle}>Banco de Dados Neon (PostgreSQL) Pronto para Ativação</div>
                 <p className={styles.databaseNoticeDesc}>
-                  As tabelas e o rastreamento automático de visitas, cliques e pedidos já estão integrados no código! Assim que você adicionar suas chaves do Supabase no arquivo <code>.env.local</code>, este painel passará a exibir números 100% reais em tempo real.
+                  As tabelas e o rastreamento automático de visitas, cliques e pedidos já estão integrados! Assim que você configurar a variável <code>DATABASE_URL</code> no arquivo <code>.env.local</code>, este painel passará a exibir números 100% reais em tempo real.
                 </p>
               </div>
             </div>

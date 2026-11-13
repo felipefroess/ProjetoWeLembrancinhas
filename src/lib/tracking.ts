@@ -52,7 +52,7 @@ export function trackProductClick(product: { id: string; name: string; category?
 }
 
 /**
- * Envia o pedido para persistência no banco Supabase
+ * Envia o pedido para persistência no banco de dados via API
  */
 export async function trackOrderToDatabase(orderData: {
   customerName: string;

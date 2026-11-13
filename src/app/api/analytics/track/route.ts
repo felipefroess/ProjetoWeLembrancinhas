@@ -1,27 +1,21 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { sql, isDbConfigured } from '@/server/db/client';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { type } = body;
 
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json({ success: true, configured: false });
-    }
-
-    const supabase = getSupabaseAdmin();
-    if (!supabase) {
+    if (!isDbConfigured()) {
       return NextResponse.json({ success: true, configured: false });
     }
 
     if (type === 'pageview') {
       const { path = '/', sessionId, userAgent } = body;
-      await supabase.from('page_views').insert({
-        page_path: path,
-        session_id: sessionId || null,
-        user_agent: userAgent || null,
-      });
+      await sql`
+        INSERT INTO public.page_views (page_path, session_id, user_agent)
+        VALUES (${path}, ${sessionId || null}, ${userAgent || null})
+      `;
       return NextResponse.json({ success: true, tracked: 'pageview' });
     }
 
@@ -31,17 +25,16 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'productId obrigatório' }, { status: 400 });
       }
 
-      await supabase.from('product_clicks').insert({
-        product_id: productId,
-        product_name: productName || null,
-        category: category || null,
-      });
+      await sql`
+        INSERT INTO public.product_clicks (product_id, product_name, category)
+        VALUES (${productId}, ${productName || null}, ${category || null})
+      `;
       return NextResponse.json({ success: true, tracked: 'click' });
     }
 
     return NextResponse.json({ error: 'Tipo de evento inválido' }, { status: 400 });
   } catch (error) {
-    console.error('Erro ao registrar analytics:', error);
+    console.error('Erro ao registrar analytics no Neon:', error);
     return NextResponse.json({ success: false, error: 'Erro interno' }, { status: 500 });
   }
 }

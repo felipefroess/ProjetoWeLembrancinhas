@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { sql, isDbConfigured } from '@/server/db/client';
 import { AnalyticsPeriod, TopProductStat } from '@/lib/analytics';
 import { getAllProductionOrders } from '@/lib/ordersStore';
 
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
     const isoStart = startDate.toISOString();
     const prevIsoStart = prevStartDate.toISOString();
 
-    if (!isSupabaseConfigured()) {
+    if (!isDbConfigured()) {
       const { orders: allLocalOrders } = await getAllProductionOrders();
       const currentOrders = allLocalOrders.filter(
         (o) => new Date(o.created_at).getTime() >= startDate.getTime()
@@ -117,44 +117,43 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const supabase = getSupabaseAdmin();
-    if (!supabase) {
-      return NextResponse.json({ configured: false, hasRealData: false });
-    }
-
-    // Executa todas as consultas de métricas no Supabase em paralelo
+    // Executa as consultas de métricas no Neon em paralelo com queries parametrizadas
     const [
-      { count: visitsCount },
-      { count: prevVisitsCount },
-      { data: orders },
-      { data: prevOrders },
-      { data: clicks },
+      visitsRows,
+      prevVisitsRows,
+      orders,
+      prevOrders,
+      clicks,
     ] = await Promise.all([
-      supabase
-        .from('page_views')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', isoStart),
-      supabase
-        .from('page_views')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', prevIsoStart)
-        .lt('created_at', isoStart),
-      supabase
-        .from('orders')
-        .select('*')
-        .gte('created_at', isoStart)
-        .neq('status', 'cancelado'),
-      supabase
-        .from('orders')
-        .select('total_amount, total_units')
-        .gte('created_at', prevIsoStart)
-        .lt('created_at', isoStart)
-        .neq('status', 'cancelado'),
-      supabase
-        .from('product_clicks')
-        .select('product_id, product_name, category')
-        .gte('created_at', isoStart),
+      sql<{ count: number }>`
+        SELECT COUNT(*)::int as count 
+        FROM public.page_views 
+        WHERE created_at >= ${isoStart}::timestamptz
+      `,
+      sql<{ count: number }>`
+        SELECT COUNT(*)::int as count 
+        FROM public.page_views 
+        WHERE created_at >= ${prevIsoStart}::timestamptz AND created_at < ${isoStart}::timestamptz
+      `,
+      sql<any>`
+        SELECT * 
+        FROM public.orders 
+        WHERE created_at >= ${isoStart}::timestamptz AND status != 'cancelado'
+      `,
+      sql<{ total_amount: number; total_units: number }>`
+        SELECT total_amount, total_units 
+        FROM public.orders 
+        WHERE created_at >= ${prevIsoStart}::timestamptz AND created_at < ${isoStart}::timestamptz AND status != 'cancelado'
+      `,
+      sql<{ product_id: string; product_name: string; category: string }>`
+        SELECT product_id, product_name, category 
+        FROM public.product_clicks 
+        WHERE created_at >= ${isoStart}::timestamptz
+      `,
     ]);
+
+    const visitsCount = visitsRows[0]?.count || 0;
+    const prevVisitsCount = prevVisitsRows[0]?.count || 0;
 
     const clicksByProduct: Record<string, { count: number; name?: string; category?: string }> = {};
     (clicks || []).forEach((c) => {
@@ -182,7 +181,7 @@ export async function GET(request: NextRequest) {
     const mostClickedUnits = mostClickedId ? salesByProduct[mostClickedId]?.units || 0 : 0;
 
     const hasRealData = Boolean(
-      (visitsCount && visitsCount > 0) ||
+      visitsCount > 0 ||
       ordersCount > 0 ||
       (clicks && clicks.length > 0)
     );
@@ -193,11 +192,11 @@ export async function GET(request: NextRequest) {
       period,
       totalRevenue,
       unitsSold,
-      visits: visitsCount || 0,
+      visits: visitsCount,
       ordersCount,
       growthRevenue: formatGrowth(totalRevenue, prevRevenue),
       growthUnits: formatGrowth(unitsSold, prevUnits),
-      growthVisits: formatGrowth(visitsCount || 0, prevVisitsCount || 0),
+      growthVisits: formatGrowth(visitsCount, prevVisitsCount),
       mostClicked: mostClickedId
         ? {
             productId: mostClickedId,
@@ -211,7 +210,7 @@ export async function GET(request: NextRequest) {
       clicksByProduct,
     });
   } catch (error) {
-    console.error('Erro ao calcular analytics reais:', error);
+    console.error('Erro ao calcular analytics reais no Neon:', error);
     return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
   }
 }

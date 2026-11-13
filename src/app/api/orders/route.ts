@@ -6,7 +6,7 @@ import {
   deleteProductionOrder 
 } from '@/lib/ordersStore';
 import { syncOrderToCustomerCard } from '@/lib/customersStore';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { isDbConfigured } from '@/server/db/client';
 import { OrderStatus } from '@/types';
 
 const NO_CACHE_HEADERS = {
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
       { 
         success: true, 
         orders, 
-        configured: isSupabaseConfigured(),
+        configured: isDbConfigured(),
         source 
       },
       {

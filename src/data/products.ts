@@ -21,10 +21,10 @@ export const PRODUCTS: Product[] = [
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
-    "image": "/uploads/1794273604641-saveclip.app_772146016_18210586753347767_6013644574615738441_n.jpg",
+    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794273604641-saveclip.app_772146016_18210586753347767_6013644574615738441_n.jpg",
     "images": [
-      "/uploads/1794273604641-saveclip.app_772146016_18210586753347767_6013644574615738441_n.jpg",
-      "/uploads/1794273611919-saveclip.app_772021578_18210586780347767_4415137288430920270_n.jpg"
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794273604641-saveclip.app_772146016_18210586753347767_6013644574615738441_n.jpg",
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794273611919-saveclip.app_772021578_18210586780347767_4415137288430920270_n.jpg"
     ],
     "customizationSettings": {
       "allowChildName": true,
@@ -60,25 +60,25 @@ export const PRODUCTS: Product[] = [
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
-    "image": "/uploads/1794416303745-recorte-1794416303725.jpg",
+    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794416303745-recorte-1794416303725.jpg",
     "images": [
-      "/uploads/1794416303745-recorte-1794416303725.jpg"
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794416303745-recorte-1794416303725.jpg"
     ],
     "variations": [
       {
         "id": "var_1794457544897_0",
         "name": "Modelo 1",
-        "image": "/uploads/1794274822116-saveclip.app_561757077_18177293875347767_1852012969418825078_n.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794274822116-saveclip.app_561757077_18177293875347767_1852012969418825078_n.jpg",
         "images": [
-          "/uploads/1794274822116-saveclip.app_561757077_18177293875347767_1852012969418825078_n.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794274822116-saveclip.app_561757077_18177293875347767_1852012969418825078_n.jpg"
         ]
       },
       {
         "id": "var_1794457544897_1",
         "name": "Modelo 2",
-        "image": "/uploads/1794274832811-saveclip.app_559554486_18177293884347767_1237520079746612932_n.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794274832811-saveclip.app_559554486_18177293884347767_1237520079746612932_n.jpg",
         "images": [
-          "/uploads/1794274832811-saveclip.app_559554486_18177293884347767_1237520079746612932_n.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794274832811-saveclip.app_559554486_18177293884347767_1237520079746612932_n.jpg"
         ]
       }
     ],
@@ -113,9 +113,9 @@ export const PRODUCTS: Product[] = [
     "leadTimeDays": 5,
     "popular": false,
     "featured": true,
-    "image": "/uploads/1794416284556-recorte-1794416284528.jpg",
+    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794416284556-recorte-1794416284528.jpg",
     "images": [
-      "/uploads/1794416284556-recorte-1794416284528.jpg",
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794416284556-recorte-1794416284528.jpg",
       "/images/professores/lembrancinha-sonho-de-valsa.jpg"
     ],
     "variations": [
@@ -224,28 +224,28 @@ export const PRODUCTS: Product[] = [
       {
         "id": "var_1794456911805_1",
         "name": "Modelo 2",
-        "image": "/uploads/1794333437976-saveclip.app_538768100_18172355338347767_2299544466431525219_n.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794333437976-saveclip.app_538768100_18172355338347767_2299544466431525219_n.jpg",
         "images": [
-          "/uploads/1794333437976-saveclip.app_538768100_18172355338347767_2299544466431525219_n.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794333437976-saveclip.app_538768100_18172355338347767_2299544466431525219_n.jpg"
         ],
         "description": "Modelo conta com a capa dura e acabamento holográfico, flores campestres, tassel roxo e passante de borboleta dourada."
       },
       {
         "id": "var_1794456911805_2",
         "name": "Modelo 3",
-        "image": "/uploads/1794333488324-saveclip.app_539454379_18173392714347767_7517392955588664362_n.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794333488324-saveclip.app_539454379_18173392714347767_7517392955588664362_n.jpg",
         "images": [
-          "/uploads/1794333488324-saveclip.app_539454379_18173392714347767_7517392955588664362_n.jpg",
-          "/uploads/1794333493211-saveclip.app_544073499_18173392741347767_8193566408890919383_n.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794333488324-saveclip.app_539454379_18173392714347767_7517392955588664362_n.jpg",
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794333493211-saveclip.app_544073499_18173392741347767_8193566408890919383_n.jpg"
         ],
         "description": "Modelo conta com a capa dura e holográfica floral, nome e inicial, e elástico com passante dourado."
       },
       {
         "id": "var_1794456911805_3",
         "name": "Modelo 4",
-        "image": "/uploads/1794333556658-saveclip.app_521541070_18169066933347767_8499588843540459767_n.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794333556658-saveclip.app_521541070_18169066933347767_8499588843540459767_n.jpg",
         "images": [
-          "/uploads/1794333556658-saveclip.app_521541070_18169066933347767_8499588843540459767_n.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794333556658-saveclip.app_521541070_18169066933347767_8499588843540459767_n.jpg"
         ],
         "description": "Modelo conta com capa dura floral holográfica, nome com inicial, elástico e tassel."
       }
@@ -278,25 +278,25 @@ export const PRODUCTS: Product[] = [
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
-    "image": "/uploads/1794419836305-gemini_generated_image_s2zf35s2zf35s2zf.jfif",
+    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794419836305-gemini_generated_image_s2zf35s2zf35s2zf.jfif",
     "images": [
-      "/uploads/1794419836305-gemini_generated_image_s2zf35s2zf35s2zf.jfif"
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794419836305-gemini_generated_image_s2zf35s2zf35s2zf.jfif"
     ],
     "variations": [
       {
         "id": "var_1794441887458_0",
         "name": "Modelo 1",
-        "image": "/uploads/1794419831520-gemini_generated_image_s2zf35s2zf35s2zf.jfif",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794419831520-gemini_generated_image_s2zf35s2zf35s2zf.jfif",
         "images": [
-          "/uploads/1794419831520-gemini_generated_image_s2zf35s2zf35s2zf.jfif"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794419831520-gemini_generated_image_s2zf35s2zf35s2zf.jfif"
         ]
       },
       {
         "id": "var_1794441887458_1",
         "name": "Modelo 2",
-        "image": "/uploads/1794419827872-saveclip.app_588720354_18183661219347767_9060147958946855120_n.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794419827872-saveclip.app_588720354_18183661219347767_9060147958946855120_n.jpg",
         "images": [
-          "/uploads/1794419827872-saveclip.app_588720354_18183661219347767_9060147958946855120_n.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794419827872-saveclip.app_588720354_18183661219347767_9060147958946855120_n.jpg"
         ]
       }
     ],
@@ -332,10 +332,10 @@ export const PRODUCTS: Product[] = [
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
-    "image": "/uploads/1794319780757-saveclip.app_502950022_18164158618347767_3604424657868561051_n.jpg",
+    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794319780757-saveclip.app_502950022_18164158618347767_3604424657868561051_n.jpg",
     "images": [
-      "/uploads/1794319780757-saveclip.app_502950022_18164158618347767_3604424657868561051_n.jpg",
-      "/uploads/1794319788254-saveclip.app_502405449_18164158609347767_4785126441019407278_n.jpg"
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794319780757-saveclip.app_502950022_18164158618347767_3604424657868561051_n.jpg",
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794319788254-saveclip.app_502405449_18164158609347767_4785126441019407278_n.jpg"
     ],
     "customizationSettings": {
       "allowChildName": false,
@@ -356,28 +356,28 @@ export const PRODUCTS: Product[] = [
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
-    "image": "/uploads/1794322329304-saveclip.app_502942743_18164158282347767_2874077480112854440_n.jpg",
+    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794322329304-saveclip.app_502942743_18164158282347767_2874077480112854440_n.jpg",
     "images": [
-      "/uploads/1794322329304-saveclip.app_502942743_18164158282347767_2874077480112854440_n.jpg",
-      "/uploads/1794322336977-saveclip.app_502084229_18164158291347767_6072347069785725598_n.jpg"
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794322329304-saveclip.app_502942743_18164158282347767_2874077480112854440_n.jpg",
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794322336977-saveclip.app_502084229_18164158291347767_6072347069785725598_n.jpg"
     ],
     "variations": [
       {
         "id": "var_1794416989068_0",
         "name": "Modelo 1",
-        "image": "/uploads/1794322348494-saveclip.app_502942743_18164158282347767_2874077480112854440_n.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794322348494-saveclip.app_502942743_18164158282347767_2874077480112854440_n.jpg",
         "images": [
-          "/uploads/1794322348494-saveclip.app_502942743_18164158282347767_2874077480112854440_n.jpg",
-          "/uploads/1794322336977-saveclip.app_502084229_18164158291347767_6072347069785725598_n.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794322348494-saveclip.app_502942743_18164158282347767_2874077480112854440_n.jpg",
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794322336977-saveclip.app_502084229_18164158291347767_6072347069785725598_n.jpg"
         ]
       },
       {
         "id": "var_1794416989068_1",
         "name": "Modelo 2",
-        "image": "/uploads/1794322416835-saveclip.app_502659714_18163975918347767_928340238878548303_n.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794322416835-saveclip.app_502659714_18163975918347767_928340238878548303_n.jpg",
         "images": [
-          "/uploads/1794322416835-saveclip.app_502659714_18163975918347767_928340238878548303_n.jpg",
-          "/uploads/1794323172385-saveclip.app_502069239_18163975927347767_3323008487323382388_n.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794322416835-saveclip.app_502659714_18163975918347767_928340238878548303_n.jpg",
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794323172385-saveclip.app_502069239_18163975927347767_3323008487323382388_n.jpg"
         ]
       }
     ],
@@ -400,9 +400,9 @@ export const PRODUCTS: Product[] = [
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
-    "image": "/uploads/1794335405021-saveclip.app_624067620_18171071590384048_8655808288146978986_n.jpg",
+    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794335405021-saveclip.app_624067620_18171071590384048_8655808288146978986_n.jpg",
     "images": [
-      "/uploads/1794335405021-saveclip.app_624067620_18171071590384048_8655808288146978986_n.jpg"
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794335405021-saveclip.app_624067620_18171071590384048_8655808288146978986_n.jpg"
     ],
     "customizationSettings": {
       "allowChildName": false,
@@ -432,9 +432,9 @@ export const PRODUCTS: Product[] = [
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
-    "image": "/uploads/1794335601162-saveclip.app_654891797_18089775532928331_951258065111492404_n.jpg",
+    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794335601162-saveclip.app_654891797_18089775532928331_951258065111492404_n.jpg",
     "images": [
-      "/uploads/1794335601162-saveclip.app_654891797_18089775532928331_951258065111492404_n.jpg"
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794335601162-saveclip.app_654891797_18089775532928331_951258065111492404_n.jpg"
     ],
     "customizationSettings": {
       "allowChildName": false,
@@ -449,20 +449,20 @@ export const PRODUCTS: Product[] = [
       {
         "id": "var_1794438450489_0",
         "name": "Modelo 1",
-        "image": "/uploads/1794335810079-saveclip.app_654891797_18089775532928331_951258065111492404_n.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794335810079-saveclip.app_654891797_18089775532928331_951258065111492404_n.jpg",
         "images": [
-          "/uploads/1794335810079-saveclip.app_654891797_18089775532928331_951258065111492404_n.jpg",
-          "/uploads/1794335815075-saveclip.app_652773064_18084625118254083_8374610967704577579_n.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794335810079-saveclip.app_654891797_18089775532928331_951258065111492404_n.jpg",
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794335815075-saveclip.app_652773064_18084625118254083_8374610967704577579_n.jpg"
         ],
         "description": "Lembrancinha de Natal Porta-Bis com 3 unidades"
       },
       {
         "id": "var_1794438450489_1",
         "name": "Modelo 2",
-        "image": "/uploads/1794335921834-saveclip.app_669951093_18579763231027025_2885427802905799559_n.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794335921834-saveclip.app_669951093_18579763231027025_2885427802905799559_n.jpg",
         "images": [
-          "/uploads/1794335921834-saveclip.app_669951093_18579763231027025_2885427802905799559_n.jpg",
-          "/uploads/1794335925204-saveclip.app_649604025_17938381596014062_8131345668314107267_n.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794335921834-saveclip.app_669951093_18579763231027025_2885427802905799559_n.jpg",
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794335925204-saveclip.app_649604025_17938381596014062_8131345668314107267_n.jpg"
         ],
         "description": "Lembrancinha de Natal Porta-Bis com 6 unidades"
       }
@@ -477,9 +477,9 @@ export const PRODUCTS: Product[] = [
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
-    "image": "/uploads/1794336063492-saveclip.app_625871771_18087632734883825_6662944217020735260_n.jpg",
+    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794336063492-saveclip.app_625871771_18087632734883825_6662944217020735260_n.jpg",
     "images": [
-      "/uploads/1794336063492-saveclip.app_625871771_18087632734883825_6662944217020735260_n.jpg"
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794336063492-saveclip.app_625871771_18087632734883825_6662944217020735260_n.jpg"
     ],
     "customizationSettings": {
       "allowChildName": false,
@@ -522,9 +522,9 @@ export const PRODUCTS: Product[] = [
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
-    "image": "/uploads/1794336276063-saveclip.app_625053975_18112211146567565_1096708006824092779_n.jpg",
+    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794336276063-saveclip.app_625053975_18112211146567565_1096708006824092779_n.jpg",
     "images": [
-      "/uploads/1794336276063-saveclip.app_625053975_18112211146567565_1096708006824092779_n.jpg"
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794336276063-saveclip.app_625053975_18112211146567565_1096708006824092779_n.jpg"
     ],
     "customizationSettings": {
       "allowChildName": false,
@@ -559,33 +559,33 @@ export const PRODUCTS: Product[] = [
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
-    "image": "/uploads/1794407326238-saveclip.app_857246287_18218060854347767_5753697527518423786_n.jpg",
+    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794407326238-saveclip.app_857246287_18218060854347767_5753697527518423786_n.jpg",
     "images": [
-      "/uploads/1794407326238-saveclip.app_857246287_18218060854347767_5753697527518423786_n.jpg"
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794407326238-saveclip.app_857246287_18218060854347767_5753697527518423786_n.jpg"
     ],
     "variations": [
       {
         "id": "var_1794457278774_0",
         "name": "Modelo 1",
-        "image": "/uploads/1794407368494-saveclip.app_859801689_18218060917347767_3784566472842721051_n.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794407368494-saveclip.app_859801689_18218060917347767_3784566472842721051_n.jpg",
         "images": [
-          "/uploads/1794407368494-saveclip.app_859801689_18218060917347767_3784566472842721051_n.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794407368494-saveclip.app_859801689_18218060917347767_3784566472842721051_n.jpg"
         ]
       },
       {
         "id": "var_1794457278774_1",
         "name": "Modelo 2",
-        "image": "/uploads/1794407375645-saveclip.app_858263650_18218060965347767_7417340956182341151_n.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794407375645-saveclip.app_858263650_18218060965347767_7417340956182341151_n.jpg",
         "images": [
-          "/uploads/1794407375645-saveclip.app_858263650_18218060965347767_7417340956182341151_n.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794407375645-saveclip.app_858263650_18218060965347767_7417340956182341151_n.jpg"
         ]
       },
       {
         "id": "var_1794457278774_2",
         "name": "Modelo 3",
-        "image": "/uploads/1794407383078-saveclip.app_858263658_18218060863347767_196120946507788477_n.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794407383078-saveclip.app_858263658_18218060863347767_196120946507788477_n.jpg",
         "images": [
-          "/uploads/1794407383078-saveclip.app_858263658_18218060863347767_196120946507788477_n.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794407383078-saveclip.app_858263658_18218060863347767_196120946507788477_n.jpg"
         ]
       }
     ],
@@ -633,9 +633,9 @@ export const PRODUCTS: Product[] = [
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
-    "image": "/uploads/1794416341154-recorte-1794416341134.jpg",
+    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794416341154-recorte-1794416341134.jpg",
     "images": [
-      "/uploads/1794416341154-recorte-1794416341134.jpg"
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794416341154-recorte-1794416341134.jpg"
     ],
     "customizationSettings": {
       "allowChildName": true,
@@ -651,27 +651,27 @@ export const PRODUCTS: Product[] = [
       {
         "id": "var_1794457002025_0",
         "name": "Mário",
-        "image": "/uploads/1794416586504-recorte-1794416586485.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794416586504-recorte-1794416586485.jpg",
         "images": [
-          "/uploads/1794416586504-recorte-1794416586485.jpg",
-          "/uploads/1794416582565-recorte-1794416582548.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794416586504-recorte-1794416586485.jpg",
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794416582565-recorte-1794416582548.jpg"
         ]
       },
       {
         "id": "var_1794457002025_1",
         "name": "Hulk",
-        "image": "/uploads/1794416607996-recorte-1794416607988.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794416607996-recorte-1794416607988.jpg",
         "images": [
-          "/uploads/1794416607996-recorte-1794416607988.jpg",
-          "/uploads/1794416614710-recorte-1794416614700.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794416607996-recorte-1794416607988.jpg",
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794416614710-recorte-1794416614700.jpg"
         ]
       },
       {
         "id": "var_1794457002025_2",
         "name": "Léo o Caminhão",
-        "image": "/uploads/1794417620183-gemini_generated_image_magdxqmagdxqmagd.jfif",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794417620183-gemini_generated_image_magdxqmagdxqmagd.jfif",
         "images": [
-          "/uploads/1794417620183-gemini_generated_image_magdxqmagdxqmagd.jfif"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794417620183-gemini_generated_image_magdxqmagdxqmagd.jfif"
         ]
       }
     ]
@@ -685,25 +685,25 @@ export const PRODUCTS: Product[] = [
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
-    "image": "/uploads/1794415829547-recorte-1794415829510.jpg",
+    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794415829547-recorte-1794415829510.jpg",
     "images": [
-      "/uploads/1794415829547-recorte-1794415829510.jpg"
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794415829547-recorte-1794415829510.jpg"
     ],
     "variations": [
       {
         "id": "var_1794457010872_0",
         "name": "Azul",
-        "image": "/uploads/1794417285879-recorte-1794417285857.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794417285879-recorte-1794417285857.jpg",
         "images": [
-          "/uploads/1794417285879-recorte-1794417285857.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794417285879-recorte-1794417285857.jpg"
         ]
       },
       {
         "id": "var_1794457010872_1",
         "name": "Rosa",
-        "image": "/uploads/1794417297379-recorte-1794417297344.jpg",
+        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794417297379-recorte-1794417297344.jpg",
         "images": [
-          "/uploads/1794417297379-recorte-1794417297344.jpg"
+          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794417297379-recorte-1794417297344.jpg"
         ]
       }
     ],
@@ -727,9 +727,9 @@ export const PRODUCTS: Product[] = [
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
-    "image": "/uploads/1794420796849-recorte-1794420796838.jpg",
+    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794420796849-recorte-1794420796838.jpg",
     "images": [
-      "/uploads/1794420796849-recorte-1794420796838.jpg"
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794420796849-recorte-1794420796838.jpg"
     ],
     "customizationSettings": {
       "allowChildName": false,
@@ -750,9 +750,9 @@ export const PRODUCTS: Product[] = [
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
-    "image": "/uploads/1794422432939-gemini_generated_image_3p41gy3p41gy3p41.jfif",
+    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794422432939-gemini_generated_image_3p41gy3p41gy3p41.jfif",
     "images": [
-      "/uploads/1794422432939-gemini_generated_image_3p41gy3p41gy3p41.jfif"
+      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794422432939-gemini_generated_image_3p41gy3p41gy3p41.jfif"
     ],
     "customizationSettings": {
       "allowChildName": false,
@@ -781,3 +781,4 @@ export const PRODUCTS: Product[] = [
     "popular": true
   }
 ];
+
