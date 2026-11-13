@@ -239,7 +239,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
 
     let message = `Olá, Wê! Tudo bem?\n`;
-    message += `Gostaria de fazer um pedido pela sua loja online (*Wê Lembrancinhas*):\n\n`;
+    message += `Gostaria de fazer um pedido pela sua loja online:\n\n`;
     message += `━━━━━━━━━━━━━━━━━━━━━\n`;
     message += `*ITENS DO PEDIDO:*\n`;
     message += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
