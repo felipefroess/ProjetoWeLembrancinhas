@@ -17,6 +17,7 @@ Save,
   Gift
 } from 'lucide-react';
 import { useStoreSettings } from '@/context/StoreSettingsContext';
+import { DEFAULT_SETTINGS } from '@/types/storeSettings';
 import styles from './StoreSettingsTab.module.css';
 
 const BANNER_TEMPLATES = [
@@ -61,7 +62,7 @@ export default function StoreSettingsTab() {
   useEffect(() => {
     if (settings) {
       setBannerEnabled(settings.topBanner?.enabled ?? true);
-      setBannerText(settings.topBanner?.text || '🎄 Agenda de encomendas para o Natal aberta até 15/12!');
+      setBannerText(settings.topBanner?.text || DEFAULT_SETTINGS.topBanner.text || '');
       setBannerLink(settings.topBanner?.link || '#catalogo');
       setBannerBgColor(settings.topBanner?.bgColor || '#6D4C3D');
       setBannerTextColor(settings.topBanner?.textColor || '#FFFFFF');

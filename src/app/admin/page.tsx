@@ -52,6 +52,7 @@ import styles from './Admin.module.css';
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [isAuthenticatedUser, setIsAuthenticatedUser] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -140,6 +141,7 @@ export default function AdminDashboardPage() {
   const [unit, setUnit] = useState('unidade');
   const [leadTimeDays, setLeadTimeDays] = useState('5');
   const [minQuantity, setMinQuantity] = useState('1');
+  const [isBestSeller, setIsBestSeller] = useState(false);
 
   // Gerenciamento de Fotos
   const [mainImage, setMainImage] = useState('');
@@ -180,9 +182,10 @@ export default function AdminDashboardPage() {
         const authRes = await fetch('/api/admin/check');
         const authData = await authRes.json();
         if (!authData.authenticated) {
-          router.push('/admin/login');
+          router.replace('/admin/login');
           return;
         }
+        setIsAuthenticatedUser(true);
 
         const [prodResult, ordersResult, customersResult, statusResult] = await Promise.allSettled([
           fetch('/api/products').then((r) => r.json()),
@@ -257,6 +260,7 @@ export default function AdminDashboardPage() {
     setUnit('unidade');
     setLeadTimeDays('5');
     setMinQuantity('1');
+    setIsBestSeller(false);
     setMainImage('');
     setAdditionalImages([]);
     setNewAdditionalUrl('');
@@ -287,6 +291,7 @@ export default function AdminDashboardPage() {
     setUnit(product.unit || 'unidade');
     setLeadTimeDays(product.leadTimeDays ? product.leadTimeDays.toString() : '5');
     setMinQuantity(product.minQuantity ? product.minQuantity.toString() : '1');
+    setIsBestSeller(Boolean(product.isBestSeller));
 
     // Carrega fotos da publicação
     const primaryImg = product.image || (product.images && product.images[0]) || '';
@@ -353,6 +358,34 @@ export default function AdminDashboardPage() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingProductId(null);
+  };
+
+  const handleToggleBestSeller = async (productId: string) => {
+    const current = products.find((p) => p.id === productId);
+    const willBeBestSeller = !current?.isBestSeller;
+    const targetId = willBeBestSeller ? productId : null;
+
+    // Atualização otimista imediata na interface
+    setProducts((prev) =>
+      prev.map((p) => ({
+        ...p,
+        isBestSeller: p.id === targetId,
+      }))
+    );
+
+    try {
+      const res = await fetch('/api/admin/products/bestseller', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: targetId }),
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.products)) {
+        setProducts(data.products);
+      }
+    } catch (err) {
+      console.error('Erro ao alternar produto mais vendido:', err);
+    }
   };
 
   const handleImageUpload = async (
@@ -639,6 +672,7 @@ export default function AdminDashboardPage() {
               : undefined,
         },
         popular: existingProduct?.popular ?? true,
+        isBestSeller: Boolean(isBestSeller),
       };
 
       const res = await fetch('/api/admin/products', {
@@ -652,7 +686,14 @@ export default function AdminDashboardPage() {
 
       const data = await res.json();
       if (data.success) {
-        if (editingProductId) {
+        if (isBestSeller) {
+          setProducts((prev) =>
+            prev.map((p) => {
+              if (p.id === data.product.id) return data.product;
+              return p.isBestSeller ? { ...p, isBestSeller: false } : p;
+            })
+          );
+        } else if (editingProductId) {
           setProducts((prev) => prev.map((p) => (p.id === editingProductId ? data.product : p)));
         } else {
           setProducts((prev) => [...prev, data.product]);
@@ -732,10 +773,10 @@ export default function AdminDashboardPage() {
     return matchesSearch && matchesCat;
   });
 
-  if (loading) {
+  if (loading || !isAuthenticatedUser) {
     return (
-      <div className={styles.adminWrapper} style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <p>Carregando painel administrativo...</p>
+      <div className={styles.adminWrapper} style={{ alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <p style={{ color: '#8C7A6B', fontSize: '0.875rem' }}>Verificando credenciais...</p>
       </div>
     );
   }
@@ -1031,6 +1072,7 @@ export default function AdminDashboardPage() {
                 <th>Categoria</th>
                 <th>Preço</th>
                 <th>Prazo</th>
+                <th style={{ textAlign: 'center' }}>Mais Vendido</th>
                 <th style={{ textAlign: 'right' }}>Ações</th>
               </tr>
             </thead>
@@ -1042,7 +1084,14 @@ export default function AdminDashboardPage() {
                       <div className={styles.productRowInfo}>
                         <img src={p.image} alt={p.name} className={styles.tableThumb} />
                         <div>
-                          <div className={styles.productNameCell}>{p.name}</div>
+                          <div className={styles.productNameCell}>
+                            {p.name}
+                            {p.isBestSeller && (
+                              <span className={styles.bestSellerTableBadge}>
+                                <Flame size={11} /> 1º Mais Vendido
+                              </span>
+                            )}
+                          </div>
                           <div className={styles.productDescCell}>{p.description}</div>
                         </div>
                       </div>
@@ -1056,6 +1105,17 @@ export default function AdminDashboardPage() {
                       </span>
                     </td>
                     <td>{p.leadTimeDays} dias úteis</td>
+                    <td style={{ textAlign: 'center' }}>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleBestSeller(p.id)}
+                        className={p.isBestSeller ? styles.bestSellerBtnActive : styles.bestSellerBtnInactive}
+                        title={p.isBestSeller ? 'Clique para desmarcar como Mais Vendido' : 'Clique para colocar como 1º produto da loja'}
+                      >
+                        <Flame size={13} />
+                        <span>{p.isBestSeller ? '1º da Loja' : 'Definir 1º'}</span>
+                      </button>
+                    </td>
                     <td style={{ textAlign: 'right' }}>
                       <div className={styles.actionsCell} style={{ justifyContent: 'flex-end' }}>
                         <button
@@ -1086,7 +1146,7 @@ export default function AdminDashboardPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#8C7A6B' }}>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#8C7A6B' }}>
                     <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Nenhum produto encontrado</p>
                     <p style={{ fontSize: '0.75rem' }}>Tente alterar a busca ou filtro de categoria.</p>
                   </td>
@@ -1466,6 +1526,30 @@ export default function AdminDashboardPage() {
                 <h4 className={styles.sectionTitle}>
                   <Package size={16} /> Dados Principais
                 </h4>
+
+                {/* Destaque: Produto Mais Vendido */}
+                <div className={styles.bestSellerToggleBox}>
+                  <div className={styles.bestSellerToggleText}>
+                    <div className={styles.bestSellerToggleHeader}>
+                      <Flame size={16} color="#D97706" />
+                      <span className={styles.bestSellerToggleTitle}>Destacar como Produto Mais Vendido</span>
+                      {isBestSeller && (
+                        <span className={styles.bestSellerBadgeActive}>1º da Loja</span>
+                      )}
+                    </div>
+                    <p className={styles.bestSellerToggleDesc}>
+                      Exibe o selo dourado <strong>Mais Vendido</strong> e posiciona este produto automaticamente como o <strong>primeiro produto</strong> a aparecer no catálogo da sua loja.
+                    </p>
+                  </div>
+                  <label className={styles.bestSellerSwitch}>
+                    <input
+                      type="checkbox"
+                      checked={isBestSeller}
+                      onChange={(e) => setIsBestSeller(e.target.checked)}
+                    />
+                    <span className={styles.bestSellerSlider} />
+                  </label>
+                </div>
 
                 <div className={styles.formField}>
                   <label className={styles.label}>

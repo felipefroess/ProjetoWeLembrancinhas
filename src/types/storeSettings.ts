@@ -27,7 +27,7 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   defaultLeadTimeDays: 5,
   topBanner: {
     enabled: true,
-    text: '🎄 Agenda de encomendas para o Natal aberta até 15/12!',
+    text: 'Feito sob encomenda • Produção 100% artesanal • Envio seguro para todo o Brasil.',
     link: '#catalogo',
     bgColor: '#6D4C3D',
     textColor: '#FFFFFF',

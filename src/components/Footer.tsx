@@ -84,7 +84,7 @@ export function Footer() {
         <div className={styles.bottomRow}>
           <p>© 2026 {storeName}. Todos os direitos reservados.</p>
           <a
-            href="/admin"
+            href="/admin/login"
             className={styles.discreetAdminLink}
             title="Acesso Administrativo"
           >

@@ -272,12 +272,30 @@
   background-color: #FAF7F2;
 }
 
-.qtyDisplay {
-  width: 2rem;
+.qtyInput {
+  width: 2.25rem;
+  height: 1.75rem;
   text-align: center;
   font-size: 0.75rem;
   font-weight: 700;
   color: #2D231E;
+  background: transparent;
+  border: none;
+  outline: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+  padding: 0 0.15rem;
+  cursor: text;
+}
+
+.qtyInput::-webkit-outer-spin-button,
+.qtyInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.qtyInput:focus {
+  background-color: #FAF7F2;
 }
 
 /* Rodapé do Carrinho */

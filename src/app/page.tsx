@@ -87,9 +87,12 @@ export default function HomePage() {
     return map;
   }, [categoriesList]);
 
-  // Categorias ordenadas automaticamente pela proximidade dos eventos comemorativos do ano
-  // Identifica o ÚNICO produto que recebe o selo de 'Mais Pedido' (pertencente ao evento sazonal mais próximo)
+  // Identifica o produto que recebe o selo de 'Mais Vendido':
+  // 1. Prioridade total para o produto configurado manualmente no painel admin (isBestSeller)
+  // 2. Se nenhum for marcado, usa o produto do evento sazonal mais próximo do calendário
   const mostRequestedProductId = useMemo(() => {
+    const manualBestSeller = productsList.find((p) => p.isBestSeller);
+    if (manualBestSeller) return manualBestSeller.id;
     if (!clientDate) return null;
     return getSeasonalTopProductId(productsList, categoryNameMap, clientDate);
   }, [productsList, categoryNameMap, clientDate]);
@@ -98,7 +101,7 @@ export default function HomePage() {
     return sortCategoriesBySeasonalProximity(categoriesList, clientDate);
   }, [categoriesList, clientDate]);
 
-  // Filtro performático combinando categoria, busca e ordenação sazonal automática
+  // Filtro performático combinando categoria, busca e ordenação
   const filteredProducts = useMemo(() => {
     const list = productsList.filter((product) => {
       const matchesCategory =
@@ -113,13 +116,26 @@ export default function HomePage() {
       return matchesCategory && matchesSearch;
     });
 
-    // Quando "Todos os Mimos" está selecionado, os produtos do evento mais próximo do calendário aparecem primeiro!
+    let sortedList: Product[];
+    // Quando "Todos os Mimos" está selecionado, os produtos do evento mais próximo aparecem primeiro
     if (selectedCategory === "todos") {
-      return sortProductsBySeasonalProximity(list, categoryNameMap, clientDate);
+      sortedList = sortProductsBySeasonalProximity(list, categoryNameMap, clientDate);
+    } else {
+      sortedList = [...list];
     }
 
-    return list;
-  }, [productsList, selectedCategory, searchQuery, categoryNameMap]);
+    // ⭐ O produto marcado como 'Mais Vendido' (isBestSeller) SEMPRE é o primeiro produto a aparecer no catálogo!
+    const bestSellerId = productsList.find((p) => p.isBestSeller)?.id;
+    if (bestSellerId) {
+      sortedList.sort((a, b) => {
+        if (a.id === bestSellerId) return -1;
+        if (b.id === bestSellerId) return 1;
+        return 0;
+      });
+    }
+
+    return sortedList;
+  }, [productsList, selectedCategory, searchQuery, categoryNameMap, clientDate]);
 
   // Escolhe a classe de grid de acordo com o número de itens
   const gridClass =
@@ -190,7 +206,7 @@ export default function HomePage() {
               <ProductCard
                 key={product.id}
                 product={product}
-                isMostRequested={product.id === mostRequestedProductId}
+                isMostRequested={product.id === mostRequestedProductId || Boolean(product.isBestSeller)}
               />
             ))}
           </div>

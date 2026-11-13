@@ -15,9 +15,17 @@ interface StoreSettingsContextType {
 
 const StoreSettingsContext = createContext<StoreSettingsContextType | undefined>(undefined);
 
-export function StoreSettingsProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<StoreSettings>(DEFAULT_SETTINGS);
-  const [loading, setLoading] = useState(true);
+const CACHE_KEY = 'we_cached_store_settings';
+
+export function StoreSettingsProvider({ 
+  children,
+  initialSettings,
+}: { 
+  children: React.ReactNode;
+  initialSettings?: StoreSettings;
+}) {
+  const [settings, setSettings] = useState<StoreSettings>(initialSettings || DEFAULT_SETTINGS);
+  const [loading, setLoading] = useState(!initialSettings);
 
   const fetchSettings = useCallback(async () => {
     try {
@@ -25,6 +33,9 @@ export function StoreSettingsProvider({ children }: { children: React.ReactNode 
       const data = await res.json();
       if (data.success && data.settings) {
         setSettings(data.settings);
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(data.settings));
+        } catch {}
       }
     } catch (err) {
       console.error('Falha ao carregar configurações da loja:', err);
@@ -34,6 +45,17 @@ export function StoreSettingsProvider({ children }: { children: React.ReactNode 
   }, []);
 
   useEffect(() => {
+    // Hidratação rápida via localStorage se disponível
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed === 'object') {
+          setSettings((prev) => ({ ...prev, ...parsed }));
+        }
+      }
+    } catch {}
+
     fetchSettings();
   }, [fetchSettings]);
 
@@ -54,6 +76,9 @@ export function StoreSettingsProvider({ children }: { children: React.ReactNode 
 
       if (data.success && data.settings) {
         setSettings(data.settings);
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(data.settings));
+        } catch {}
         return { success: true, message: data.message || 'Configurações salvas com sucesso!' };
       } else {
         return { success: false, error: data.error || 'Erro ao salvar configurações.' };

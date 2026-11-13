@@ -179,7 +179,7 @@ export function Header({
             }
           }}
           onKeyDown={handleKeyDown}
-          placeholder={isMobile ? 'Buscar produto, caixa, modelo...' : 'O que você procura?'}
+          placeholder="O que você procura?"
           className={styles.searchInput}
         />
 

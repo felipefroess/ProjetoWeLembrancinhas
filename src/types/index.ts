@@ -73,6 +73,7 @@ export interface Product {
   leadTimeDays: number; // Prazo de produção em dias úteis
   popular?: boolean;
   featured?: boolean;
+  isBestSeller?: boolean; // ⭐ Definido no painel admin como Mais Vendido (aparece em 1º com selo na loja)
   unit: string; // "unidade", "kit", "cento"
   availableRibbonColors?: string[];
   customizationSettings?: CustomizationSettings;

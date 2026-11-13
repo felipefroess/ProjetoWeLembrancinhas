@@ -76,7 +76,7 @@ export function ProductCard({ product, isMostRequested }: ProductCardProps) {
 
         {/* Badges superiores */}
         <div className={styles.badgesWrapper}>
-          {isMostRequested && (
+          {(isMostRequested || product.isBestSeller) && (
             <span className={styles.popularBadge}>
               Mais Vendido
             </span>

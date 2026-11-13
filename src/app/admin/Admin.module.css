@@ -3295,3 +3295,164 @@
 .modalDeliveredNavBtn:hover {
   background-color: #14532D;
 }
+
+/* ========================================================
+   Destaque: Produto Mais Vendido (Admin)
+   ======================================================== */
+.bestSellerToggleBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+  border: 1.5px solid #FDE68A;
+  border-radius: 0.75rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(217, 119, 6, 0.08);
+}
+
+.bestSellerToggleText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.bestSellerToggleHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.bestSellerToggleTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #92400E;
+}
+
+.bestSellerBadgeActive {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background-color: #F59E0B;
+  color: #ffffff;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.bestSellerToggleDesc {
+  font-size: 0.75rem;
+  color: #78350F;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.bestSellerSwitch {
+  position: relative;
+  display: inline-block;
+  width: 2.75rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+}
+
+.bestSellerSwitch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.bestSellerSlider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #DACFBF;
+  transition: 0.2s ease;
+  border-radius: 9999px;
+}
+
+.bestSellerSlider:before {
+  position: absolute;
+  content: "";
+  height: 1.15rem;
+  width: 1.15rem;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ffffff;
+  transition: 0.2s ease;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.bestSellerSwitch input:checked + .bestSellerSlider {
+  background-color: #D97706;
+}
+
+.bestSellerSwitch input:checked + .bestSellerSlider:before {
+  transform: translateX(1.25rem);
+}
+
+/* Badge na tabela de produtos */
+.bestSellerTableBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: #FEF3C7;
+  color: #B45309;
+  border: 1px solid #FDE68A;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 9999px;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+/* Botões de Ação de Mais Vendido na Tabela */
+.bestSellerBtnActive {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.5rem;
+  background-color: #FEF3C7;
+  color: #92400E;
+  border: 1.5px solid #F59E0B;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(217, 119, 6, 0.15);
+}
+
+.bestSellerBtnActive:hover {
+  background-color: #FDE68A;
+  border-color: #D97706;
+  transform: scale(1.03);
+}
+
+.bestSellerBtnInactive {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.5rem;
+  background-color: #FAF7F2;
+  color: #8C7A6B;
+  border: 1px dashed #DACFBF;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bestSellerBtnInactive:hover {
+  background-color: #FFFBEB;
+  color: #B45309;
+  border: 1px solid #F59E0B;
+  transform: translateY(-1px);
+}
+

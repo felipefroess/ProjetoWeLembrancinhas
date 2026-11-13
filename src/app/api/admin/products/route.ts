@@ -36,6 +36,16 @@ export async function POST(request: Request) {
       });
     }
 
+    // Se marcado como Mais Vendido, garante exclusividade desmarcando dos demais produtos
+    if (product.isBestSeller) {
+      const allExisting = await getAllProducts();
+      for (const p of allExisting) {
+        if (p.id !== product.id && p.isBestSeller) {
+          await saveProduct({ ...p, isBestSeller: false });
+        }
+      }
+    }
+
     const saved = await saveProduct(product);
     return NextResponse.json({ success: true, product: saved });
   } catch (error) {

@@ -169,15 +169,34 @@ export function CartDrawer() {
                     <button
                       onClick={() => updateQuantity(item.cartItemId, item.quantity - 1)}
                       className={styles.qtyButton}
+                      aria-label="Diminuir quantidade"
                     >
                       -
                     </button>
-                    <span className={styles.qtyDisplay}>
-                      {item.quantity}
-                    </span>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min={item.product.minQuantity || 1}
+                      value={item.quantity || ''}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        if (!isNaN(val) && val >= 0) {
+                          updateQuantity(item.cartItemId, val);
+                        }
+                      }}
+                      onBlur={() => {
+                        const min = item.product.minQuantity || 1;
+                        if (!item.quantity || item.quantity < min) {
+                          updateQuantity(item.cartItemId, min);
+                        }
+                      }}
+                      className={styles.qtyInput}
+                      aria-label="Digitar quantidade"
+                    />
                     <button
                       onClick={() => updateQuantity(item.cartItemId, item.quantity + 1)}
                       className={styles.qtyButton}
+                      aria-label="Aumentar quantidade"
                     >
                       +
                     </button>

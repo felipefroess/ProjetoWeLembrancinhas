@@ -4,6 +4,8 @@ import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { StoreSettingsProvider } from "@/context/StoreSettingsContext";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
+import { getStoreSettings } from "@/lib/storeSettingsStore";
+import { StoreSettings, DEFAULT_SETTINGS } from "@/types/storeSettings";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-serif",
@@ -94,15 +96,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let initialSettings: StoreSettings = DEFAULT_SETTINGS;
+  try {
+    initialSettings = await getStoreSettings();
+  } catch {}
+
   return (
     <html lang="pt-BR" className={`${cormorant.variable} ${jakarta.variable} ${playfair.variable} ${dancingScript.variable} ${lora.variable}`}>
       <body suppressHydrationWarning>
-        <StoreSettingsProvider>
+        <StoreSettingsProvider initialSettings={initialSettings}>
           <CartProvider>
             <AnalyticsTracker />
             {children}

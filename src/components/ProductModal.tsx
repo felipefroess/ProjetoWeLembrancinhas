@@ -301,7 +301,10 @@ export function ProductModal() {
       return;
     }
 
-    addToCart(product, quantity, {
+    const finalQuantity = Math.max(product.minQuantity || 1, quantity || 1);
+    setQuantity(finalQuantity);
+
+    addToCart(product, finalQuantity, {
       variation: selectedVariation ? selectedVariation.name : undefined,
       childName: childName.trim() || undefined,
       ribbonColor: ribbonColor || undefined,
@@ -724,19 +727,43 @@ export function ProductModal() {
                   <div className={styles.qtyControl}>
                     <button
                       type="button"
-                      onClick={() => setQuantity((q) => Math.max(product.minQuantity, q - 1))}
+                      onClick={() => setQuantity((q) => Math.max(product.minQuantity, (q || 0) - 1))}
                       disabled={quantity <= product.minQuantity}
                       className={styles.qtyBtn}
+                      aria-label="Diminuir quantidade"
                     >
                       -
                     </button>
-                    <span className={styles.qtyValue}>
-                      {quantity}
-                    </span>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min={product.minQuantity || 1}
+                      value={quantity || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '') {
+                          setQuantity(0);
+                        } else {
+                          const parsed = parseInt(val, 10);
+                          if (!isNaN(parsed) && parsed >= 0) {
+                            setQuantity(parsed);
+                          }
+                        }
+                      }}
+                      onBlur={() => {
+                        const min = product.minQuantity || 1;
+                        if (!quantity || quantity < min) {
+                          setQuantity(min);
+                        }
+                      }}
+                      className={styles.qtyInput}
+                      aria-label="Digitar quantidade"
+                    />
                     <button
                       type="button"
-                      onClick={() => setQuantity((q) => q + 1)}
+                      onClick={() => setQuantity((q) => (q || 0) + 1)}
                       className={styles.qtyBtn}
+                      aria-label="Aumentar quantidade"
                     >
                       +
                     </button>

@@ -367,7 +367,7 @@ export async function validateCoupon(
     if (hasPrevious) {
       return {
         valid: false,
-        message: 'Este cupom é exclusivo para novos clientes e este número de WhatsApp já possui pedidos anteriores.',
+        message: 'Este cupom é exclusivo para novos clientes.',
       };
     }
   }
