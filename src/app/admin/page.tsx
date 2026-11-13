@@ -34,6 +34,7 @@ import {
   ArrowUpRight,
   Calendar,
   Crop,
+  Download,
   Users,
   RefreshCw
 } from 'lucide-react';
@@ -441,6 +442,28 @@ export default function AdminDashboardPage() {
     } finally {
       setUploadingImage(false);
       if (additionalFileInputRef.current) additionalFileInputRef.current.value = '';
+    }
+  };
+
+  const handleDownloadImage = async (url: string, filename?: string) => {
+    if (!url || !url.trim()) return;
+    try {
+      const cleanUrl = url.trim();
+      const res = await fetch(cleanUrl);
+      if (!res.ok) throw new Error('Falha ao obter imagem');
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      const cleanName = filename || cleanUrl.split('/').pop()?.split('?')[0] || `foto-${Date.now()}.jpg`;
+      a.download = cleanName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fallback: se houver bloqueio de rede ou CORS, abre direto para salvar
+      window.open(url, '_blank');
     }
   };
 
@@ -1056,6 +1079,14 @@ export default function AdminDashboardPage() {
                     <td style={{ textAlign: 'right' }}>
                       <div className={styles.actionsCell} style={{ justifyContent: 'flex-end' }}>
                         <button
+                          type="button"
+                          onClick={() => handleDownloadImage(p.image, `${p.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-capa.jpg`)}
+                          className={styles.downloadBtn}
+                          title="Baixar foto de capa deste produto"
+                        >
+                          <Download size={14} />
+                        </button>
+                        <button
                           onClick={() => handleOpenEditProduct(p)}
                           className={styles.editBtn}
                           title="Editar publicação do produto"
@@ -1645,6 +1676,15 @@ export default function AdminDashboardPage() {
                             <Crop size={13} />
                             <span>Ajustar / Cortar</span>
                           </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDownloadImage(mainImage, `${name || 'produto'}-capa.jpg`)}
+                            className={styles.downloadPhotoBtn}
+                            title="Baixar foto da capa para o computador"
+                          >
+                            <Download size={13} />
+                            <span>Baixar Foto</span>
+                          </button>
                           <label className={styles.changePhotoBtn}>
                             <Upload size={13} />
                             <span>Trocar Foto</span>
@@ -1740,6 +1780,14 @@ export default function AdminDashboardPage() {
                               title="Cortar, girar e ajustar esta foto"
                             >
                               <Crop size={11} /> Ajustar / Cortar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadImage(imgUrl, `${name || 'produto'}-foto-${idx + 2}.jpg`)}
+                              className={styles.galleryDownloadBtn}
+                              title="Baixar esta foto para o computador"
+                            >
+                              <Download size={11} /> Baixar
                             </button>
                             <button
                               type="button"
@@ -1980,6 +2028,19 @@ export default function AdminDashboardPage() {
                                 </button>
                                 <button
                                   type="button"
+                                  onClick={() =>
+                                    handleDownloadImage(
+                                      v.image,
+                                      `${name || 'produto'}-${(v.name || `modelo-${idx + 1}`).toLowerCase().replace(/[^a-z0-9]/g, '-')}-foto1.jpg`
+                                    )
+                                  }
+                                  className={styles.modelDownloadPhotoBtn}
+                                  title="Baixar 1ª foto para o computador"
+                                >
+                                  <Download size={11} /> Baixar Foto
+                                </button>
+                                <button
+                                  type="button"
                                   onClick={() => {
                                     const next = [...variations];
                                     next[idx].image = '';
@@ -2039,6 +2100,19 @@ export default function AdminDashboardPage() {
                                   title="Cortar, girar e ajustar 2ª foto"
                                 >
                                   <Crop size={11} /> Ajustar / Cortar
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleDownloadImage(
+                                      v.image2,
+                                      `${name || 'produto'}-${(v.name || `modelo-${idx + 1}`).toLowerCase().replace(/[^a-z0-9]/g, '-')}-foto2.jpg`
+                                    )
+                                  }
+                                  className={styles.modelDownloadPhotoBtn}
+                                  title="Baixar 2ª foto para o computador"
+                                >
+                                  <Download size={11} /> Baixar Foto
                                 </button>
                                 <button
                                   type="button"

@@ -1,61 +1,5 @@
 [
   {
-    "id": "04f5d509-e7f7-4ab0-b5f5-b85951119a82",
-    "customer_name": "Felipe Fróes Pereira",
-    "customer_phone": "35997416282",
-    "event_date": "2026-12-02",
-    "delivery_method": "retirada-paraisopolis",
-    "delivery_address": "",
-    "general_notes": "",
-    "total_units": 4,
-    "total_amount": 60,
-    "subtotal_amount": 60,
-    "status": "em_analise",
-    "items": [
-      {
-        "cartItemId": "porta-sabonete-5923____Laço Vermelho",
-        "product": {
-          "id": "porta-sabonete-5923",
-          "name": "Porta-sabonete",
-          "unit": "unidade",
-          "image": "/uploads/1794335405021-saveclip.app_624067620_18171071590384048_8655808288146978986_n.jpg",
-          "price": 15,
-          "images": [
-            "/uploads/1794335405021-saveclip.app_624067620_18171071590384048_8655808288146978986_n.jpg"
-          ],
-          "popular": false,
-          "category": "natal",
-          "description": "Lembrancinha de Natal Porta-Sabonete com Saco e Laço Vermelho",
-          "minQuantity": 1,
-          "leadTimeDays": 5,
-          "availableRibbonColors": [
-            "Laço Vermelho",
-            "Laço Verde",
-            "Laço Dourado"
-          ],
-          "customizationSettings": {
-            "allowNotes": true,
-            "ribbonColors": [
-              "Laço Vermelho",
-              "Laço Verde",
-              "Laço Dourado"
-            ],
-            "allowChildName": false,
-            "childNameLabel": "Nome na Lembrancinha",
-            "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial...",
-            "allowRibbonColors": true
-          }
-        },
-        "quantity": 4,
-        "customization": {
-          "ribbonColor": "Laço Vermelho"
-        },
-        "subtotal": 60
-      }
-    ],
-    "created_at": "2026-11-13T00:24:35.877Z"
-  },
-  {
     "id": "740b5d2f-07be-443d-b962-d895153ba31b",
     "customer_name": "Felipe Fróes Pereira",
     "customer_phone": "35997416282",
@@ -64,11 +8,10 @@
     "delivery_address": "Rua Delcides Telles - Inatel - Santa Rita do Sapucaí/MG",
     "general_notes": "Frete: Correios SEDEX (R$ 11,85) - CEP 37537-262",
     "total_units": 11,
-    "total_amount": 159.35999999999999,
+    "total_amount": 159.36,
     "status": "em_analise",
     "items": [
       {
-        "cartItemId": "mini-lata-natal-luxo___Luís_Laço Verde com Pompom Branco",
         "product": {
           "id": "mini-lata-natal-luxo",
           "name": "Mini Lata Natalina",
@@ -105,14 +48,72 @@
           }
         },
         "quantity": 11,
+        "subtotal": 163.9,
+        "cartItemId": "mini-lata-natal-luxo___Luís_Laço Verde com Pompom Branco",
         "customization": {
+          "notes": "Teste",
           "childName": "Luís",
-          "ribbonColor": "Laço Verde com Pompom Branco",
-          "notes": "Teste"
-        },
-        "subtotal": 163.9
+          "ribbonColor": "Laço Verde com Pompom Branco"
+        }
       }
     ],
-    "created_at": "2026-11-12T23:34:19.943Z"
+    "created_at": "2026-11-13T00:43:40.57028+00:00",
+    "updated_at": "2026-11-13T00:43:40.57028+00:00"
+  },
+  {
+    "id": "04f5d509-e7f7-4ab0-b5f5-b85951119a82",
+    "customer_name": "Felipe Fróes Pereira",
+    "customer_phone": "35997416282",
+    "event_date": "2026-12-02",
+    "delivery_method": "retirada-paraisopolis",
+    "delivery_address": "",
+    "general_notes": "",
+    "total_units": 4,
+    "total_amount": 60,
+    "status": "em_analise",
+    "items": [
+      {
+        "product": {
+          "id": "porta-sabonete-5923",
+          "name": "Porta-sabonete",
+          "unit": "unidade",
+          "image": "/uploads/1794335405021-saveclip.app_624067620_18171071590384048_8655808288146978986_n.jpg",
+          "price": 15,
+          "images": [
+            "/uploads/1794335405021-saveclip.app_624067620_18171071590384048_8655808288146978986_n.jpg"
+          ],
+          "popular": false,
+          "category": "natal",
+          "description": "Lembrancinha de Natal Porta-Sabonete com Saco e Laço Vermelho",
+          "minQuantity": 1,
+          "leadTimeDays": 5,
+          "availableRibbonColors": [
+            "Laço Vermelho",
+            "Laço Verde",
+            "Laço Dourado"
+          ],
+          "customizationSettings": {
+            "allowNotes": true,
+            "ribbonColors": [
+              "Laço Vermelho",
+              "Laço Verde",
+              "Laço Dourado"
+            ],
+            "allowChildName": false,
+            "childNameLabel": "Nome na Lembrancinha",
+            "notesPlaceholder": "Conte sua ideia! Pode escolher o tema, cores, frase ou qualquer detalhe especial...",
+            "allowRibbonColors": true
+          }
+        },
+        "quantity": 4,
+        "subtotal": 60,
+        "cartItemId": "porta-sabonete-5923____Laço Vermelho",
+        "customization": {
+          "ribbonColor": "Laço Vermelho"
+        }
+      }
+    ],
+    "created_at": "2026-11-13T00:43:40.354039+00:00",
+    "updated_at": "2026-11-13T00:43:40.354039+00:00"
   }
 ]

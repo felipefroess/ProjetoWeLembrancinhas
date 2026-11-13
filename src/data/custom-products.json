@@ -147,19 +147,19 @@
   {
     "id": "mini-lata-natal-luxo",
     "name": "Mini Lata Natalina",
-    "category": "natal",
-    "description": "Lembrancinha natalina em lata. Acompanha rótulo temático personalizado com o nome, laço de cetim com pompom de neve e tag de Boas Festas com cordão dourado. Ideal para rechear com biscoitos caseiros, bombons, pães de mel ou doces.",
-    "price": 14.9,
-    "minQuantity": 1,
     "unit": "unidade",
-    "leadTimeDays": 5,
-    "popular": true,
-    "featured": true,
-    "image": "/images/natal/lata-natal-1.jpg",
+    "image": "https://hmklbjhyjstjrdrmsiha.supabase.co/storage/v1/object/public/product-images/1794535458027-imagemnatal2.jpg",
+    "price": 14.9,
     "images": [
-      "/images/natal/lata-natal-1.jpg",
-      "/images/natal/lata-natal-2.jpg"
+      "https://hmklbjhyjstjrdrmsiha.supabase.co/storage/v1/object/public/product-images/1794535458027-imagemnatal2.jpg",
+      "https://hmklbjhyjstjrdrmsiha.supabase.co/storage/v1/object/public/product-images/1794535479068-imagemnatal1.jpg"
     ],
+    "popular": true,
+    "category": "natal",
+    "featured": true,
+    "description": "Lembrancinha natalina em lata. Acompanha rótulo temático personalizado com o nome, laço de cetim com pompom de neve e tag de Boas Festas com cordão dourado. Ideal para rechear com biscoitos caseiros, bombons, pães de mel ou doces.",
+    "minQuantity": 1,
+    "leadTimeDays": 5,
     "availableRibbonColors": [
       "Laço Verde com Pompom Branco",
       "Laço Vermelho com Pompom Branco",
@@ -182,43 +182,36 @@
   {
     "id": "caderno-personalizado-luxo",
     "name": "Caderno Personalizado com Elástico",
-    "category": "cadernos",
-    "description": "Caderno personalizado com o seu nome. Perfeito para anotações, estudos ou presentes afetivos.",
-    "price": 79.9,
-    "minQuantity": 1,
     "unit": "unidade",
-    "leadTimeDays": 5,
-    "popular": false,
-    "featured": true,
-    "image": "/images/cadernos/caderno-azul-fechado.jpg",
+    "image": "https://hmklbjhyjstjrdrmsiha.supabase.co/storage/v1/object/public/product-images/1794535694651-recorte-1794535694547.jpg",
+    "price": 79.9,
     "images": [
-      "/images/cadernos/caderno-azul-fechado.jpg",
-      "/images/cadernos/caderno-azul-aberto.jpg",
-      "/images/cadernos/caderno-verde-fechado.jpg",
-      "/images/cadernos/caderno-verde-aberto.jpg",
-      "/images/cadernos/caderneta-floral-lilas.jpg"
+      "https://hmklbjhyjstjrdrmsiha.supabase.co/storage/v1/object/public/product-images/1794535694651-recorte-1794535694547.jpg"
     ],
+    "popular": false,
+    "category": "cadernos",
+    "featured": true,
     "variations": [
       {
-        "id": "var_1794456911805_0",
+        "id": "var_1794536540705_0",
         "name": "Modelo 1",
-        "image": "/images/cadernos/caderno-azul-fechado.jpg",
+        "image": "https://hmklbjhyjstjrdrmsiha.supabase.co/storage/v1/object/public/product-images/1794536468652-caderno1.jpg",
         "images": [
-          "/images/cadernos/caderno-azul-fechado.jpg"
+          "https://hmklbjhyjstjrdrmsiha.supabase.co/storage/v1/object/public/product-images/1794536468652-caderno1.jpg"
         ],
         "description": "Modelo conta com capa dura em azul marinho com elástico e personalizado com o nome"
       },
       {
-        "id": "var_1794456911805_1",
+        "id": "var_1794536540705_1",
         "name": "Modelo 2",
-        "image": "/uploads/1794333437976-saveclip.app_538768100_18172355338347767_2299544466431525219_n.jpg",
+        "image": "https://hmklbjhyjstjrdrmsiha.supabase.co/storage/v1/object/public/product-images/1794536480242-caderno3.jpg",
         "images": [
-          "/uploads/1794333437976-saveclip.app_538768100_18172355338347767_2299544466431525219_n.jpg"
+          "https://hmklbjhyjstjrdrmsiha.supabase.co/storage/v1/object/public/product-images/1794536480242-caderno3.jpg"
         ],
         "description": "Modelo conta com a capa dura e acabamento holográfico, flores campestres, tassel roxo e passante de borboleta dourada."
       },
       {
-        "id": "var_1794456911805_2",
+        "id": "var_1794536540705_2",
         "name": "Modelo 3",
         "image": "/uploads/1794333488324-saveclip.app_539454379_18173392714347767_7517392955588664362_n.jpg",
         "images": [
@@ -228,7 +221,7 @@
         "description": "Modelo conta com a capa dura e holográfica floral, nome e inicial, e elástico com passante dourado."
       },
       {
-        "id": "var_1794456911805_3",
+        "id": "var_1794536540705_3",
         "name": "Modelo 4",
         "image": "/uploads/1794333556658-saveclip.app_521541070_18169066933347767_8499588843540459767_n.jpg",
         "images": [
@@ -237,6 +230,9 @@
         "description": "Modelo conta com capa dura floral holográfica, nome com inicial, elástico e tassel."
       }
     ],
+    "description": "Caderno personalizado com o seu nome. Perfeito para anotações, estudos ou presentes afetivos.",
+    "minQuantity": 1,
+    "leadTimeDays": 5,
     "customizationSettings": {
       "allowChildName": true,
       "childNameLabel": "Nome na Lembrancinha",
