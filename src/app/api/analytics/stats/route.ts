@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse, connection } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sql, isDbConfigured } from '@/server/db/client';
 import { AnalyticsPeriod, TopProductStat } from '@/lib/analytics';
 import { getAllProductionOrders } from '@/lib/ordersStore';
@@ -68,10 +68,8 @@ function aggregateOrders(
 }
 
 export async function GET(request: NextRequest) {
-  await connection();
+  const period = (request.nextUrl.searchParams.get('period') || 'mes') as AnalyticsPeriod;
   try {
-    const period = (request.nextUrl.searchParams.get('period') || 'mes') as AnalyticsPeriod;
-
     const now = new Date();
     const durationMs =
       period === 'semana'

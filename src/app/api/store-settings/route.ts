@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse, connection } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { getStoreSettings, updateStoreSettings } from '@/lib/storeSettingsStore';
 
 // GET: Retornar as configurações atuais da loja
-export async function GET() {
-  await connection();
+export async function GET(request: NextRequest) {
+  request.nextUrl.searchParams.get('t');
   try {
     const settings = await getStoreSettings();
     return NextResponse.json(

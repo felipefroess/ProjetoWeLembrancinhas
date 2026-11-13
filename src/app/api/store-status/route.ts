@@ -1,9 +1,10 @@
-import { NextResponse, connection } from 'next/server';
+import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { getStoreStatus, updateStoreStatus } from '@/lib/storeSettingsStore';
 
-export async function GET() {
-  await connection();
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  searchParams.get('t');
   try {
     const status = await getStoreStatus();
     return NextResponse.json(status, {

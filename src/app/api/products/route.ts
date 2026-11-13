@@ -1,8 +1,10 @@
-import { NextResponse, connection } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getAllProducts, getAllCategories } from '@/lib/productsStore';
 
-export async function GET() {
-  await connection();
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  searchParams.get('t'); // Força execução dinâmica sob demanda
+
   try {
     const [products, categories] = await Promise.all([
       getAllProducts(),

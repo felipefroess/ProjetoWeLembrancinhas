@@ -1,11 +1,10 @@
-import { NextResponse, connection } from 'next/server';
+import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { isAuthenticated } from '@/lib/auth';
 import { getAllProducts, saveProduct, deleteProduct, saveCategory } from '@/lib/productsStore';
 import { Product } from '@/types';
 
 export async function GET() {
-  await connection();
   const auth = await isAuthenticated();
   if (!auth) {
     return NextResponse.json({ success: false, error: 'Não autorizado' }, { status: 401 });
