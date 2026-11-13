@@ -79,6 +79,10 @@ function writeLocalStatus(data: { isOnline: boolean }): void {
  * Lê as configurações da loja no Neon (com auto-seed inicial e fallback local)
  */
 export async function getStoreSettings(): Promise<StoreSettings> {
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return readLocalSettings();
+  }
+
   if (isDbConfigured()) {
     try {
       const rows = await sql<{ data: Partial<StoreSettings> }>`
@@ -102,8 +106,15 @@ export async function getStoreSettings(): Promise<StoreSettings> {
         await markSeedMeta({ settingsSeeded: true });
       }
       return local;
-    } catch (err) {
-      console.error('Erro ao buscar ajustes da loja no Neon, usando fallback local:', err);
+    } catch (err: any) {
+      const isPrerenderAbort =
+        err?.digest === 'HANGING_PROMISE_REJECTION' ||
+        err?.sourceError?.digest === 'HANGING_PROMISE_REJECTION' ||
+        String(err?.message || '').includes('During prerendering, fetch() rejects');
+
+      if (!isPrerenderAbort) {
+        console.error('Erro ao buscar ajustes da loja no Neon, usando fallback local:', err);
+      }
     }
   }
 

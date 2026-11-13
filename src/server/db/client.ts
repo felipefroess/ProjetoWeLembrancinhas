@@ -14,6 +14,11 @@ const rawDatabaseUrl = (process.env.DATABASE_URL || '').trim();
  * Verifica se a variável DATABASE_URL está configurada e válida.
  */
 export function isDbConfigured(): boolean {
+  // Durante o build estático (next build), evita chamadas externas que possam travar os workers
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return false;
+  }
+
   return Boolean(
     rawDatabaseUrl &&
     rawDatabaseUrl.startsWith('postgres') &&
