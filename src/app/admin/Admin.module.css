@@ -2805,6 +2805,30 @@
   color: #92400E;
 }
 
+.itemCouponBox {
+  background-color: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+  color: #166534;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.itemCouponBadge {
+  background-color: #DCFCE7;
+  color: #15803D;
+  font-weight: 800;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.25rem;
+  letter-spacing: 0.05em;
+  font-family: monospace;
+}
+
 /* Dados do Cliente e Entrega */
 .modalCustomerGrid {
   display: grid;

@@ -54,6 +54,9 @@ export async function POST(request: Request) {
       generalNotes,
       totalUnits,
       totalAmount,
+      couponCode,
+      discountAmount,
+      subtotalAmount,
       items,
       status,
     } = body;
@@ -74,6 +77,9 @@ export async function POST(request: Request) {
       generalNotes,
       totalUnits: Number(totalUnits) || 0,
       totalAmount: Number(totalAmount) || 0,
+      couponCode: couponCode ? String(couponCode).trim() : undefined,
+      discountAmount: discountAmount !== undefined ? Number(discountAmount) : undefined,
+      subtotalAmount: subtotalAmount !== undefined ? Number(subtotalAmount) : undefined,
       items: items || [],
       status: status as OrderStatus,
     });

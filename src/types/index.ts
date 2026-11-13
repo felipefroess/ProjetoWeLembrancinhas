@@ -122,6 +122,9 @@ export interface ProductionOrder {
   general_notes?: string;
   total_units: number;
   total_amount: number;
+  coupon_code?: string;
+  discount_amount?: number;
+  subtotal_amount?: number;
   status: OrderStatus;
   items: any[];
   created_at: string;

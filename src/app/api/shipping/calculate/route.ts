@@ -57,6 +57,18 @@ export async function POST(request: NextRequest) {
 
     const addressInfo = await lookupViaCep(toCep);
 
+    // Se o CEP tiver 8 dígitos numéricos mas não for encontrado nos Correios/ViaCEP
+    if (!addressInfo) {
+      return NextResponse.json(
+        {
+          success: false,
+          invalidCep: true,
+          error: 'CEP não encontrado ou inválido. Por favor, confira os números digitados.',
+        },
+        { status: 400 }
+      );
+    }
+
     const token = process.env.MELHOR_ENVIO_TOKEN?.trim();
     const fromCep = cleanCep(process.env.MELHOR_ENVIO_FROM_CEP) || '37550000';
     const isSandbox = process.env.MELHOR_ENVIO_SANDBOX === 'true';

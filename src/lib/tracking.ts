@@ -63,6 +63,9 @@ export async function trackOrderToDatabase(orderData: {
   generalNotes?: string;
   totalUnits: number;
   totalAmount: number;
+  couponCode?: string;
+  discountAmount?: number;
+  subtotalAmount?: number;
   items: any[];
 }) {
   try {

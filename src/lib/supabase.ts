@@ -47,6 +47,15 @@ export function getSupabaseAdmin(): SupabaseClient | null {
         persistSession: false,
         autoRefreshToken: false,
       },
+      global: {
+        fetch: (url, options) => {
+          return fetch(url, {
+            ...options,
+            // Aumenta tolerância de timeout para servidores na nuvem
+            signal: options?.signal || AbortSignal.timeout(30000),
+          });
+        },
+      },
     });
   }
   return supabaseAdminInstance;

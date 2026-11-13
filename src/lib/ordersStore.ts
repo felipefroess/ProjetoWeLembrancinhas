@@ -165,6 +165,9 @@ export async function getAllProductionOrders(): Promise<{ orders: ProductionOrde
               general_notes: o.general_notes || '',
               total_units: Number(o.total_units) || 0,
               total_amount: Number(o.total_amount) || 0,
+              coupon_code: o.coupon_code || undefined,
+              discount_amount: o.discount_amount ? Number(o.discount_amount) : undefined,
+              subtotal_amount: o.subtotal_amount ? Number(o.subtotal_amount) : undefined,
               status: normalizeStatus(o.status),
               items: Array.isArray(o.items) ? o.items : [],
               created_at: o.created_at || new Date().toISOString(),
@@ -227,6 +230,9 @@ export async function createProductionOrder(orderData: {
   generalNotes?: string;
   totalUnits: number;
   totalAmount: number;
+  couponCode?: string;
+  discountAmount?: number;
+  subtotalAmount?: number;
   items: any[];
   status?: OrderStatus;
 }): Promise<ProductionOrder> {
@@ -243,6 +249,9 @@ export async function createProductionOrder(orderData: {
     general_notes: orderData.generalNotes || '',
     total_units: Number(orderData.totalUnits) || 0,
     total_amount: Number(orderData.totalAmount) || 0,
+    coupon_code: orderData.couponCode || undefined,
+    discount_amount: orderData.discountAmount !== undefined ? Number(orderData.discountAmount) : undefined,
+    subtotal_amount: orderData.subtotalAmount !== undefined ? Number(orderData.subtotalAmount) : undefined,
     status: normalizeStatus(orderData.status),
     items: orderData.items || [],
     created_at: nowIso,
@@ -265,6 +274,9 @@ export async function createProductionOrder(orderData: {
             general_notes: newOrder.general_notes || null,
             total_units: newOrder.total_units,
             total_amount: newOrder.total_amount,
+            coupon_code: newOrder.coupon_code || null,
+            discount_amount: newOrder.discount_amount || null,
+            subtotal_amount: newOrder.subtotal_amount || null,
             status: newOrder.status,
             items: newOrder.items,
           })

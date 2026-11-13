@@ -21,7 +21,8 @@ import {
   ChevronRight,
   ExternalLink,
   MapPin,
-  Tag
+  Tag,
+  Ticket
 } from 'lucide-react';
 import { ProductionOrder, OrderStatus } from '@/types';
 import { getSupabase } from '@/lib/supabase';
@@ -977,28 +978,28 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                           {/* Grid com os Detalhes da Personalização */}
                           <div className={styles.modalSpecsGrid}>
                             <div className={styles.specBox}>
-                              <span className={styles.specLabel}>🏷️ Modelo / Variação</span>
+                              <span className={styles.specLabel}>Modelo / Variação</span>
                               <span className={`${styles.specValue} ${cust.variation ? styles.specValueHighlight : ''}`}>
                                 {cust.variation || 'Modelo Padrão'}
                               </span>
                             </div>
 
                             <div className={styles.specBox}>
-                              <span className={styles.specLabel}>👶 Nome na Lembrancinha</span>
+                              <span className={styles.specLabel}>Nome na Lembrancinha</span>
                               <span className={`${styles.specValue} ${cust.childName ? styles.specValueHighlight : ''}`}>
                                 {cust.childName || 'Não especificado'}
                               </span>
                             </div>
 
                             <div className={styles.specBox}>
-                              <span className={styles.specLabel}>📅 Data do Evento / Aniversário</span>
+                              <span className={styles.specLabel}>Data do Evento / Aniversário</span>
                               <span className={styles.specValue}>
                                 {cust.ageOrDate || formatDateDisplay(selectedOrder.event_date) || 'Não informada'}
                               </span>
                             </div>
 
                             <div className={styles.specBox}>
-                              <span className={styles.specLabel}>🎀 Cor da Fita / Laço</span>
+                              <span className={styles.specLabel}>Cor da Fita / Laço</span>
                               <span className={`${styles.specValue} ${cust.ribbonColor ? styles.specValueHighlight : ''}`}>
                                 {cust.ribbonColor || 'Padrão da foto'}
                               </span>
@@ -1008,7 +1009,7 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                             {cust.customFieldValues &&
                               Object.entries(cust.customFieldValues).map(([k, val]) => (
                                 <div key={k} className={styles.specBox}>
-                                  <span className={styles.specLabel}>📋 {k}</span>
+                                  <span className={styles.specLabel}>{k}</span>
                                   <span className={styles.specValue}>{String(val)}</span>
                                 </div>
                               ))}
@@ -1025,6 +1026,24 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                           {selectedOrder.general_notes && (
                             <div className={styles.itemNotesBox} style={{ marginTop: cust.notes ? '0.5rem' : '0' }}>
                               <strong>Observações Gerais do Pedido:</strong> {selectedOrder.general_notes}
+                            </div>
+                          )}
+
+                          {/* Informação do Cupom de Desconto Utilizado */}
+                          {selectedOrder.coupon_code && (
+                            <div className={styles.itemCouponBox} style={{ marginTop: '0.5rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                <Ticket size={15} />
+                                <span>
+                                  <strong>Cupom de Desconto Aplicado:</strong>{' '}
+                                  <span className={styles.itemCouponBadge}>{selectedOrder.coupon_code}</span>
+                                </span>
+                              </div>
+                              {selectedOrder.discount_amount !== undefined && selectedOrder.discount_amount > 0 && (
+                                <span style={{ fontWeight: 700 }}>
+                                  Desconto: -R$ {Number(selectedOrder.discount_amount).toFixed(2).replace('.', ',')}
+                                </span>
+                              )}
                             </div>
                           )}
                         </div>
@@ -1082,6 +1101,11 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                     <span className={styles.customerBoxContent} style={{ color: '#2E7D32', fontSize: '1.15rem' }}>
                       R$ {Number(selectedOrder.total_amount).toFixed(2).replace('.', ',')}
                     </span>
+                    {selectedOrder.coupon_code && selectedOrder.discount_amount !== undefined && selectedOrder.discount_amount > 0 && (
+                      <span style={{ fontSize: '0.75rem', color: '#166534', fontWeight: 600 }}>
+                        (Economia de R$ {Number(selectedOrder.discount_amount).toFixed(2).replace('.', ',')} com cupom {selectedOrder.coupon_code})
+                      </span>
+                    )}
                   </div>
                 </div>
 

@@ -75,12 +75,26 @@ export async function POST(request: Request) {
         // Segue tentando o upload normalmente
       }
 
-      const { error: uploadError } = await supabase.storage
+      // Tenta upload com retry em caso de oscilação momentânea de rede na hospedagem
+      let uploadResult = await supabase.storage
         .from(STORAGE_BUCKET)
         .upload(uniqueFileName, buffer, {
           contentType,
           upsert: false,
         });
+
+      if (uploadResult.error && (uploadResult.error.message.includes('fetch failed') || uploadResult.error.message.includes('network'))) {
+        console.warn('Primeira tentativa de upload falhou, tentando novamente em 1s...');
+        await new Promise((r) => setTimeout(r, 1000));
+        uploadResult = await supabase.storage
+          .from(STORAGE_BUCKET)
+          .upload(uniqueFileName, buffer, {
+            contentType,
+            upsert: false,
+          });
+      }
+
+      const { error: uploadError } = uploadResult;
 
       if (uploadError) {
         console.error('Erro ao enviar imagem para Supabase Storage:', uploadError);

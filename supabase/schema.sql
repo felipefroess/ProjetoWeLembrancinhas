@@ -52,11 +52,19 @@ CREATE TABLE IF NOT EXISTS public.orders (
     general_notes TEXT,
     total_units INTEGER NOT NULL DEFAULT 0,
     total_amount NUMERIC(10, 2) NOT NULL DEFAULT 0,
+    coupon_code TEXT,
+    discount_amount NUMERIC(10, 2),
+    subtotal_amount NUMERIC(10, 2),
     status TEXT NOT NULL DEFAULT 'pendente', -- 'pendente', 'confirmado', 'concluido', 'cancelado'
     items JSONB NOT NULL DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Adiciona as colunas caso a tabela já exista
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS coupon_code TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS discount_amount NUMERIC(10, 2);
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS subtotal_amount NUMERIC(10, 2);
 
 -- Índices para filtros de status e relatórios de faturamento
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON public.orders (created_at);

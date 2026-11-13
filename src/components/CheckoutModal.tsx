@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useCart } from '@/context/CartContext';
 import { X, Send, MapPin, Calendar, User, Phone, CheckCircle2, Truck, Loader2, AlertTriangle, Tag } from 'lucide-react';
 import { DeliveryMethod } from '@/types';
@@ -55,6 +55,8 @@ export function CheckoutModal() {
   const [isSent, setIsSent] = useState(false);
   const [isStoreOnline, setIsStoreOnline] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCepInvalid, setIsCepInvalid] = useState(false);
+  const cepInputRef = useRef<HTMLInputElement>(null);
 
   const [shippingLoading, setShippingLoading] = useState(false);
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
@@ -91,12 +93,14 @@ export function CheckoutModal() {
   const calculateShipping = async (rawCep: string) => {
     const digits = rawCep.replace(/\D/g, '');
     if (digits.length !== 8) {
+      setIsCepInvalid(true);
       setShippingError('Digite um CEP completo com 8 números.');
       return;
     }
 
     setShippingLoading(true);
     setShippingError('');
+    setIsCepInvalid(false);
     setShippingNotice('');
     try {
       const res = await fetch('/api/shipping/calculate', {
@@ -111,6 +115,7 @@ export function CheckoutModal() {
       const data = await res.json();
       setLastCalculatedCep(digits);
 
+      // Preenchimento automático do endereço com base no CEP (ViaCEP)
       if (data.addressInfo) {
         const parts = [
           data.addressInfo.street,
@@ -128,10 +133,12 @@ export function CheckoutModal() {
       if (!res.ok || data.success === false) {
         setShippingOptions([]);
         setSelectedShippingId(null);
+        setIsCepInvalid(Boolean(data.invalidCep));
         setShippingError(data.error || 'Não foi possível calcular o frete agora.');
         return;
       }
 
+      setIsCepInvalid(false);
       const opts: ShippingOption[] = Array.isArray(data.options) ? data.options : [];
       setShippingOptions(opts);
 
@@ -156,6 +163,7 @@ export function CheckoutModal() {
   const handleCepChange = (value: string) => {
     const formatted = formatCepInput(value);
     setShippingCep(formatted);
+    setIsCepInvalid(false);
     const digits = formatted.replace(/\D/g, '');
     if (digits.length < 8) {
       setShippingOptions([]);
@@ -315,6 +323,9 @@ export function CheckoutModal() {
     // Abre o WhatsApp na nova aba
     window.open(url, '_blank');
 
+    // Limpa o carrinho de imediato para novas compras
+    clearCart();
+
     // Registra o pedido no banco de dados Supabase de forma assíncrona
     const shippingSummary = selectedShippingOption
       ? `Frete: ${selectedShippingOption.companyName} ${selectedShippingOption.name} (R$ ${selectedShippingOption.price.toFixed(2).replace('.', ',')}) - CEP ${shippingCep}`
@@ -333,6 +344,9 @@ export function CheckoutModal() {
       generalNotes: combinedNotes || undefined,
       totalUnits,
       totalAmount: orderTotalWithShipping,
+      couponCode: appliedCoupon ? appliedCoupon.code : undefined,
+      discountAmount: discountAmount > 0 ? discountAmount : undefined,
+      subtotalAmount: subtotalAmount,
       items,
     });
   };
@@ -410,14 +424,6 @@ export function CheckoutModal() {
               </div>
             </div>
 
-            {/* Alerta de Cupom (Ex: Cupom de 1ª compra já utilizado por este WhatsApp) */}
-            {couponWarning && (
-              <div className={styles.couponWarningBox}>
-                <AlertTriangle size={16} className={styles.couponWarningIcon} />
-                <span>{couponWarning}</span>
-              </div>
-            )}
-
             {/* Nome Completo */}
             <div>
               <label className={styles.fieldLabel}>
@@ -447,7 +453,11 @@ export function CheckoutModal() {
                     setCustomerPhone(e.target.value);
                     if (couponWarning) setCouponWarning(null);
                   }}
-                  onBlur={() => checkCouponForPhone(customerPhone)}
+                  onBlur={() => {
+                    if (appliedCoupon) {
+                      checkCouponForPhone(customerPhone);
+                    }
+                  }}
                   className={styles.formInput}
                 />
               </div>
@@ -539,8 +549,19 @@ export function CheckoutModal() {
                   <Truck size={13} className={styles.labelIcon} /> CEP para calcular o frete <span className={styles.reqStar}>*</span>
                 </label>
 
+                {isCepInvalid && (
+                  <div className={styles.requiredPingBadge} role="alert">
+                    <span className={styles.pingDotWrap}>
+                      <span className={styles.pingDotRing} />
+                      <span className={styles.pingDotCore} />
+                    </span>
+                    <span>CEP inválido</span>
+                  </div>
+                )}
+
                 <div className={styles.cepRow}>
                   <input
+                    ref={cepInputRef}
                     type="text"
                     inputMode="numeric"
                     required
@@ -548,7 +569,7 @@ export function CheckoutModal() {
                     placeholder="00000-000"
                     value={shippingCep}
                     onChange={(e) => handleCepChange(e.target.value)}
-                    className={styles.formInput}
+                    className={`${styles.formInput} ${isCepInvalid ? styles.inputError : ''}`}
                   />
                   <button
                     type="button"
@@ -686,6 +707,14 @@ export function CheckoutModal() {
 
                   {/* PARTE DO CUPOM DE DESCONTO EM BAIXO DE RETIRADA */}
                   <div className={styles.checkoutCouponContainer}>
+                    {/* Alerta de Cupom (Ex: Cupom de 1ª compra já utilizado por este WhatsApp) */}
+                    {couponWarning && (
+                      <div className={styles.couponWarningBox} style={{ marginBottom: '0.625rem' }}>
+                        <AlertTriangle size={15} className={styles.couponWarningIcon} />
+                        <span>{couponWarning}</span>
+                      </div>
+                    )}
+
                     <span className={styles.checkoutCouponLabel}>Cupom de desconto</span>
                     {appliedCoupon ? (
                       <div className={styles.checkoutAppliedCouponRow}>
