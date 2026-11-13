@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, connection } from 'next/server';
 import { sql, isDbConfigured } from '@/server/db/client';
 import { AnalyticsPeriod, TopProductStat } from '@/lib/analytics';
 import { getAllProductionOrders } from '@/lib/ordersStore';
@@ -68,6 +68,7 @@ function aggregateOrders(
 }
 
 export async function GET(request: NextRequest) {
+  await connection();
   try {
     const period = (request.nextUrl.searchParams.get('period') || 'mes') as AnalyticsPeriod;
 
@@ -208,6 +209,12 @@ export async function GET(request: NextRequest) {
       salesByProduct,
       topSellingProducts,
       clicksByProduct,
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
     });
   } catch (error) {
     console.error('Erro ao calcular analytics reais no Neon:', error);

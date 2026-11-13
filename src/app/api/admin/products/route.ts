@@ -1,16 +1,25 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, connection } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { isAuthenticated } from '@/lib/auth';
 import { getAllProducts, saveProduct, deleteProduct, saveCategory } from '@/lib/productsStore';
 import { Product } from '@/types';
 
 export async function GET() {
+  await connection();
   const auth = await isAuthenticated();
   if (!auth) {
     return NextResponse.json({ success: false, error: 'Não autorizado' }, { status: 401 });
   }
 
   const products = await getAllProducts();
-  return NextResponse.json({ success: true, products });
+  return NextResponse.json(
+    { success: true, products },
+    {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+      },
+    }
+  );
 }
 
 export async function POST(request: Request) {
@@ -47,6 +56,16 @@ export async function POST(request: Request) {
     }
 
     const saved = await saveProduct(product);
+
+    // Invalida os caches do Next.js para garantir atualização imediata no site e na API
+    try {
+      revalidatePath('/api/products');
+      revalidatePath('/', 'page');
+      revalidatePath('/admin', 'page');
+    } catch (revalErr) {
+      console.warn('Erro ao revalidar cache após salvar produto:', revalErr);
+    }
+
     return NextResponse.json({ success: true, product: saved });
   } catch (error) {
     console.error('Erro ao salvar produto:', error);
@@ -69,6 +88,16 @@ export async function DELETE(request: Request) {
     }
 
     const deleted = await deleteProduct(id);
+
+    // Invalida os caches do Next.js para garantir atualização imediata no site e na API
+    try {
+      revalidatePath('/api/products');
+      revalidatePath('/', 'page');
+      revalidatePath('/admin', 'page');
+    } catch (revalErr) {
+      console.warn('Erro ao revalidar cache após excluir produto:', revalErr);
+    }
+
     return NextResponse.json({ success: true, deleted });
   } catch (error) {
     console.error('Erro ao excluir produto:', error);

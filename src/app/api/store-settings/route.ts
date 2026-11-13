@@ -1,11 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, connection } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getStoreSettings, updateStoreSettings } from '@/lib/storeSettingsStore';
 
 // GET: Retornar as configurações atuais da loja
 export async function GET() {
+  await connection();
   try {
     const settings = await getStoreSettings();
-    return NextResponse.json({ success: true, settings });
+    return NextResponse.json(
+      { success: true, settings },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
+    );
   } catch (error) {
     console.error('Erro na API de store-settings (GET):', error);
     return NextResponse.json(
@@ -29,6 +40,12 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    try {
+      revalidatePath('/api/store-settings');
+      revalidatePath('/', 'page');
+      revalidatePath('/admin', 'page');
+    } catch {}
 
     return NextResponse.json({
       success: true,

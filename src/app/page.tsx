@@ -73,16 +73,22 @@ export default function HomePage() {
     // 2. Revalidação em segundo plano sem travar a interface
     async function fetchDynamicData() {
       try {
-        const res = await fetch("/api/products");
+        const res = await fetch(`/api/products?t=${Date.now()}`, {
+          cache: "no-store",
+          headers: {
+            "Pragma": "no-cache",
+            "Cache-Control": "no-cache",
+          },
+        });
         const data = await res.json();
         if (data.success) {
-          if (data.products && data.products.length > 0) {
+          if (Array.isArray(data.products) && data.products.length > 0) {
             setProductsList(data.products);
             try {
               localStorage.setItem("we_cached_products", JSON.stringify(data.products));
             } catch {}
           }
-          if (data.categories && data.categories.length > 0) {
+          if (Array.isArray(data.categories) && data.categories.length > 0) {
             setCategoriesList(data.categories);
             try {
               localStorage.setItem("we_cached_categories", JSON.stringify(data.categories));
@@ -95,6 +101,16 @@ export default function HomePage() {
     }
 
     fetchDynamicData();
+
+    // Revalida automaticamente quando a aba ganha foco
+    const handleFocus = () => {
+      fetchDynamicData();
+    };
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
   }, []);
 
   // Mapeia nomes das categorias para consulta rápida
