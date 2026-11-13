@@ -30,6 +30,23 @@ export default function HomePage() {
 
   useEffect(() => {
     setClientDate(new Date());
+
+    // Desativa a restauração automática do navegador e garante que a página sempre inicie no topo ao recarregar
+    if (typeof window !== "undefined") {
+      if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+      }
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+
+      const handleBeforeUnload = () => {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      };
+      window.addEventListener("beforeunload", handleBeforeUnload);
+
+      return () => {
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+      };
+    }
   }, []);
 
   useEffect(() => {

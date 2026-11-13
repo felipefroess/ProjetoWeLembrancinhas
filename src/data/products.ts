@@ -365,6 +365,7 @@ export const PRODUCTS: Product[] = [
       {
         "id": "var_1794416989068_0",
         "name": "Modelo 1",
+        "description": "Caixa com Fotos e Mensagens para 7 Doces",
         "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794322348494-saveclip.app_502942743_18164158282347767_2874077480112854440_n.jpg",
         "images": [
           "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794322348494-saveclip.app_502942743_18164158282347767_2874077480112854440_n.jpg",
@@ -374,6 +375,7 @@ export const PRODUCTS: Product[] = [
       {
         "id": "var_1794416989068_1",
         "name": "Modelo 2",
+        "description": "Caixa com Fotos e Mensagens para 2 Doces",
         "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794322416835-saveclip.app_502659714_18163975918347767_928340238878548303_n.jpg",
         "images": [
           "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794322416835-saveclip.app_502659714_18163975918347767_928340238878548303_n.jpg",

@@ -38,6 +38,11 @@ export function ProductCard({ product, isMostRequested }: ProductCardProps) {
     currency: 'BRL',
   });
 
+  const displayDescription =
+    selectedVariation && selectedVariation.description && selectedVariation.description.trim()
+      ? selectedVariation.description.trim()
+      : product.description;
+
   const handleSelectVariation = (e: React.MouseEvent, v: ProductVariation) => {
     e.stopPropagation();
     setSelectedVariation(v);
@@ -102,7 +107,7 @@ export function ProductCard({ product, isMostRequested }: ProductCardProps) {
             {product.name}
           </h3>
           <p className={styles.productDescription}>
-            {product.description}
+            {displayDescription}
           </p>
 
           {/* Miniaturas de variação estilo Mercado Livre */}
