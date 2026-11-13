@@ -20,15 +20,6 @@ export function HeroBanner() {
           <h1 className={styles.heroTitle}>
             Transformando momentos únicos em memórias inesquecíveis.
           </h1>
-
-          <p className={styles.heroSubtitle}>
-            <span>Feito sob encomenda</span>
-            <span className={styles.bulletDot} aria-hidden="true" />
-            <span>Produção 100% artesanal</span>
-            <span className={styles.bulletDot} aria-hidden="true" />
-            <span>Envio seguro para todo o Brasil.</span>
-          </p>
-
           <div className={styles.buttonGroup}>
             <button
               onClick={scrollToCatalog}
@@ -37,13 +28,17 @@ export function HeroBanner() {
               Ver Catálogo & Montar Pedido
             </button>
           </div>
+        </div>
 
-          {/* 3 Passos Simples Didáticos */}
-          <div className={styles.stepsSection}>
-            <div className={styles.stepsHeader}>
-              <span className={styles.stepsTag}>Como funciona</span>
-              <h3 className={styles.stepsTitle}>Fazer seu pedido é simples e rápido:</h3>
-            </div>
+        {/* Linha divisória tracejada na largura normal da página */}
+        <div className={styles.heroDivider} />
+
+        {/* 3 Passos Simples Didáticos */}
+        <div className={styles.stepsSection}>
+          <div className={styles.stepsHeader}>
+            <span className={styles.stepsTag}>Como funciona</span>
+            <h3 className={styles.stepsTitle}>Fazer seu pedido é simples e rápido:</h3>
+          </div>
 
             <div className={styles.stepsGrid}>
               {/* Passo 1 */}
@@ -84,7 +79,6 @@ export function HeroBanner() {
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
   );
 }

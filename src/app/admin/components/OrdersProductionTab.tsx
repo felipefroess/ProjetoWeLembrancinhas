@@ -354,8 +354,7 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
               }}
               title={dataSource === 'neon' ? 'Conectado e sincronizado com o PostgreSQL Neon' : 'Usando armazenamento local com redundância'}
             >
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: dataSource === 'neon' ? '#16A34A' : '#D97706' }} />
-              {dataSource === 'neon' ? 'Sincronizado ao Vivo (Neon)' : 'Armazenamento Local'}
+              <span/>
             </span>
           </h2>
           <p className={styles.ordersSubheading}>

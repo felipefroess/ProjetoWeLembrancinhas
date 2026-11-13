@@ -21,6 +21,7 @@ export function ProductModal() {
     isCustomizingModalOpen,
     closeCustomizationModal,
     selectedProductForCustomization: product,
+    selectedVariationIdForCustomization,
     addToCart,
   } = useCart();
 
@@ -52,14 +53,16 @@ export function ProductModal() {
       setNotes('');
       setCustomFieldValues({});
       setMissingFields({});
-      const initialVariation = product.variations?.[0] || null;
+      const initialVariation = (selectedVariationIdForCustomization && product.variations?.find((v) => v.id === selectedVariationIdForCustomization))
+        || product.variations?.[0]
+        || null;
       setSelectedVariation(initialVariation);
       const initialImg = initialVariation?.images?.[0] || initialVariation?.image || product.image;
       setSelectedImage(initialImg);
       setScale(1);
       setPosition({ x: 0, y: 0 });
     }
-  }, [product]);
+  }, [product, selectedVariationIdForCustomization]);
 
   // Reseta o zoom sempre que a imagem selecionada mudar
   useEffect(() => {

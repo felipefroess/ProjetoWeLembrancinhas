@@ -101,7 +101,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${cormorant.variable} ${jakarta.variable} ${playfair.variable} ${dancingScript.variable} ${lora.variable}`}>
-      <body>
+      <body suppressHydrationWarning>
         <StoreSettingsProvider>
           <CartProvider>
             <AnalyticsTracker />

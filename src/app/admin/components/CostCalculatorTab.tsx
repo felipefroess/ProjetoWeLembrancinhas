@@ -32,7 +32,7 @@ interface PresetItem {
 
 const PRESET_TEMPLATES: PresetItem[] = [
   {
-    name: '🍬 Mini Lata Natalina',
+    name: 'Mini Lata Natalina',
     paper: 1.50,
     ribbon: 0.90,
     treat: 2.20,
@@ -42,7 +42,7 @@ const PRESET_TEMPLATES: PresetItem[] = [
     margin: 60,
   },
   {
-    name: '🧼 Porta-Sabonete Luxo',
+    name: 'Porta-Sabonete Luxo',
     paper: 1.20,
     ribbon: 0.80,
     treat: 2.50,
@@ -52,7 +52,7 @@ const PRESET_TEMPLATES: PresetItem[] = [
     margin: 50,
   },
   {
-    name: '📓 Caderno c/ Elástico',
+    name: 'Caderno c/ Elástico',
     paper: 8.50,
     ribbon: 1.20,
     treat: 0,
@@ -62,7 +62,7 @@ const PRESET_TEMPLATES: PresetItem[] = [
     margin: 70,
   },
   {
-    name: '🍼 Caixa Milk 3D',
+    name: 'Caixa Milk 3D',
     paper: 2.10,
     ribbon: 1.40,
     treat: 1.50,
@@ -72,7 +72,7 @@ const PRESET_TEMPLATES: PresetItem[] = [
     margin: 60,
   },
   {
-    name: '🎓 Estojo Professores',
+    name: 'Estojo Professores',
     paper: 12.00,
     ribbon: 2.00,
     treat: 4.50,
@@ -233,8 +233,7 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
 
       {/* Modelos Prontos de Precificação */}
       <div className={styles.presetTemplatesBar}>
-        <span className={styles.presetLabel}>
-          <Sparkles size={14} color="#D97706" /> Modelos Sugeridos:
+        <span className={styles.presetLabel}> Modelos Sugeridos:
         </span>
         <div className={styles.presetButtons}>
           {PRESET_TEMPLATES.map((tmpl, idx) => (

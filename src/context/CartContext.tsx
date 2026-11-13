@@ -21,7 +21,7 @@ interface CartContextType {
   removeCoupon: () => void;
   openCart: () => void;
   closeCart: () => void;
-  openCustomizationModal: (product: Product) => void;
+  openCustomizationModal: (product: Product, initialVariationId?: string) => void;
   closeCustomizationModal: () => void;
   openCheckout: () => void;
   closeCheckout: () => void;
@@ -30,6 +30,7 @@ interface CartContextType {
   updateQuantity: (cartItemId: string, newQuantity: number) => void;
   clearCart: () => void;
   generateWhatsAppOrderUrl: (orderData: CustomerOrderData) => string;
+  selectedVariationIdForCustomization?: string | null;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -45,6 +46,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isCustomizingModalOpen, setIsCustomizingModalOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [selectedProductForCustomization, setSelectedProductForCustomization] = useState<Product | null>(null);
+  const [selectedVariationIdForCustomization, setSelectedVariationIdForCustomization] = useState<string | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Carregar do localStorage ao montar o componente
@@ -91,14 +93,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 
-  const openCustomizationModal = (product: Product) => {
+  const openCustomizationModal = (product: Product, initialVariationId?: string) => {
     setSelectedProductForCustomization(product);
+    setSelectedVariationIdForCustomization(initialVariationId || null);
     setIsCustomizingModalOpen(true);
     trackProductClick(product);
   };
 
   const closeCustomizationModal = () => {
     setSelectedProductForCustomization(null);
+    setSelectedVariationIdForCustomization(null);
     setIsCustomizingModalOpen(false);
   };
 
@@ -342,6 +346,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         isCustomizingModalOpen,
         isCheckoutOpen,
         selectedProductForCustomization,
+        selectedVariationIdForCustomization,
         totalItems,
         subtotalAmount,
         appliedCoupon,

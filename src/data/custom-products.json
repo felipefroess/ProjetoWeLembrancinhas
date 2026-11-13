@@ -193,7 +193,7 @@
     "featured": true,
     "variations": [
       {
-        "id": "var_1794536540705_0",
+        "id": "var_1794592425838_0",
         "name": "Modelo 1",
         "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794536468652-caderno1.jpg",
         "images": [
@@ -202,7 +202,7 @@
         "description": "Modelo conta com capa dura em azul marinho com elástico e personalizado com o nome"
       },
       {
-        "id": "var_1794536540705_1",
+        "id": "var_1794592425838_1",
         "name": "Modelo 2",
         "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794536480242-caderno3.jpg",
         "images": [
@@ -211,21 +211,20 @@
         "description": "Modelo conta com a capa dura e acabamento holográfico, flores campestres, tassel roxo e passante de borboleta dourada."
       },
       {
-        "id": "var_1794536540705_2",
+        "id": "var_1794592425838_2",
         "name": "Modelo 3",
-        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794333488324-saveclip.app_539454379_18173392714347767_7517392955588664362_n.jpg",
+        "image": "/uploads/1794592411953-caderno4.jpg",
         "images": [
-          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794333488324-saveclip.app_539454379_18173392714347767_7517392955588664362_n.jpg",
-          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794333493211-saveclip.app_544073499_18173392741347767_8193566408890919383_n.jpg"
+          "/uploads/1794592411953-caderno4.jpg"
         ],
         "description": "Modelo conta com a capa dura e holográfica floral, nome e inicial, e elástico com passante dourado."
       },
       {
-        "id": "var_1794536540705_3",
+        "id": "var_1794592425838_3",
         "name": "Modelo 4",
-        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794333556658-saveclip.app_521541070_18169066933347767_8499588843540459767_n.jpg",
+        "image": "/uploads/1794592424217-caderno5.jpg",
         "images": [
-          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794333556658-saveclip.app_521541070_18169066933347767_8499588843540459767_n.jpg"
+          "/uploads/1794592424217-caderno5.jpg"
         ],
         "description": "Modelo conta com capa dura floral holográfica, nome com inicial, elástico e tassel."
       }
@@ -668,25 +667,25 @@
     "unit": "unidade",
     "leadTimeDays": 5,
     "minQuantity": 1,
-    "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794415829547-recorte-1794415829510.jpg",
+    "image": "/uploads/1794592435998-colorindo.jpg",
     "images": [
-      "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794415829547-recorte-1794415829510.jpg"
+      "/uploads/1794592435998-colorindo.jpg"
     ],
     "variations": [
       {
-        "id": "var_1794457010872_0",
+        "id": "var_1794592452159_0",
         "name": "Azul",
-        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794417285879-recorte-1794417285857.jpg",
+        "image": "/uploads/1794592442191-colorindo.jpg",
         "images": [
-          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794417285879-recorte-1794417285857.jpg"
+          "/uploads/1794592442191-colorindo.jpg"
         ]
       },
       {
-        "id": "var_1794457010872_1",
+        "id": "var_1794592452159_1",
         "name": "Rosa",
-        "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794417297379-recorte-1794417297344.jpg",
+        "image": "/uploads/1794592451008-colorindo2.jpg",
         "images": [
-          "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794417297379-recorte-1794417297344.jpg"
+          "/uploads/1794592451008-colorindo2.jpg"
         ]
       }
     ],

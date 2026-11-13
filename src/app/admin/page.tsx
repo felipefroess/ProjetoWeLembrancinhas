@@ -1115,15 +1115,6 @@ export default function AdminDashboardPage() {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                 <h2 className={styles.dashboardHeading}>Dashboard de Desempenho & Vendas</h2>
-                {isDbConfigured ? (
-                  <span className={styles.databaseStatusBadge + ' ' + styles.databaseStatusBadgeConnected}>
-                    <ShieldCheck size={12} /> PostgreSQL Neon Ativo (Dados Reais)
-                  </span>
-                ) : (
-                  <span className={styles.databaseStatusBadge + ' ' + styles.databaseStatusBadgeDemo}>
-                    ⚡ Modo Demonstração (Sem Banco)
-                  </span>
-                )}
               </div>
               <p className={styles.dashboardSubheading}>
                 Acompanhe o faturamento, lembrancinhas vendidas, visitas e os produtos campeões de cliques.
@@ -1174,18 +1165,6 @@ export default function AdminDashboardPage() {
               </div>
             </div>
           </div>
-
-          {!isDbConfigured && (
-            <div className={styles.databaseNoticeBanner}>
-              <div>
-                <div className={styles.databaseNoticeTitle}>Banco de Dados Neon (PostgreSQL) Pronto para Ativação</div>
-                <p className={styles.databaseNoticeDesc}>
-                  As tabelas e o rastreamento automático de visitas, cliques e pedidos já estão integrados! Assim que você configurar a variável <code>DATABASE_URL</code> no arquivo <code>.env.local</code>, este painel passará a exibir números 100% reais em tempo real.
-                </p>
-              </div>
-            </div>
-          )}
-
           {/* Cards de KPIs Principais (Reativos ao Período Selecionado) */}
           <div className={styles.kpiGrid}>
             {/* Card 1: Valor Total de Ganhos */}

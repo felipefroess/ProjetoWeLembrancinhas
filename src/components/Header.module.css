@@ -12,7 +12,7 @@
 /* Barra de aviso superior */
 
 .topBannerLink {
-  color: inherit;
+  color: #e2e2e2;
   text-decoration: none;
   text-underline-offset: 3px;
   transition: opacity 0.15s ease;
