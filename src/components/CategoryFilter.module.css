@@ -49,11 +49,106 @@
   color: #9E9084;
 }
 
+/* Wrapper do carrossel para conter os botões absolutos de navegação */
+.carouselWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Fades suaves nas bordas indicando conteúdo oculto */
+.fadeEdge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 48px;
+  pointer-events: none;
+  z-index: 15;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.fadeEdgeLeft {
+  left: -0.5rem;
+  background: linear-gradient(to right, #FAF7F2 35%, rgba(250, 247, 242, 0) 100%);
+}
+
+.fadeEdgeRight {
+  right: -0.5rem;
+  background: linear-gradient(to left, #FAF7F2 35%, rgba(250, 247, 242, 0) 100%);
+}
+
+.fadeVisible {
+  opacity: 1;
+}
+
+/* Botões circulares flutuantes de navegação (setas) */
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  background-color: #FFFFFF;
+  border: 1.5px solid #E8DFD5;
+  color: #4A3B32;
+  box-shadow: 0 4px 12px rgba(74, 59, 50, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 25;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.2s ease;
+}
+
+.navButtonVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.navButtonLeft {
+  left: -6px;
+}
+
+.navButtonRight {
+  right: -6px;
+}
+
+@media (min-width: 640px) {
+  .navButton {
+    width: 40px;
+    height: 40px;
+  }
+  .navButtonLeft {
+    left: -12px;
+  }
+  .navButtonRight {
+    right: -12px;
+  }
+}
+
+.navButton:hover:not(:disabled) {
+  background-color: #6D4C3D;
+  border-color: #6D4C3D;
+  color: #FFFFFF;
+  box-shadow: 0 6px 16px rgba(109, 76, 61, 0.28);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.navButton:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.96);
+}
+
 .categoriesList {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   overflow-x: auto;
+  scroll-behavior: smooth;
+  width: 100%;
   margin-top: -0.75rem;
   margin-left: -0.5rem;
   margin-right: -0.5rem;
