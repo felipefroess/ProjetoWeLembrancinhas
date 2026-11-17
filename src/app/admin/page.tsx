@@ -462,7 +462,13 @@ export default function AdminDashboardPage() {
     if (!url || !url.trim()) return;
     try {
       const cleanUrl = url.trim();
-      const res = await fetch(cleanUrl);
+      let res: Response;
+      try {
+        res = await fetch(cleanUrl);
+        if (!res.ok) throw new Error('Falha direta');
+      } catch {
+        res = await fetch(`/api/admin/proxy-image?url=${encodeURIComponent(cleanUrl)}`);
+      }
       if (!res.ok) throw new Error('Falha ao obter imagem');
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);

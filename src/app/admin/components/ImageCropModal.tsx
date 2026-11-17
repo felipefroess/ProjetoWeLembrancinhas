@@ -53,14 +53,70 @@ function clamp(val: number, min: number, max: number) {
   return Math.max(min, Math.min(max, val));
 }
 
-function loadImageElement(src: string): Promise<HTMLImageElement> {
+async function resolveImageSrc(src: string): Promise<{ url: string; revoke?: () => void }> {
+  if (!src) return { url: src };
+
+  // Data URLs e local blobs já estão seguros para canvas
+  if (src.startsWith('data:') || src.startsWith('blob:')) {
+    return { url: src };
+  }
+
+  // Caminhos relativos de mesma origem
+  if (!src.startsWith('http://') && !src.startsWith('https://')) {
+    return { url: src };
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      const parsed = new URL(src, window.location.href);
+      if (parsed.origin === window.location.origin) {
+        return { url: src };
+      }
+    } catch {
+      return { url: src };
+    }
+
+    // Tenta fetch direto com CORS (caso o host externo já envie headers de CORS)
+    try {
+      const direct = await fetch(src, { mode: 'cors' });
+      if (direct.ok) {
+        const blob = await direct.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        return { url: blobUrl, revoke: () => URL.revokeObjectURL(blobUrl) };
+      }
+    } catch {
+      // Bloqueado pelo CORS do navegador, fallback imediato para o proxy do servidor
+    }
+
+    // Fallback: busca via proxy seguro no backend
+    try {
+      const proxyUrl = `/api/admin/proxy-image?url=${encodeURIComponent(src)}`;
+      const proxyRes = await fetch(proxyUrl);
+      if (proxyRes.ok) {
+        const blob = await proxyRes.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        return { url: blobUrl, revoke: () => URL.revokeObjectURL(blobUrl) };
+      }
+    } catch {
+      // Se falhar, tenta usar a URL de proxy direta
+      return { url: `/api/admin/proxy-image?url=${encodeURIComponent(src)}` };
+    }
+  }
+
+  return { url: src };
+}
+
+async function loadImageElement(src: string): Promise<HTMLImageElement> {
+  const resolved = await resolveImageSrc(src);
+
   return new Promise((resolve, reject) => {
     const img = new Image();
     const isRemote =
-      src.startsWith('http://') || src.startsWith('https://');
+      resolved.url.startsWith('http://') || resolved.url.startsWith('https://');
+
     if (isRemote && typeof window !== 'undefined') {
       try {
-        const url = new URL(src, window.location.href);
+        const url = new URL(resolved.url, window.location.href);
         if (url.origin !== window.location.origin) {
           img.crossOrigin = 'anonymous';
         }
@@ -68,14 +124,23 @@ function loadImageElement(src: string): Promise<HTMLImageElement> {
         img.crossOrigin = 'anonymous';
       }
     }
-    img.onload = () => resolve(img);
-    img.onerror = () =>
+
+    img.onload = () => {
+      resolve(img);
+    };
+
+    img.onerror = () => {
+      if (resolved.revoke) {
+        resolved.revoke();
+      }
       reject(
         new Error(
-          'Não foi possível carregar a imagem para edição. Se for um link externo, envie a foto do dispositivo.'
+          'Não foi possível carregar a imagem para edição. Verifique o link ou envie a foto do dispositivo.'
         )
       );
-    img.src = src;
+    };
+
+    img.src = resolved.url;
   });
 }
 
@@ -137,6 +202,8 @@ export function ImageCropModal({
   const [error, setError] = useState<string>('');
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const sourceImageRef = useRef<HTMLImageElement | null>(null);
+  const sourceUrlRef = useRef<string>('');
   const dragStateRef = useRef<{
     handle: DragHandle;
     startClientX: number;
@@ -148,7 +215,11 @@ export function ImageCropModal({
 
   // Reset all settings whenever modal opens for a new image
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      sourceImageRef.current = null;
+      sourceUrlRef.current = '';
+      return;
+    }
     setRotation(0);
     setFlipH(false);
     setBrightness(100);
@@ -168,7 +239,12 @@ export function ImageCropModal({
       setLoadingImage(true);
       setError('');
       try {
-        const img = await loadImageElement(imageUrl);
+        let img = sourceImageRef.current;
+        if (!img || sourceUrlRef.current !== imageUrl) {
+          img = await loadImageElement(imageUrl);
+          sourceImageRef.current = img;
+          sourceUrlRef.current = imageUrl;
+        }
         if (cancelled) return;
 
         const normRot = ((rotation % 360) + 360) % 360;
