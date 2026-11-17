@@ -59,18 +59,35 @@ export const metadata: Metadata = {
       { url: '/apple-icon.png?v=2', sizes: '180x180', type: 'image/png' },
     ],
   },
-  title: "Wê Lembrancinhas | Papelaria Afetiva & Personalizados",
+  title: {
+    default: "Wê Lembrancinhas | Papelaria Afetiva & Personalizados",
+    template: "%s | Wê Lembrancinhas",
+  },
   description: "Lembrancinhas personalizadas para qualquer ocasião: topos de bolo, caixas milk luxo, batizados, aniversários e datas especiais em Pouso Alegre e Paraisópolis - MG.",
   keywords: [
+    "welembrancinhas",
+    "we lembrancinhas",
+    "wê lembrancinhas",
+    "welembrancinhas instagram",
+    "welembrancinhas pouso alegre",
+    "welembrancinhas paraisopolis",
     "Wê Lembrancinhas",
     "Lembrancinhas personalizadas",
+    "Papelaria personalizada",
+    "Papelaria afetiva",
     "Topo de bolo",
     "Pouso Alegre",
     "Paraisópolis",
-    "Papelaria personalizada",
     "Batizado",
-    "Caixa milk luxo"
+    "Caixa milk luxo",
+    "Wenilze Fróes"
   ],
+  alternates: {
+    canonical: "https://welembrancinhas.com.br",
+  },
+  verification: {
+    google: "Ni4GsTTIbYm4AV382BOuE17g7Ort1C-8P9WmbbEDM0M",
+  },
   authors: [{ name: "Wenilze Fróes" }],
   openGraph: {
     title: "Wê Lembrancinhas | Papelaria Afetiva & Personalizados",
@@ -106,8 +123,44 @@ export default async function RootLayout({
     initialSettings = await getStoreSettings();
   } catch {}
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Wê Lembrancinhas",
+    "alternateName": [
+      "welembrancinhas",
+      "We Lembrancinhas",
+      "Wê Lembrancinhas Personalizados",
+      "welembrancinhas instagram"
+    ],
+    "description": "Lembrancinhas personalizadas e papelaria afetiva para topos de bolo, batizados, aniversários e datas especiais em Pouso Alegre e Paraisópolis - MG.",
+    "url": "https://welembrancinhas.com.br",
+    "telephone": "+5535984026382",
+    "image": "https://welembrancinhas.com.br/icon.png",
+    "sameAs": [
+      "https://www.instagram.com/welembrancinhas",
+      "https://instagram.com/welembrancinhas"
+    ],
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Pouso Alegre",
+      "addressRegion": "MG",
+      "addressCountry": "BR"
+    },
+    "areaServed": [
+      { "@type": "City", "name": "Pouso Alegre" },
+      { "@type": "City", "name": "Paraisópolis" }
+    ]
+  };
+
   return (
     <html lang="pt-BR" className={`${cormorant.variable} ${jakarta.variable} ${playfair.variable} ${dancingScript.variable} ${lora.variable}`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body suppressHydrationWarning>
         <StoreSettingsProvider initialSettings={initialSettings}>
           <CartProvider>
