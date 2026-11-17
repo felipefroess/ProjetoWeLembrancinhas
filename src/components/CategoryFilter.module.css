@@ -44,9 +44,52 @@
   color: #8C7A6B;
 }
 
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .sectionCount {
   font-size: 0.75rem;
   color: #9E9084;
+}
+
+/* Botões discretos de navegação no cabeçalho */
+.headerNavButtons {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.headerNavBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  border: 1px solid #E8DFD5;
+  background-color: #FFFFFF;
+  color: #B5A89D;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: not-allowed;
+  opacity: 0.35;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.headerNavBtnActive {
+  opacity: 1;
+  cursor: pointer;
+  color: #4A3B32;
+  border-color: #C8B9AB;
+}
+
+.headerNavBtnActive:hover {
+  background-color: #6D4C3D;
+  border-color: #6D4C3D;
+  color: #FFFFFF;
+  transform: scale(1.05);
 }
 
 /* Wrapper do carrossel para conter os botões absolutos de navegação */
@@ -56,33 +99,7 @@
   align-items: center;
 }
 
-/* Fades suaves nas bordas indicando conteúdo oculto */
-.fadeEdge {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 48px;
-  pointer-events: none;
-  z-index: 15;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.fadeEdgeLeft {
-  left: -0.5rem;
-  background: linear-gradient(to right, #FAF7F2 35%, rgba(250, 247, 242, 0) 100%);
-}
-
-.fadeEdgeRight {
-  right: -0.5rem;
-  background: linear-gradient(to left, #FAF7F2 35%, rgba(250, 247, 242, 0) 100%);
-}
-
-.fadeVisible {
-  opacity: 1;
-}
-
-/* Botões circulares flutuantes de navegação (setas) */
+/* Botões circulares flutuantes de navegação (setas laterais) */
 .navButton {
   position: absolute;
   top: 50%;
@@ -93,20 +110,25 @@
   background-color: #FFFFFF;
   border: 1.5px solid #E8DFD5;
   color: #4A3B32;
-  box-shadow: 0 4px 12px rgba(74, 59, 50, 0.14);
+  box-shadow: 0 4px 14px rgba(74, 59, 50, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 25;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.2s ease;
+  animation: navBtnFadeIn 0.2s ease;
 }
 
-.navButtonVisible {
-  opacity: 1;
-  pointer-events: auto;
+@keyframes navBtnFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
 }
 
 .navButtonLeft {
@@ -130,15 +152,15 @@
   }
 }
 
-.navButton:hover:not(:disabled) {
+.navButton:hover {
   background-color: #6D4C3D;
   border-color: #6D4C3D;
   color: #FFFFFF;
-  box-shadow: 0 6px 16px rgba(109, 76, 61, 0.28);
+  box-shadow: 0 6px 18px rgba(109, 76, 61, 0.28);
   transform: translateY(-50%) scale(1.08);
 }
 
-.navButton:active:not(:disabled) {
+.navButton:active {
   transform: translateY(-50%) scale(0.96);
 }
 
@@ -147,13 +169,11 @@
   align-items: center;
   gap: 0.75rem;
   overflow-x: auto;
-  scroll-behavior: smooth;
   width: 100%;
   margin-top: -0.75rem;
   margin-left: -0.5rem;
   margin-right: -0.5rem;
   padding: 1.125rem 0.75rem 0.75rem 0.75rem; /* Respiro no topo para que a touca de natal nunca seja cortada */
-  scroll-snap-type: x mandatory;
   -ms-overflow-style: none; /* Internet Explorer e Edge */
   scrollbar-width: none; /* Firefox */
 }
@@ -174,7 +194,6 @@
   transition: all 0.2s ease-in-out;
   flex-shrink: 0;
   cursor: pointer;
-  scroll-snap-align: start;
   border: 1px solid #4A3B32;
   background-color: #ffffff;
   color: #4A3B32;
