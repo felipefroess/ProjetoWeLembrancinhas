@@ -36,9 +36,10 @@ import {
   Crop,
   Download,
   Users,
-  RefreshCw
+  RefreshCw,
+  Tag
 } from 'lucide-react';
-import { Product, Category, ProductVariation, CustomFieldDefinition } from '@/types';
+import { Product, Category, ProductVariation, CustomFieldDefinition, QuantityDiscount } from '@/types';
 import OrdersProductionTab from './components/OrdersProductionTab';
 import CouponsTab from './components/CouponsTab';
 import StoreSettingsTab from './components/StoreSettingsTab';
@@ -156,9 +157,35 @@ export default function AdminDashboardPage() {
   
   // Modelos / Variações
   const [hasVariations, setHasVariations] = useState(false);
-  const [modalTab, setModalTab] = useState<'basico' | 'fotos' | 'modelos' | 'personalizacao'>('basico');
+  const [modalTab, setModalTab] = useState<'basico' | 'fotos' | 'modelos' | 'promocoes' | 'personalizacao'>('basico');
   const [variations, setVariations] = useState<Array<{ name: string; image: string; image2: string; description: string; price: string }>>([]);
   const [variationsNote, setVariationsNote] = useState('');
+
+  // Promoções & Atacado (Preço por Quantidade)
+  const [originalPrice, setOriginalPrice] = useState('');
+  const [quantityDiscounts, setQuantityDiscounts] = useState<Array<{ minQuantity: string; price: string }>>([]);
+
+  const handleAddQuantityDiscount = () => {
+    setQuantityDiscounts((prev) => [...prev, { minQuantity: '', price: '' }]);
+  };
+
+  const handleRemoveQuantityDiscount = (index: number) => {
+    setQuantityDiscounts((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleUpdateQuantityDiscount = (index: number, field: 'minQuantity' | 'price', value: string) => {
+    setQuantityDiscounts((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
+    );
+  };
+
+  const handleApplyBolinhasNatalExample = () => {
+    setPrice('9.90');
+    setQuantityDiscounts([
+      { minQuantity: '4', price: '9.50' },
+      { minQuantity: '10', price: '8.50' },
+    ]);
+  };
 
   // Opções de Personalização
   const [allowChildName, setAllowChildName] = useState(true);
@@ -261,6 +288,8 @@ export default function AdminDashboardPage() {
     setLeadTimeDays('5');
     setMinQuantity('1');
     setIsBestSeller(false);
+    setOriginalPrice('');
+    setQuantityDiscounts([]);
     setMainImage('');
     setAdditionalImages([]);
     setNewAdditionalUrl('');
@@ -292,6 +321,17 @@ export default function AdminDashboardPage() {
     setLeadTimeDays(product.leadTimeDays ? product.leadTimeDays.toString() : '5');
     setMinQuantity(product.minQuantity ? product.minQuantity.toString() : '1');
     setIsBestSeller(Boolean(product.isBestSeller));
+    setOriginalPrice(product.originalPrice !== undefined && product.originalPrice > 0 ? String(product.originalPrice) : '');
+    if (product.quantityDiscounts && product.quantityDiscounts.length > 0) {
+      setQuantityDiscounts(
+        product.quantityDiscounts.map((d) => ({
+          minQuantity: String(d.minQuantity),
+          price: String(d.price),
+        }))
+      );
+    } else {
+      setQuantityDiscounts([]);
+    }
 
     // Carrega fotos da publicação
     const primaryImg = product.image || (product.images && product.images[0]) || '';
@@ -621,6 +661,18 @@ export default function AdminDashboardPage() {
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)+/g, '') + `-${Date.now().toString().slice(-4)}`;
 
+      const parsedOriginalPrice = originalPrice && !isNaN(parseFloat(originalPrice.replace(',', '.')))
+        ? parseFloat(originalPrice.replace(',', '.'))
+        : undefined;
+
+      const formattedDiscounts: QuantityDiscount[] = quantityDiscounts
+        .map((d) => ({
+          minQuantity: parseInt(d.minQuantity, 10),
+          price: parseFloat(d.price.replace(',', '.')),
+        }))
+        .filter((d) => !isNaN(d.minQuantity) && d.minQuantity > 1 && !isNaN(d.price) && d.price > 0)
+        .sort((a, b) => a.minQuantity - b.minQuantity);
+
       const savedProductData: Product = {
         ...existingProduct,
         id: slugId,
@@ -628,6 +680,8 @@ export default function AdminDashboardPage() {
         category: finalCategory,
         description: description.trim(),
         price: parsedPrice,
+        originalPrice: parsedOriginalPrice,
+        quantityDiscounts: formattedDiscounts.length > 0 ? formattedDiscounts : undefined,
         unit: unit.trim() || 'unidade',
         leadTimeDays: parsedLeadTime,
         minQuantity: parsedMinQty,
@@ -711,6 +765,8 @@ export default function AdminDashboardPage() {
         setMainImage('');
         setAdditionalImages([]);
         setNewAdditionalUrl('');
+        setOriginalPrice('');
+        setQuantityDiscounts([]);
         setVariations([]);
         setHasVariations(false);
         setCustomFields([]);
@@ -1109,6 +1165,24 @@ export default function AdminDashboardPage() {
                       <span className={styles.priceTag}>
                         {p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                       </span>
+                      {p.quantityDiscounts && p.quantityDiscounts.length > 0 && (
+                        <div style={{ marginTop: '0.2rem' }}>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.2rem',
+                            backgroundColor: '#ECFDF5',
+                            color: '#065F46',
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '1px 6px',
+                            borderRadius: '4px',
+                            border: '1px solid #A7F3D0',
+                          }} title={p.quantityDiscounts.map(d => `${d.minQuantity}+ un: R$ ${d.price}`).join(' | ')}>
+                            <Tag size={10} /> Atacado ({p.quantityDiscounts.length})
+                          </span>
+                        </div>
+                      )}
                     </td>
                     <td>{p.leadTimeDays} dias úteis</td>
                     <td style={{ textAlign: 'center' }}>
@@ -1494,7 +1568,10 @@ export default function AdminDashboardPage() {
             <div className={styles.modalTabsBar}>
               <button
                 type="button"
-                onClick={() => setModalTab('basico')}
+                onClick={() => {
+                  setModalTab('basico');
+                  document.getElementById('modal-sec-basico')?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 className={`${styles.modalTabBtn} ${modalTab === 'basico' ? styles.modalTabBtnActive : ''}`}
               >
                 <Package size={14} />
@@ -1502,7 +1579,21 @@ export default function AdminDashboardPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setModalTab('fotos')}
+                onClick={() => {
+                  setModalTab('promocoes');
+                  document.getElementById('modal-sec-promocoes')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className={`${styles.modalTabBtn} ${modalTab === 'promocoes' ? styles.modalTabBtnActive : ''}`}
+              >
+                <Tag size={14} />
+                <span>Promoções & Atacado {quantityDiscounts.length > 0 ? `(${quantityDiscounts.length})` : ''}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setModalTab('fotos');
+                  document.getElementById('modal-sec-fotos')?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 className={`${styles.modalTabBtn} ${modalTab === 'fotos' ? styles.modalTabBtnActive : ''}`}
               >
                 <Upload size={14} />
@@ -1510,7 +1601,10 @@ export default function AdminDashboardPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setModalTab('modelos')}
+                onClick={() => {
+                  setModalTab('modelos');
+                  document.getElementById('modal-sec-modelos')?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 className={`${styles.modalTabBtn} ${modalTab === 'modelos' ? styles.modalTabBtnActive : ''}`}
               >
                 <Layers size={14} />
@@ -1518,7 +1612,10 @@ export default function AdminDashboardPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setModalTab('personalizacao')}
+                onClick={() => {
+                  setModalTab('personalizacao');
+                  document.getElementById('modal-sec-personalizacao')?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 className={`${styles.modalTabBtn} ${modalTab === 'personalizacao' ? styles.modalTabBtnActive : ''}`}
               >
                 <AlertCircle size={14} />
@@ -1528,7 +1625,7 @@ export default function AdminDashboardPage() {
 
             <form onSubmit={handleSaveProduct} className={styles.modalBody}>
               {/* Seção 1: Dados Básicos */}
-              <div className={styles.sectionBox}>
+              <div className={styles.sectionBox} id="modal-sec-basico">
                 <h4 className={styles.sectionTitle}>
                   <Package size={16} /> Dados Principais
                 </h4>
@@ -1618,28 +1715,54 @@ export default function AdminDashboardPage() {
                       <label className={styles.label} style={{ margin: 0 }}>
                         Preço (R$) <span className={styles.reqStar}>*</span>
                       </label>
-                      <button
-                        type="button"
-                        onClick={() => setIsCalculatorModalOpen(true)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#6D4C3D',
-                          fontSize: '0.71875rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.25rem',
-                          padding: '0.15rem 0.45rem',
-                          borderRadius: '0.35rem',
-                          backgroundColor: '#F5EDE4',
-                        }}
-                        title="Calcular preço ideal com base em custos e margem"
-                      >
-                        <Calculator size={11} />
-                        <span>Calcular</span>
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setModalTab('promocoes');
+                            document.getElementById('modal-sec-promocoes')?.scrollIntoView({ behavior: 'smooth' });
+                          }}
+                          style={{
+                            background: '#ECFDF5',
+                            border: '1px solid #A7F3D0',
+                            color: '#065F46',
+                            fontSize: '0.71875rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            padding: '0.15rem 0.45rem',
+                            borderRadius: '0.35rem',
+                          }}
+                          title="Configurar descontos por quantidade / atacado"
+                        >
+                          <Tag size={11} />
+                          <span>Promoções {quantityDiscounts.length > 0 ? `(${quantityDiscounts.length})` : ''}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsCalculatorModalOpen(true)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#6D4C3D',
+                            fontSize: '0.71875rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            padding: '0.15rem 0.45rem',
+                            borderRadius: '0.35rem',
+                            backgroundColor: '#F5EDE4',
+                          }}
+                          title="Calcular preço ideal com base em custos e margem"
+                        >
+                          <Calculator size={11} />
+                          <span>Calcular</span>
+                        </button>
+                      </div>
                     </div>
                     <input
                       type="text"
@@ -1688,8 +1811,223 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
+              {/* Seção: Promoções & Descontos por Quantidade (Atacado) */}
+              <div className={styles.sectionBox} id="modal-sec-promocoes">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <h4 className={styles.sectionTitle} style={{ margin: 0 }}>
+                    <Tag size={16} /> Promoções & Preço por Quantidade (Atacado)
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={handleApplyBolinhasNatalExample}
+                    style={{
+                      background: 'none',
+                      border: '1px dashed #C89B6D',
+                      color: '#6D4C3D',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      padding: '0.3rem 0.65rem',
+                      borderRadius: '0.45rem',
+                      backgroundColor: '#FBF8F5',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                    }}
+                    title="Preenche automaticamente com o exemplo das Bolinhas de Natal"
+                  >
+                    <span>💡 Exemplo: Bolinha de Natal (4 por 9,50 | 10 por 8,50)</span>
+                  </button>
+                </div>
+
+                <p style={{ fontSize: '0.8125rem', color: '#6B7280', marginBottom: '1rem', lineHeight: 1.4 }}>
+                  Defina descontos progressivos para compras em maior volume. Por exemplo: 1 unidade a <strong>R$ {price || '9,90'}</strong>, a partir de 4 unidades a <strong>R$ 9,50 cada</strong> e a partir de 10 unidades a <strong>R$ 8,50 cada</strong>. O site calcula e aplica o desconto automaticamente na hora da compra!
+                </p>
+
+                {/* Preço Original Riscado (De / Por) */}
+                <div style={{ marginBottom: '1.2rem', padding: '0.85rem 1rem', backgroundColor: '#F9F6F0', borderRadius: '0.65rem', border: '1px solid #EFE4D8' }}>
+                  <label className={styles.label} style={{ marginBottom: '0.3rem', display: 'block' }}>
+                    Preço Original &quot;De / Por&quot; (Opcional - exibe preço riscado na loja)
+                  </label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.85rem', color: '#6B7280', fontWeight: 600 }}>De R$</span>
+                    <input
+                      type="text"
+                      placeholder="Ex: 12.90"
+                      value={originalPrice}
+                      onChange={(e) => setOriginalPrice(e.target.value)}
+                      className={styles.input}
+                      style={{ maxWidth: '140px' }}
+                    />
+                    <span style={{ fontSize: '0.85rem', color: '#6B7280' }}>
+                      por <strong>R$ {price || '0,00'}</strong> ({unit})
+                    </span>
+                    {Boolean(originalPrice && parseFloat(originalPrice.replace(',', '.')) > (parseFloat(price.replace(',', '.')) || 0)) && (
+                      <span style={{
+                        backgroundColor: '#ECFDF5',
+                        color: '#065F46',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        padding: '2px 8px',
+                        borderRadius: '9999px',
+                        border: '1px solid #A7F3D0'
+                      }}>
+                        -{Math.round(((parseFloat(originalPrice.replace(',', '.')) - (parseFloat(price.replace(',', '.')) || 0)) / parseFloat(originalPrice.replace(',', '.'))) * 100)}% de desconto
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Faixas de Quantidade */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                    <label className={styles.label} style={{ margin: 0 }}>
+                      Faixas de Preço por Quantidade ({quantityDiscounts.length})
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleAddQuantityDiscount}
+                      style={{
+                        background: '#6D4C3D',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        padding: '0.35rem 0.75rem',
+                        borderRadius: '0.45rem',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                      }}
+                    >
+                      <Plus size={13} />
+                      <span>Adicionar Faixa</span>
+                    </button>
+                  </div>
+
+                  {quantityDiscounts.length === 0 ? (
+                    <div style={{
+                      padding: '1.4rem',
+                      textAlign: 'center',
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: '0.65rem',
+                      border: '1px dashed #D1C7BD',
+                      color: '#8C7E72',
+                      fontSize: '0.8125rem'
+                    }}>
+                      <Tag size={22} color="#C89B6D" style={{ margin: '0 auto 0.4rem auto', display: 'block' }} />
+                      Nenhuma faixa de atacado configurada para este produto.
+                      <div style={{ marginTop: '0.4rem' }}>
+                        <button
+                          type="button"
+                          onClick={handleAddQuantityDiscount}
+                          style={{
+                            color: '#6D4C3D',
+                            background: 'none',
+                            border: 'none',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            textDecoration: 'underline'
+                          }}
+                        >
+                          Clique aqui para criar a primeira faixa
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                      {quantityDiscounts.map((tier, idx) => {
+                        const parsedBasePrice = parseFloat(price.replace(',', '.')) || 0;
+                        const parsedTierPrice = parseFloat(tier.price.replace(',', '.')) || 0;
+                        const savings = parsedBasePrice > 0 && parsedTierPrice > 0 ? (parsedBasePrice - parsedTierPrice) : 0;
+                        const savingsPct = parsedBasePrice > 0 && parsedTierPrice > 0 ? Math.round((savings / parsedBasePrice) * 100) : 0;
+
+                        return (
+                          <div
+                            key={idx}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.75rem',
+                              padding: '0.75rem 1rem',
+                              backgroundColor: '#FFFFFF',
+                              borderRadius: '0.65rem',
+                              border: '1px solid #E5E7EB',
+                              flexWrap: 'wrap',
+                            }}
+                          >
+                            <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#4A3428', minWidth: '70px' }}>
+                              Faixa {idx + 1}:
+                            </span>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <span style={{ fontSize: '0.8125rem', color: '#6B7280' }}>A partir de</span>
+                              <input
+                                type="number"
+                                min={2}
+                                placeholder="Ex: 4"
+                                value={tier.minQuantity}
+                                onChange={(e) => handleUpdateQuantityDiscount(idx, 'minQuantity', e.target.value)}
+                                className={styles.input}
+                                style={{ width: '75px' }}
+                              />
+                              <span style={{ fontSize: '0.8125rem', color: '#6B7280' }}>{unit}s:</span>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <span style={{ fontSize: '0.8125rem', color: '#6B7280' }}>R$</span>
+                              <input
+                                type="text"
+                                placeholder="Ex: 9.50"
+                                value={tier.price}
+                                onChange={(e) => handleUpdateQuantityDiscount(idx, 'price', e.target.value)}
+                                className={styles.input}
+                                style={{ width: '95px' }}
+                              />
+                              <span style={{ fontSize: '0.8125rem', color: '#6B7280' }}>cada</span>
+                            </div>
+
+                            {savings > 0 && (
+                              <span style={{
+                                backgroundColor: '#ECFDF5',
+                                color: '#047857',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                padding: '2px 8px',
+                                borderRadius: '9999px',
+                                border: '1px solid #A7F3D0',
+                              }}>
+                                Economia de {savings.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/un (-{savingsPct}%)
+                              </span>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveQuantityDiscount(idx)}
+                              style={{
+                                marginLeft: 'auto',
+                                background: 'none',
+                                border: 'none',
+                                color: '#EF4444',
+                                cursor: 'pointer',
+                                padding: '0.35rem',
+                                borderRadius: '0.35rem',
+                              }}
+                              title="Remover esta faixa de desconto"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Seção 2: Fotos com Remoção e Gerenciamento */}
-              <div className={styles.sectionBox}>
+              <div className={styles.sectionBox} id="modal-sec-fotos">
                 <h4 className={styles.sectionTitle}>
                   <Upload size={16} /> Fotos da Publicação
                 </h4>
@@ -1893,7 +2231,7 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* Seção 3: Modelos (Estilo Mercado Livre) */}
-              <div className={styles.sectionBox}>
+              <div className={styles.sectionBox} id="modal-sec-modelos">
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <h4 className={styles.sectionTitle}>
                     <Sparkles size={16} /> Modelos & Variações
@@ -2228,7 +2566,7 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* Seção 4: Configuração de Personalização */}
-              <div className={styles.sectionBox}>
+              <div className={styles.sectionBox} id="modal-sec-personalizacao">
                 <h4 className={styles.sectionTitle}>
                   <AlertCircle size={16} /> Campos de Personalização do Cliente
                 </h4>

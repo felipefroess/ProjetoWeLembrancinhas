@@ -35,6 +35,14 @@ export function ProductCard({ product, isMostRequested }: ProductCardProps) {
     ? selectedVariation.price
     : minPrice;
 
+  const validDiscounts = (product.quantityDiscounts || []).filter(
+    (d) => typeof d.price === 'number' && d.price > 0 && typeof d.minQuantity === 'number' && d.minQuantity > 1
+  );
+  const lowestTierPrice = validDiscounts.length > 0
+    ? Math.min(...validDiscounts.map((d) => d.price))
+    : null;
+  const hasQuantityDiscounts = validDiscounts.length > 0;
+
   const formattedPrice = (Number(displayPrice) || 0).toLocaleString('pt-BR', {
     style: 'currency',
     currency: 'BRL',
@@ -86,6 +94,20 @@ export function ProductCard({ product, isMostRequested }: ProductCardProps) {
           {(isMostRequested || product.isBestSeller) && (
             <span className={styles.popularBadge}>
               Mais Vendido
+            </span>
+          )}
+          {hasQuantityDiscounts && (
+            <span style={{
+              background: '#ecfdf5',
+              color: '#065f46',
+              border: '1px solid #a7f3d0',
+              padding: '2px 7px',
+              borderRadius: '9999px',
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              boxShadow: '0 1px 2px rgba(0,0,0,0.06)'
+            }}>
+              Atacado
             </span>
           )}
           {product.minQuantity > 1 && (
@@ -140,6 +162,11 @@ export function ProductCard({ product, isMostRequested }: ProductCardProps) {
         {/* Preço e Botão */}
         <div className={styles.cardFooter}>
           <div>
+            {Boolean(product.originalPrice && product.originalPrice > displayPrice) && (
+              <span style={{ display: 'block', fontSize: '0.72rem', textDecoration: 'line-through', color: '#9ca3af', lineHeight: 1.1 }}>
+                De {product.originalPrice?.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </span>
+            )}
             <span className={styles.unitLabel}>
               {selectedVariation && typeof selectedVariation.price === 'number' && selectedVariation.price > 0
                 ? `Valor por ${product.unit}`
@@ -148,6 +175,11 @@ export function ProductCard({ product, isMostRequested }: ProductCardProps) {
             <span className={styles.priceValue}>
               {formattedPrice}
             </span>
+            {Boolean(lowestTierPrice && lowestTierPrice < displayPrice) && (
+              <span style={{ display: 'block', fontSize: '0.72rem', color: '#059669', fontWeight: 700, marginTop: 2 }}>
+                Até {lowestTierPrice?.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} no atacado
+              </span>
+            )}
           </div>
 
           <button

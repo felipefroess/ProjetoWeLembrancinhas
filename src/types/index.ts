@@ -49,6 +49,11 @@ export interface CustomizationSettings {
   customFields?: CustomFieldDefinition[]; // Campos extras flexíveis
 }
 
+export interface QuantityDiscount {
+  minQuantity: number; // Quantidade mínima para atingir o desconto
+  price: number; // Preço unitário para esta faixa
+}
+
 export interface CustomizationOptions {
   theme?: string;
   childName?: string;
@@ -65,7 +70,9 @@ export interface Product {
   category: CategoryId;
   description: string;
   price: number;
+  originalPrice?: number; // Preço original para exibir riscado ("De R$ X por R$ Y")
   minQuantity: number;
+  quantityDiscounts?: QuantityDiscount[]; // Promoções por quantidade (ex: 4 un por R$ 9,50 cada, 10 un por R$ 8,50 cada)
   image: string;
   images?: string[];
   variations?: ProductVariation[];
@@ -86,6 +93,7 @@ export interface CartItem {
   quantity: number;
   customization: CustomizationOptions;
   subtotal: number;
+  unitPrice?: number; // Preço unitário aplicado (com ou sem promoção de volume)
 }
 
 export type DeliveryMethod = 

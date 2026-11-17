@@ -12,8 +12,10 @@ import {
   ChevronRight, 
   ZoomIn, 
   RotateCcw,
-  Camera 
+  Camera,
+  Tag 
 } from 'lucide-react';
+import { calculateUnitPrice, getSortedQuantityDiscounts, getNextDiscountTier } from '@/lib/pricing';
 import styles from './ProductModal.module.css';
 
 export function ProductModal() {
@@ -100,10 +102,14 @@ export function ProductModal() {
   }
 
   const hasVariations = Boolean(product.variations && product.variations.length > 1);
-  const currentPrice = (selectedVariation?.price && selectedVariation.price > 0)
+  const baseVariationPrice = (selectedVariation?.price && selectedVariation.price > 0)
     ? selectedVariation.price
     : product.price;
-  const subtotal = currentPrice * quantity;
+  const currentQuantity = quantity || product.minQuantity || 1;
+  const currentPrice = calculateUnitPrice(product, currentQuantity, baseVariationPrice);
+  const subtotal = currentPrice * currentQuantity;
+  const sortedDiscounts = getSortedQuantityDiscounts(product);
+  const nextDiscount = getNextDiscountTier(product, currentQuantity);
 
   // Lista de imagens para navegação por setas:
   // Se a variação selecionada tiver suas próprias fotos (ex: modelo com foto fechado e aberto), usa elas!
@@ -711,6 +717,128 @@ export function ProductModal() {
                   )}
                 </div>
 
+                {/* Tabela de Preços por Quantidade (Atacado / Descontos Progressivos) */}
+                {sortedDiscounts.length > 0 && (
+                  <div style={{
+                    marginBottom: '1.25rem',
+                    padding: '0.9rem 1rem',
+                    borderRadius: '0.85rem',
+                    backgroundColor: '#FDFBF7',
+                    border: '1px solid #EFE5D8',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <Tag size={15} color="#9C7A3C" />
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#4A3428' }}>
+                          Preço Promocional por Quantidade
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '0.72rem', color: '#8C7769' }}>
+                        Clique para selecionar
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${1 + sortedDiscounts.length}, minmax(0, 1fr))`, gap: '0.5rem' }}>
+                      {/* Faixa Padrão / Avulsa */}
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(product.minQuantity || 1)}
+                        style={{
+                          cursor: 'pointer',
+                          padding: '0.55rem 0.45rem',
+                          borderRadius: '0.55rem',
+                          backgroundColor: currentPrice === baseVariationPrice && currentQuantity < (sortedDiscounts[sortedDiscounts.length - 1]?.minQuantity || 999) ? '#FFF7ED' : '#FFFFFF',
+                          border: currentPrice === baseVariationPrice && currentQuantity < (sortedDiscounts[sortedDiscounts.length - 1]?.minQuantity || 999) ? '2px solid #D97706' : '1px solid #E5E7EB',
+                          textAlign: 'center',
+                          transition: 'all 0.15s ease',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <span style={{ fontSize: '0.72rem', color: '#6B7280', fontWeight: 600 }}>
+                          {product.minQuantity > 1 ? `${product.minQuantity} un` : '1 un'}
+                        </span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1F2937', marginTop: 2 }}>
+                          {baseVariationPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </span>
+                        <span style={{ fontSize: '0.65rem', color: '#9CA3AF' }}>cada</span>
+                      </button>
+
+                      {/* Faixas com Desconto */}
+                      {[...sortedDiscounts].reverse().map((tier) => {
+                        const isCurrentTier = currentPrice === tier.price;
+                        const discountPct = Math.round(((baseVariationPrice - tier.price) / baseVariationPrice) * 100);
+
+                        return (
+                          <button
+                            key={tier.minQuantity}
+                            type="button"
+                            onClick={() => setQuantity(tier.minQuantity)}
+                            style={{
+                              cursor: 'pointer',
+                              padding: '0.55rem 0.45rem',
+                              borderRadius: '0.55rem',
+                              backgroundColor: isCurrentTier ? '#ECFDF5' : '#FFFFFF',
+                              border: isCurrentTier ? '2px solid #059669' : '1px solid #E5E7EB',
+                              textAlign: 'center',
+                              position: 'relative',
+                              transition: 'all 0.15s ease',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                            }}
+                          >
+                            {discountPct > 0 && (
+                              <span style={{
+                                position: 'absolute',
+                                top: -8,
+                                right: 2,
+                                backgroundColor: '#059669',
+                                color: '#FFFFFF',
+                                fontSize: '0.6rem',
+                                fontWeight: 800,
+                                padding: '1px 5px',
+                                borderRadius: '9999px',
+                              }}>
+                                -{discountPct}%
+                              </span>
+                            )}
+                            <span style={{ fontSize: '0.72rem', color: isCurrentTier ? '#065F46' : '#6B7280', fontWeight: 700 }}>
+                              {tier.minQuantity}+ un
+                            </span>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: isCurrentTier ? '#047857' : '#1F2937', marginTop: 2 }}>
+                              {tier.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </span>
+                            <span style={{ fontSize: '0.65rem', color: isCurrentTier ? '#059669' : '#9CA3AF' }}>cada</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Dica de incentivo para próxima faixa */}
+                    {nextDiscount && (
+                      <div style={{
+                        marginTop: '0.65rem',
+                        fontSize: '0.75rem',
+                        color: '#92400E',
+                        backgroundColor: '#FEF3C7',
+                        padding: '0.4rem 0.65rem',
+                        borderRadius: '0.45rem',
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                      }}>
+                        <span>💡</span>
+                        <span>
+                          Adicione mais <strong>{nextDiscount.neededQty} {product.unit}</strong> para pagar apenas <strong>{nextDiscount.discountPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> cada!
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Controle de Quantidade */}
                 <div className={styles.qtySection}>
                   <div>
@@ -778,12 +906,32 @@ export function ProductModal() {
         {/* Rodapé com Subtotal e Ação de Adicionar */}
         <div className={styles.modalFooter}>
           <div>
-            <span className={styles.subtotalLabel}>
-              Subtotal do Item
-            </span>
-            <span className={styles.subtotalValue}>
-              {subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span className={styles.subtotalLabel}>
+                Subtotal ({currentQuantity} {product.unit})
+              </span>
+              {currentPrice < baseVariationPrice && (
+                <span style={{
+                  backgroundColor: '#ECFDF5',
+                  color: '#059669',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  padding: '1px 6px',
+                  borderRadius: '9999px',
+                  border: '1px solid #A7F3D0'
+                }}>
+                  Promoção aplicada!
+                </span>
+              )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.45rem' }}>
+              <span className={styles.subtotalValue}>
+                {subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </span>
+              <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>
+                ({currentPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} cada)
+              </span>
+            </div>
           </div>
 
           <button

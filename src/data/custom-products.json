@@ -266,7 +266,7 @@
     ],
     "variations": [
       {
-        "id": "var_1794441887458_0",
+        "id": "var_1794943990994_0",
         "name": "Modelo 1",
         "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794419831520-gemini_generated_image_s2zf35s2zf35s2zf.jfif",
         "images": [
@@ -274,7 +274,7 @@
         ]
       },
       {
-        "id": "var_1794441887458_1",
+        "id": "var_1794943990994_1",
         "name": "Modelo 2",
         "image": "https://pub-5f80dd6841fe4a50865ac65cdf461956.r2.dev/1794419827872-saveclip.app_588720354_18183661219347767_9060147958946855120_n.jpg",
         "images": [
@@ -304,7 +304,17 @@
     },
     "popular": false,
     "variationsNote": "OBS: As fotos para a personalização das bolinhas devem ser enviadas pelo nosso WhatsApp após o fechamento do pedido!",
-    "isBestSeller": true
+    "isBestSeller": true,
+    "quantityDiscounts": [
+      {
+        "minQuantity": 4,
+        "price": 9.5
+      },
+      {
+        "minQuantity": 10,
+        "price": 8.5
+      }
+    ]
   },
   {
     "id": "kit-tacas-de-champanhe-acrilicas-3787",

@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, CartItem, CustomizationOptions, CustomerOrderData, AppliedCoupon } from '@/types';
 import { STORE_CONFIG } from '@/data/products';
 import { trackProductClick } from '@/lib/tracking';
+import { calculateUnitPrice } from '@/lib/pricing';
 import { useStoreSettings } from './StoreSettingsContext';
 
 interface CartContextType {
@@ -113,24 +114,41 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const closeCheckout = () => setIsCheckoutOpen(false);
 
+  const getEffectiveUnitPrice = (
+    product: Product,
+    quantity: number,
+    customization?: CustomizationOptions
+  ): number => {
+    let variationPrice: number | undefined;
+    if (customization?.variation && product.variations) {
+      const v = product.variations.find((item) => item.name === customization.variation);
+      if (v && typeof v.price === 'number' && v.price > 0) {
+        variationPrice = v.price;
+      }
+    }
+    return calculateUnitPrice(product, quantity, variationPrice);
+  };
+
   const addToCart = (product: Product, quantity: number, customization: CustomizationOptions) => {
     // Cria um identificador único considerando as opções de personalização
     const customKey = `${product.id}_${customization.variation || ''}_${customization.theme || ''}_${customization.childName || ''}_${customization.ribbonColor || ''}`;
-    const subtotal = product.price * quantity;
 
     setItems((prev) => {
       const existingIndex = prev.findIndex((item) => item.cartItemId === customKey);
       if (existingIndex > -1) {
         const updated = [...prev];
         const newQty = updated[existingIndex].quantity + quantity;
+        const unitPrice = getEffectiveUnitPrice(updated[existingIndex].product, newQty, updated[existingIndex].customization);
         updated[existingIndex] = {
           ...updated[existingIndex],
           quantity: newQty,
-          subtotal: updated[existingIndex].product.price * newQty,
+          unitPrice,
+          subtotal: unitPrice * newQty,
         };
         return updated;
       }
 
+      const unitPrice = getEffectiveUnitPrice(product, quantity, customization);
       return [
         ...prev,
         {
@@ -138,7 +156,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           product,
           quantity,
           customization,
-          subtotal,
+          unitPrice,
+          subtotal: unitPrice * quantity,
         },
       ];
     });
@@ -160,10 +179,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) =>
       prev.map((item) => {
         if (item.cartItemId === cartItemId) {
+          const unitPrice = getEffectiveUnitPrice(item.product, newQuantity, item.customization);
           return {
             ...item,
             quantity: newQuantity,
-            subtotal: item.product.price * newQuantity,
+            unitPrice,
+            subtotal: unitPrice * newQuantity,
           };
         }
         return item;
@@ -245,9 +266,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     message += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
     items.forEach((item, index) => {
+      const unitPrice = item.unitPrice ?? item.product.price;
+      const isDiscounted = item.product.quantityDiscounts && item.product.quantityDiscounts.length > 0 && unitPrice < item.product.price;
       message += `*${index + 1}. ${item.product.name}*\n`;
       message += `   • Quantidade: ${item.quantity} ${item.product.unit}\n`;
-      message += `   • Valor unitário: R$ ${item.product.price.toFixed(2).replace('.', ',')}\n`;
+      message += `   • Valor unitário: R$ ${unitPrice.toFixed(2).replace('.', ',')}${isDiscounted ? ' (Preço promocional por quantidade!)' : ''}\n`;
       
       if (item.customization.variation) {
         message += `   • Modelo / Variação: *${item.customization.variation}*\n`;

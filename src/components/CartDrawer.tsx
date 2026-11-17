@@ -97,7 +97,12 @@ export function CartDrawer() {
                       {item.subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </p>
                     <p className={styles.itemUnitCalc}>
-                      {item.quantity} x {item.product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      {item.quantity} x {(item.unitPrice ?? item.product.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      {Boolean(item.unitPrice && item.unitPrice < item.product.price) && (
+                        <span style={{ marginLeft: 6, color: '#16a34a', fontSize: '0.75rem', fontWeight: 600 }}>
+                          (Desconto por quantidade)
+                        </span>
+                      )}
                     </p>
                   </div>
                   <button
