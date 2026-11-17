@@ -127,64 +127,33 @@ export function CategoryFilter({
           </div>
         </div>
 
-        {/* Wrapper do Carrossel com Botões de Navegação */}
-        <div className={styles.carouselWrapper}>
+        {/* Lista com scroll horizontal de categorias */}
+        <div ref={listRef} className={styles.categoriesList}>
+          {categories.map((cat, index) => {
+            const isSelected = selectedCategory === cat.id;
+            // A 1ª categoria temática após "Todos os Mimos" é o evento comemorativo mais próximo do ano
+            const isUpcomingHighlight = index === 1 && cat.id !== 'todos';
+            const isNatal = cat.id === 'natal';
 
-          {/* Botão de Rolar para Esquerda - Só aparece quando rolado para a direita */}
-          {canScrollLeft && (
-            <button
-              type="button"
-              onClick={() => handleScroll('left')}
-              className={`${styles.navButton} ${styles.navButtonLeft}`}
-              aria-label="Ver categorias anteriores"
-              title="Voltar para o início das categorias"
-            >
-              <ChevronLeft size={20} strokeWidth={2.5} />
-            </button>
-          )}
-
-          {/* Lista com scroll horizontal */}
-          <div ref={listRef} className={styles.categoriesList}>
-            {categories.map((cat, index) => {
-              const isSelected = selectedCategory === cat.id;
-              // A 1ª categoria temática após "Todos os Mimos" é o evento comemorativo mais próximo do ano
-              const isUpcomingHighlight = index === 1 && cat.id !== 'todos';
-              const isNatal = cat.id === 'natal';
-
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => handleCategoryClick(cat.id)}
-                  className={`${isSelected ? styles.categoryButtonSelected : styles.categoryButton} ${isUpcomingHighlight && !isSelected ? styles.categoryButtonHighlight : ''} ${isNatal ? styles.categoryButtonNatal : ''}`}
-                  title={isNatal ? 'Coleção Especial de Natal' : isUpcomingHighlight ? 'Evento comemorativo em destaque!' : undefined}
-                >
-                  <span>{cat.name}</span>
-                  {isNatal && (
-                    <img
-                      src="/images/natal/touca-natal.png"
-                      alt="Touca de Natal"
-                      className={styles.natalSantaHat}
-                      aria-hidden="true"
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Botão de Rolar para Direita - Só aparece quando há mais categorias à direita */}
-          {canScrollRight && (
-            <button
-              type="button"
-              onClick={() => handleScroll('right')}
-              className={`${styles.navButton} ${styles.navButtonRight}`}
-              aria-label="Ver mais categorias"
-              title="Ver mais categorias"
-            >
-              <ChevronRight size={20} strokeWidth={2.5} />
-            </button>
-          )}
-
+            return (
+              <button
+                key={cat.id}
+                onClick={() => handleCategoryClick(cat.id)}
+                className={`${isSelected ? styles.categoryButtonSelected : styles.categoryButton} ${isUpcomingHighlight && !isSelected ? styles.categoryButtonHighlight : ''} ${isNatal ? styles.categoryButtonNatal : ''}`}
+                title={isNatal ? 'Coleção Especial de Natal' : isUpcomingHighlight ? 'Evento comemorativo em destaque!' : undefined}
+              >
+                <span>{cat.name}</span>
+                {isNatal && (
+                  <img
+                    src="/images/natal/touca-natal.png"
+                    alt="Touca de Natal"
+                    className={styles.natalSantaHat}
+                    aria-hidden="true"
+                  />
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
