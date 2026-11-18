@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useCart } from '@/context/CartContext';
-import { X, Send, MapPin, Calendar, User, Phone, CheckCircle2, Truck, Loader2, AlertTriangle, Tag } from 'lucide-react';
+import { X, Send, MapPin, Calendar, User, Phone, CheckCircle2, Truck, Loader2, AlertTriangle, Tag, Info } from 'lucide-react';
 import { DeliveryMethod } from '@/types';
 import confetti from 'canvas-confetti';
 import styles from './CheckoutModal.module.css';
@@ -24,6 +24,17 @@ function formatCepInput(value: string): string {
     return `${digits.slice(0, 5)}-${digits.slice(5)}`;
   }
   return digits;
+}
+
+function formatPhoneInput(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (!digits) return '';
+  if (digits.length <= 2) return `(${digits}`;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
 export function CheckoutModal() {
@@ -57,6 +68,8 @@ export function CheckoutModal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCepInvalid, setIsCepInvalid] = useState(false);
   const cepInputRef = useRef<HTMLInputElement>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const [phoneError, setPhoneError] = useState('');
 
   const [shippingLoading, setShippingLoading] = useState(false);
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
@@ -243,6 +256,14 @@ export function CheckoutModal() {
     e.preventDefault();
     if (isSubmitting) return;
 
+    const phoneDigits = customerPhone.replace(/\D/g, '');
+    if (!phoneDigits || phoneDigits.length < 10) {
+      setPhoneError('Por favor, informe seu número de WhatsApp completo com DDD.');
+      const phoneInput = document.getElementById('customerPhoneInput');
+      phoneInput?.focus();
+      return;
+    }
+
     // Se houver cupom aplicado, valida o telefone do cliente com o banco antes de enviar
     if (appliedCoupon) {
       const digits = customerPhone.replace(/\D/g, '');
@@ -286,8 +307,7 @@ export function CheckoutModal() {
           localStorage.setItem('we_used_coupons', JSON.stringify(used));
         }
       } catch {}
-    }
-    e.preventDefault();
+    }
 
     const url = generateWhatsAppOrderUrl({
       customerName,
@@ -442,37 +462,78 @@ export function CheckoutModal() {
             {/* Telefone e Data do Evento */}
             <div className={styles.twoColsGrid}>
               <div>
-                <label className={styles.fieldLabel}>
-                  <Phone size={13} className={styles.labelIcon} /> WhatsApp / Celular
+                <label className={styles.fieldLabel} htmlFor="customerPhoneInput">
+                  <Phone size={13} className={styles.labelIcon} /> WhatsApp / Celular <span className={styles.reqStar}>*</span>
                 </label>
                 <input
+                  id="customerPhoneInput"
                   type="tel"
+                  required
                   placeholder="(35) 99999-9999"
                   value={customerPhone}
                   onChange={(e) => {
-                    setCustomerPhone(e.target.value);
+                    setCustomerPhone(formatPhoneInput(e.target.value));
                     if (couponWarning) setCouponWarning(null);
+                    if (phoneError) setPhoneError('');
                   }}
                   onBlur={() => {
+                    const digits = customerPhone.replace(/\D/g, '');
+                    if (digits.length > 0 && digits.length < 10) {
+                      setPhoneError('Informe o DDD + número completo (mínimo 10 dígitos).');
+                    } else {
+                      setPhoneError('');
+                    }
                     if (appliedCoupon) {
                       checkCouponForPhone(customerPhone);
                     }
                   }}
-                  className={styles.formInput}
+                  className={`${styles.formInput} ${phoneError ? styles.inputError : ''}`}
                 />
+                {phoneError && (
+                  <span className={styles.fieldErrorText}>{phoneError}</span>
+                )}
               </div>
 
               <div>
-                <label className={styles.fieldLabel}>
+                <label 
+                  className={styles.fieldLabel} 
+                  htmlFor="eventDateInput"
+                  onClick={() => {
+                    try {
+                      dateInputRef.current?.showPicker?.();
+                    } catch {
+                      dateInputRef.current?.focus();
+                    }
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
                   <Calendar size={13} className={styles.labelIcon} /> Data do Evento <span className={styles.reqStar}>*</span>
                 </label>
-                <input
-                  type="date"
-                  required
-                  value={eventDate}
-                  onChange={(e) => setEventDate(e.target.value)}
-                  className={styles.formInput}
-                />
+                <div 
+                  className={styles.dateBlockWrapper}
+                  onClick={() => {
+                    try {
+                      dateInputRef.current?.showPicker?.();
+                    } catch {
+                      dateInputRef.current?.focus();
+                    }
+                  }}
+                >
+                  <input
+                    ref={dateInputRef}
+                    id="eventDateInput"
+                    type="date"
+                    required
+                    value={eventDate}
+                    onChange={(e) => setEventDate(e.target.value)}
+                    onClick={(e) => {
+                      try {
+                        e.currentTarget.showPicker?.();
+                      } catch {}
+                    }}
+                    className={`${styles.formInput} ${styles.dateInputBlock}`}
+                  />
+                </div>
               </div>
             </div>
 
@@ -531,11 +592,11 @@ export function CheckoutModal() {
                   />
                   <div className={styles.deliveryTextWrap}>
                     <div className={styles.deliveryTitleRow}>
-                      <span className={styles.deliveryOptionTitle}>Correios / Melhor Envio</span>
+                      <span className={styles.deliveryOptionTitle}>Correios (Sedex)</span>
                       <span className={styles.shippingBadge}>Cálculo pelo CEP</span>
                     </div>
                     <span className={styles.deliveryOptionDesc}>
-                      Enviamos para todo o Brasil! O valor do frete é calculado pelo seu CEP via Correios ou Melhor Envio.
+                      Enviamos para todo o Brasil! O valor do frete é calculado pelo seu CEP.
                     </span>
                   </div>
                 </label>
@@ -805,6 +866,35 @@ export function CheckoutModal() {
                       currency: 'BRL',
                     })}
                   </span>
+                </div>
+
+                {/* Aviso destacado: Condição de Pagamento dinâmica */}
+                <div className={styles.paymentTermsNotice}>
+                  <div className={styles.paymentTermsHeader}>
+                    <Info size={15} className={styles.paymentTermsIcon} />
+                    <span className={styles.paymentTermsTitle}>Condição de pagamento</span>
+                  </div>
+                  <p className={styles.paymentTermsText}>
+                    {deliveryMethod !== 'entrega-correios' ? (
+                      <>
+                        Para iniciar a produção, é necessário o pagamento de <strong>50% de entrada</strong> e o restante no dia da <strong>retirada</strong>.
+                      </>
+                    ) : (
+                      <>
+                        Para iniciar a produção, é necessário o pagamento de <strong>50% de entrada</strong> e o restante no dia da <strong>entrega</strong>.
+                      </>
+                    )}
+                  </p>
+                  <div className={styles.paymentTermsSplitRow}>
+                    <span className={styles.paymentTermsSplitBadge}>
+                      Entrada (50%): <strong>{(orderTotalWithShipping / 2).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
+                    </span>
+                    {deliveryMethod !== 'entrega-correios' && (
+                      <span className={styles.paymentTermsSplitBadge}>
+                        Na retirada (50%): <strong>{(orderTotalWithShipping / 2).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 

@@ -323,6 +323,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       message += `*TOTAL ESTIMADO:* R$ ${finalTotal.toFixed(2).replace('.', ',')}\n\n`;
     }
 
+    const effectiveTotal = shippingValue > 0 ? totalWithShipping : finalTotal;
+    const halfTotal = effectiveTotal / 2;
+    const isPickup = orderData.deliveryMethod !== 'entrega-correios';
+
+    message += `💳 *CONDIÇÃO DE PAGAMENTO:*\n`;
+    if (isPickup) {
+      message += `Para iniciar a produção, é necessário o pagamento de 50% de entrada e o restante no dia da retirada.\n`;
+      message += `• Entrada (50%): R$ ${halfTotal.toFixed(2).replace('.', ',')}\n`;
+      message += `• Na retirada (50%): R$ ${halfTotal.toFixed(2).replace('.', ',')}\n\n`;
+    } else {
+      message += `Para iniciar a produção, é necessário o pagamento de 50% de entrada e o restante no dia da entrega.\n`;
+      message += `• Entrada (50%): R$ ${halfTotal.toFixed(2).replace('.', ',')}\n\n`;
+    }
+
     message += `Fico no aguardo para confirmar a data de produção e os detalhes da arte. Agradeço desde já!`;
 
     const encoded = encodeURIComponent(message);
