@@ -253,27 +253,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Formata o pedido em Markdown limpo para WhatsApp
   const generateWhatsAppOrderUrl = (orderData: CustomerOrderData): string => {
-    const deliveryLabels: Record<string, string> = {
-      'retirada-pouso-alegre': 'Retirada em Pouso Alegre - MG',
-      'retirada-paraisopolis': 'Retirada em Paraisópolis - MG',
-      'entrega-correios': 'Envio por Correios / Transportadora',
-    };
-
     let message = `Olá, Wê! Tudo bem?\n`;
     message += `Gostaria de fazer um pedido pela sua loja online:\n\n`;
-    message += `━━━━━━━━━━━━━━━━━━━━━\n`;
-    message += `*ITENS DO PEDIDO:*\n`;
-    message += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
     items.forEach((item, index) => {
-      const unitPrice = item.unitPrice ?? item.product.price;
-      const isDiscounted = item.product.quantityDiscounts && item.product.quantityDiscounts.length > 0 && unitPrice < item.product.price;
       message += `*${index + 1}. ${item.product.name}*\n`;
-      message += `   • Quantidade: ${item.quantity} ${item.product.unit}\n`;
-      message += `   • Valor unitário: R$ ${unitPrice.toFixed(2).replace('.', ',')}${isDiscounted ? ' (Preço promocional por quantidade!)' : ''}\n`;
+      const rawUnit = item.product.unit?.toLowerCase() || '';
+      const unitLabel = rawUnit.includes('un') || !rawUnit ? 'unidade(s)' : `${item.product.unit}(s)`;
+      message += `   • ${item.quantity} ${unitLabel}\n`;
       
       if (item.customization.variation) {
-        message += `   • Modelo / Variação: *${item.customization.variation}*\n`;
+        message += `   • Modelo: *${item.customization.variation}*\n`;
+      }
+      if (item.customization.ribbonColor) {
+        const ribbon = item.customization.ribbonColor.trim();
+        const formattedRibbon = ribbon.toLowerCase().startsWith('laço') ? ribbon : `Laço ${ribbon}`;
+        message += `   • *${formattedRibbon}*\n`;
       }
       if (item.customization.theme) {
         message += `   • Tema: *${item.customization.theme}*\n`;
@@ -283,9 +278,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       if (item.customization.ageOrDate) {
         message += `   • Idade / Data: *${item.customization.ageOrDate}*\n`;
-      }
-      if (item.customization.ribbonColor) {
-        message += `   • Cor dos laços/detalhes: *${item.customization.ribbonColor}*\n`;
       }
       if (item.customization.customFieldValues) {
         Object.entries(item.customization.customFieldValues).forEach(([k, val]) => {
@@ -308,17 +300,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         : 0;
     const totalWithShipping = finalTotal + shippingValue;
 
-    message += `━━━━━━━━━━━━━━━━━━━━━\n`;
     if (appliedCoupon && discountAmount > 0) {
       const descText =
         appliedCoupon.type === 'percentage'
           ? `${appliedCoupon.value}% OFF`
           : `R$ ${appliedCoupon.value.toFixed(2).replace('.', ',')} OFF`;
       message += `*SUBTOTAL:* R$ ${subtotalAmount.toFixed(2).replace('.', ',')}\n`;
-      message += `*CUPOM APLICADO:* ${appliedCoupon.code} (${descText})\n`;
+      message += `*CUPOM:* ${appliedCoupon.code} (${descText})\n`;
       message += `*DESCONTO:* -R$ ${discountAmount.toFixed(2).replace('.', ',')}\n`;
-    } else if (shippingValue > 0) {
-      message += `*PRODUTOS:* R$ ${finalTotal.toFixed(2).replace('.', ',')}\n`;
     }
 
     if (shippingValue > 0) {
@@ -328,33 +317,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const daysLabel = orderData.shippingDeliveryDays
         ? ` (${orderData.shippingDeliveryDays} dias úteis)`
         : '';
-      message += `*FRETE (${serviceLabel || 'Melhor Envio'}):* R$ ${shippingValue.toFixed(2).replace('.', ',')}${daysLabel}\n`;
-      message += `*TOTAL COM FRETE:* R$ ${totalWithShipping.toFixed(2).replace('.', ',')}\n`;
+      message += `*FRETE (${serviceLabel || 'Correios'}):* R$ ${shippingValue.toFixed(2).replace('.', ',')}${daysLabel}\n`;
+      message += `*TOTAL COM FRETE:* R$ ${totalWithShipping.toFixed(2).replace('.', ',')}\n\n`;
     } else {
-      message += `*TOTAL ESTIMADO:* R$ ${finalTotal.toFixed(2).replace('.', ',')}\n`;
-    }
-    message += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
-
-    message += `*DADOS PARA COMBINAR A ENTREGA:*\n`;
-    message += `• *Cliente:* ${orderData.customerName}\n`;
-    if (orderData.customerPhone) {
-      message += `• *Contato:* ${orderData.customerPhone}\n`;
-    }
-    if (orderData.eventDate) {
-      message += `• *Data do Evento:* ${orderData.eventDate}\n`;
-    }
-    message += `• *Entrega/Retirada:* ${deliveryLabels[orderData.deliveryMethod] || orderData.deliveryMethod}\n`;
-    if (orderData.shippingCep) {
-      message += `• *CEP:* ${orderData.shippingCep}\n`;
-    }
-    if (orderData.deliveryAddress) {
-      message += `• *Endereço/Cidade:* ${orderData.deliveryAddress}\n`;
-    }
-    if (orderData.generalNotes) {
-      message += `• *Observações adicionais:* ${orderData.generalNotes}\n`;
+      message += `*TOTAL ESTIMADO:* R$ ${finalTotal.toFixed(2).replace('.', ',')}\n\n`;
     }
 
-    message += `\nFico no aguardo para confirmar a data de produção e os detalhes da arte! Obrigada!`;
+    message += `Fico no aguardo para confirmar a data de produção e os detalhes da arte. Agradeço desde já!`;
 
     const encoded = encodeURIComponent(message);
     const activePhone = storeSettings?.whatsappNumber || STORE_CONFIG.whatsappNumber;
