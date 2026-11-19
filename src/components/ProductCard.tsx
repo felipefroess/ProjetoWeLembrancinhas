@@ -3,18 +3,30 @@
 import React, { useState, useEffect } from 'react';
 import { Product, ProductVariation } from '@/types';
 import { useCart } from '@/context/CartContext';
-import { Clock, Heart } from 'lucide-react';
+import { Tag, Heart } from 'lucide-react';
+import { CATEGORIES } from '@/data/categories';
 import styles from './ProductCard.module.css';
 
 interface ProductCardProps {
   product: Product;
   isMostRequested?: boolean;
+  categoryName?: string;
 }
 
-export function ProductCard({ product, isMostRequested }: ProductCardProps) {
+export function ProductCard({ product, isMostRequested, categoryName }: ProductCardProps) {
   const { openCustomizationModal } = useCart();
   const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null);
   const [currentImage, setCurrentImage] = useState<string>(product.image);
+
+  // Nome da categoria legível para exibição na caixa do produto
+  const resolvedCategoryName =
+    categoryName ||
+    CATEGORIES.find((c) => c.id === product.category)?.name ||
+    (product.category && product.category !== 'todos'
+      ? (product.category.includes('anivers')
+          ? 'Aniversário Infantil'
+          : product.category.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '))
+      : '');
 
   // Mantém a imagem atualizada caso as propriedades do produto mudem
   useEffect(() => {
@@ -117,11 +129,13 @@ export function ProductCard({ product, isMostRequested }: ProductCardProps) {
           )}
         </div>
 
-        {/* Prazo de Produção */}
-        <div className={styles.leadTimeBadge}>
-          <Clock size={11} className={styles.leadTimeIcon} />
-          <span>{product.leadTimeDays} dias úteis</span>
-        </div>
+        {/* Categoria do Produto (substituiu o antigo "5 dias úteis") */}
+        {resolvedCategoryName && (
+          <div className={styles.categoryBadge} title={`Categoria: ${resolvedCategoryName}`}>
+            <Tag size={10} className={styles.categoryIcon} />
+            <span>{resolvedCategoryName}</span>
+          </div>
+        )}
       </div>
 
       {/* Conteúdo do Card */}

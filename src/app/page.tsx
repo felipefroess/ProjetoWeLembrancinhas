@@ -239,6 +239,7 @@ export default function HomePage() {
               <ProductCard
                 key={product.id}
                 product={product}
+                categoryName={categoriesList.find((c) => c.id === product.category)?.name}
                 isMostRequested={product.id === mostRequestedProductId || Boolean(product.isBestSeller)}
               />
             ))}

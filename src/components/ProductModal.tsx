@@ -16,6 +16,7 @@ import {
   Tag 
 } from 'lucide-react';
 import { calculateUnitPrice, getSortedQuantityDiscounts, getNextDiscountTier } from '@/lib/pricing';
+import { CATEGORIES } from '@/data/categories';
 import styles from './ProductModal.module.css';
 
 export function ProductModal() {
@@ -254,6 +255,15 @@ export function ProductModal() {
     );
   };
 
+  const modalCategoryName = product
+    ? (CATEGORIES.find((c) => c.id === product.category)?.name ||
+       (product.category && product.category !== 'todos'
+         ? (product.category.includes('anivers')
+             ? 'Aniversário Infantil'
+             : product.category.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '))
+         : ''))
+    : '';
+
   const handleConfirm = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -460,6 +470,26 @@ export function ProductModal() {
 
               {/* Informações: Título, Descrição, Preço e Prazo */}
               <div className={styles.productInfoBlock}>
+                {modalCategoryName && (
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.3rem',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      color: '#6D4C3D',
+                      backgroundColor: '#FAF7F2',
+                      border: '1px solid #E8DFD5',
+                      padding: '0.15rem 0.55rem',
+                      borderRadius: '9999px',
+                      letterSpacing: '0.01em'
+                    }}>
+                      <Tag size={10} style={{ color: '#8C594D' }} />
+                      {modalCategoryName}
+                    </span>
+                  </div>
+                )}
                 <h4 className={styles.productTitle}>
                   {product.name}
                 </h4>
