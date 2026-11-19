@@ -307,7 +307,8 @@ export function CheckoutModal() {
           localStorage.setItem('we_used_coupons', JSON.stringify(used));
         }
       } catch {}
-    }
+    }
+
 
     const url = generateWhatsAppOrderUrl({
       customerName,
@@ -889,11 +890,6 @@ export function CheckoutModal() {
                     <span className={styles.paymentTermsSplitBadge}>
                       Entrada (50%): <strong>{(orderTotalWithShipping / 2).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
                     </span>
-                    {deliveryMethod !== 'entrega-correios' && (
-                      <span className={styles.paymentTermsSplitBadge}>
-                        Na retirada (50%): <strong>{(orderTotalWithShipping / 2).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
