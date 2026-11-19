@@ -376,6 +376,7 @@ export default function AdminDashboardPage() {
     setNotesPlaceholder(cs?.notesPlaceholder || '');
     const hasRibbonColors = cs?.allowRibbonColors ?? (product.availableRibbonColors && product.availableRibbonColors.length > 0 ? true : false);
     setAllowRibbonColors(hasRibbonColors);
+    setRibbonColorRequired(Boolean(cs?.ribbonColorRequired));
     setRibbonColorsText(
       product.availableRibbonColors?.join(', ') ||
       cs?.ribbonColors?.join(', ') ||
@@ -692,11 +693,13 @@ export default function AdminDashboardPage() {
         availableRibbonColors: ribbonColorsList.length > 0 ? ribbonColorsList : undefined,
         customizationSettings: {
           allowChildName,
+          childNameRequired,
           childNameLabel: childNameLabel.trim() || 'Nome na Lembrancinha',
           childNamePlaceholder: childNamePlaceholder.trim() || undefined,
           notesPlaceholder: notesPlaceholder.trim() || undefined,
           variationsNote: variationsNote.trim() || undefined,
           allowRibbonColors,
+          ribbonColorRequired,
           ribbonColors: ribbonColorsList,
           allowNotes,
           customFields:

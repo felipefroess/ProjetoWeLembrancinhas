@@ -36,7 +36,8 @@
         }
       ]
     },
-    "popular": false
+    "popular": false,
+    "isBestSeller": false
   },
   {
     "id": "kit-presente-professores-bloco-de-notas-com-caixa-estojo-e-caneta-8914",
