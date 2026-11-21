@@ -18,6 +18,8 @@ interface CartContextType {
   appliedCoupon: AppliedCoupon | null;
   discountAmount: number;
   finalTotal: number;
+  hasWholesaleInCart: boolean;
+  eligibleSubtotal: number;
   applyCoupon: (code: string) => Promise<{ success: boolean; message: string }>;
   removeCoupon: () => void;
   openCart: () => void;
@@ -38,6 +40,19 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'welembrancinhas_cart_v1';
 const COUPON_STORAGE_KEY = 'welembrancinhas_coupon_v1';
+
+/**
+ * Identifica se um item do carrinho é de atacado (possui tabela progressiva ou recebeu preço com desconto de atacado)
+ */
+export function isWholesaleCartItem(item: CartItem): boolean {
+  const hasWholesaleTiers = Boolean(
+    item.product.quantityDiscounts &&
+    Array.isArray(item.product.quantityDiscounts) &&
+    item.product.quantityDiscounts.length > 0
+  );
+  const hasVolumeDiscount = typeof item.unitPrice === 'number' && item.unitPrice < item.product.price;
+  return hasWholesaleTiers || hasVolumeDiscount;
+}
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { settings: storeSettings } = useStoreSettings();
@@ -200,11 +215,31 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
   const subtotalAmount = items.reduce((acc, item) => acc + item.subtotal, 0);
 
-  // Calcula desconto dinamicamente de acordo com o subtotal atual
+  // Verifica se o cupom atual exclui produtos de atacado (que já possuem desconto por volume)
+  const isCouponExcludedFromWholesale = Boolean(
+    appliedCoupon?.firstPurchaseOnly ||
+    appliedCoupon?.code === 'PRIMEIRACOMPRA' ||
+    appliedCoupon?.excludeWholesale !== false
+  );
+
+  // Itens elegíveis para o desconto do cupom
+  const eligibleItems = items.filter((item) => {
+    if (isCouponExcludedFromWholesale && isWholesaleCartItem(item)) {
+      return false;
+    }
+    return true;
+  });
+
+  const eligibleSubtotal = eligibleItems.reduce((acc, item) => acc + item.subtotal, 0);
+  const hasWholesaleInCart = items.some(isWholesaleCartItem);
+
+  // Calcula desconto dinamicamente sobre a base de produtos elegíveis
   const discountAmount = appliedCoupon
-    ? appliedCoupon.type === 'percentage'
-      ? Number(((subtotalAmount * appliedCoupon.value) / 100).toFixed(2))
-      : Math.min(appliedCoupon.value, subtotalAmount)
+    ? isCouponExcludedFromWholesale && eligibleSubtotal <= 0
+      ? 0
+      : appliedCoupon.type === 'percentage'
+        ? Number((((isCouponExcludedFromWholesale ? eligibleSubtotal : subtotalAmount) * appliedCoupon.value) / 100).toFixed(2))
+        : Math.min(appliedCoupon.value, isCouponExcludedFromWholesale ? eligibleSubtotal : subtotalAmount)
     : 0;
 
   const finalTotal = Math.max(0, subtotalAmount - discountAmount);
@@ -213,6 +248,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const cleanCode = code.trim().toUpperCase();
     if (!cleanCode) {
       return { success: false, message: 'Digite o código do cupom.' };
+    }
+
+    const onlyWholesale = items.length > 0 && items.every(isWholesaleCartItem);
+    const nonWholesaleSubtotal = items
+      .filter((i) => !isWholesaleCartItem(i))
+      .reduce((acc, i) => acc + i.subtotal, 0);
+
+    // Validação preventiva imediata para o cupom de primeira compra
+    if (onlyWholesale && (cleanCode === 'PRIMEIRACOMPRA' || cleanCode.includes('PRIMEIR'))) {
+      return {
+        success: false,
+        message: 'O cupom de 1ª compra não é aplicável em produtos de atacado (que já possuem desconto progressivo).',
+      };
     }
 
     // 1. Verifica se o cupom já foi utilizado anteriormente neste aparelho
@@ -232,11 +280,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch('/api/coupons', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: cleanCode, subtotal: subtotalAmount }),
+        body: JSON.stringify({
+          code: cleanCode,
+          subtotal: subtotalAmount,
+          eligibleSubtotal: nonWholesaleSubtotal,
+          hasOnlyWholesale: onlyWholesale,
+        }),
       });
       const data = await res.json();
 
       if ((data.valid || data.success) && data.coupon) {
+        if (data.coupon.firstPurchaseOnly && onlyWholesale) {
+          return {
+            success: false,
+            message: 'O cupom de 1ª compra não é aplicável em produtos de atacado (que já possuem desconto progressivo).',
+          };
+        }
         setAppliedCoupon(data.coupon);
         return { success: true, message: data.message || 'Cupom aplicado com sucesso!' };
       } else {
@@ -306,7 +365,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           ? `${appliedCoupon.value}% OFF`
           : `R$ ${appliedCoupon.value.toFixed(2).replace('.', ',')} OFF`;
       message += `*SUBTOTAL:* R$ ${subtotalAmount.toFixed(2).replace('.', ',')}\n`;
-      message += `*CUPOM:* ${appliedCoupon.code} (${descText})\n`;
+      message += `*CUPOM:* ${appliedCoupon.code} (${descText}${hasWholesaleInCart ? ' - itens participantes' : ''})\n`;
       message += `*DESCONTO:* -R$ ${discountAmount.toFixed(2).replace('.', ',')}\n`;
     }
 
@@ -358,6 +417,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         appliedCoupon,
         discountAmount,
         finalTotal,
+        hasWholesaleInCart,
+        eligibleSubtotal,
         applyCoupon,
         removeCoupon,
         openCart,

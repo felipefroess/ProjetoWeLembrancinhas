@@ -45,6 +45,8 @@ export function CheckoutModal() {
     subtotalAmount,
     finalTotal,
     discountAmount,
+    hasWholesaleInCart,
+    eligibleSubtotal,
     appliedCoupon,
     applyCoupon,
     removeCoupon,
@@ -234,6 +236,8 @@ export function CheckoutModal() {
           code: appliedCoupon.code,
           subtotal: subtotalAmount,
           phone: digits,
+          eligibleSubtotal,
+          hasOnlyWholesale: items.length > 0 && items.every((i) => i.product.quantityDiscounts && i.product.quantityDiscounts.length > 0),
         }),
       });
       const data = await res.json();
@@ -779,8 +783,9 @@ export function CheckoutModal() {
 
                     <span className={styles.checkoutCouponLabel}>Cupom de desconto</span>
                     {appliedCoupon ? (
-                      <div className={styles.checkoutAppliedCouponRow}>
-                        <div className={styles.checkoutAppliedLeft}>
+                      <>
+                        <div className={styles.checkoutAppliedCouponRow}>
+                          <div className={styles.checkoutAppliedLeft}>
                           <Tag size={13} className={styles.checkoutAppliedTagIcon} />
                           <span className={styles.checkoutAppliedCode}>{appliedCoupon.code}</span>
                           <span className={styles.checkoutAppliedDesc}>
@@ -806,6 +811,17 @@ export function CheckoutModal() {
                           </button>
                         </div>
                       </div>
+                      {hasWholesaleInCart && discountAmount > 0 && (
+                        <span style={{ fontSize: '0.72rem', color: '#8C7A6B', marginTop: '0.35rem', display: 'block' }}>
+                          * Desconto aplicado sobre os produtos regulares (itens de atacado como as bolinhas já possuem desconto progressivo).
+                        </span>
+                      )}
+                      {hasWholesaleInCart && discountAmount === 0 && (
+                        <span style={{ fontSize: '0.72rem', color: '#D97706', marginTop: '0.35rem', display: 'block' }}>
+                          * Este cupom não se aplica a produtos com preço de atacado/desconto progressivo.
+                        </span>
+                      )}
+                    </>
                     ) : (
                       <div className={styles.checkoutCouponRow}>
                         <div className={styles.checkoutCouponInputWrapper}>

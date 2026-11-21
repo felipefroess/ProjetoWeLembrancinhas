@@ -33,6 +33,7 @@ export interface CouponItem {
   expiresAt?: string | null;
   isActive: boolean;
   firstPurchaseOnly?: boolean;
+  excludeWholesale?: boolean;
   createdAt?: string;
 }
 
@@ -624,6 +625,16 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                         </span>
                       </div>
                     )}
+
+                    {/* Regra de Não Cumulativo com Atacado */}
+                    {(coupon.firstPurchaseOnly || coupon.code === 'PRIMEIRACOMPRA' || coupon.excludeWholesale !== false) && (
+                      <div className={styles.couponDetailItem}>
+                        <Zap size={13} style={{ color: '#047857' }} />
+                        <span style={{ fontSize: '0.75rem', color: '#047857', fontWeight: 600 }}>
+                          Não acumula com produtos de atacado
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -859,7 +870,7 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                 <label htmlFor="firstPurchaseOnly" style={{ fontSize: '0.8125rem', color: '#4A3B32', cursor: 'pointer', fontWeight: 600 }}>
                   Válido apenas na 1ª compra do cliente
                   <span style={{ display: 'block', fontSize: '11px', color: '#8C7A6B', fontWeight: 400, marginTop: 2 }}>
-                    Bloqueia automaticamente compras subsequentes com este mesmo número de WhatsApp ou no mesmo aparelho.
+                    Bloqueia compras subsequentes com mesmo telefone/aparelho e não acumula com produtos de atacado (ex: bolinhas).
                   </span>
                 </label>
               </div>

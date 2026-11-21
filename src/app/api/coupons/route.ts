@@ -57,8 +57,13 @@ export async function POST(request: NextRequest) {
     const rawCode = (body.code || '').trim();
     const subtotal = Number(body.subtotal) || 0;
     const phone = body.phone ? String(body.phone).trim() : undefined;
+    const eligibleSubtotal = typeof body.eligibleSubtotal === 'number' ? body.eligibleSubtotal : undefined;
+    const hasOnlyWholesale = Boolean(body.hasOnlyWholesale);
 
-    const validation = await validateCoupon(rawCode, subtotal, phone);
+    const validation = await validateCoupon(rawCode, subtotal, phone, {
+      eligibleSubtotal,
+      hasOnlyWholesale,
+    });
     if (!validation.valid) {
       return NextResponse.json({
         success: false,

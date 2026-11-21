@@ -14,6 +14,7 @@ export interface AdminCoupon {
   expiresAt?: string | null; // Formato YYYY-MM-DD ou ISO
   isActive: boolean;
   firstPurchaseOnly?: boolean; // Válido apenas na 1ª compra do cliente
+  excludeWholesale?: boolean;  // Não cumulativo com produtos de atacado / desconto por quantidade
   createdAt: string;
 }
 
@@ -47,6 +48,7 @@ function readLocalCoupons(): AdminCoupon[] {
         expiresAt: item.expiresAt || null,
         isActive: item.isActive !== false,
         firstPurchaseOnly: isFirstPurchase,
+        excludeWholesale: item.excludeWholesale !== false,
         createdAt: item.createdAt || new Date().toISOString(),
       };
     });
@@ -92,6 +94,7 @@ function mapRowToCoupon(row: any): AdminCoupon {
     expiresAt: row.expires_at || null,
     isActive: row.is_active !== false,
     firstPurchaseOnly: isFirstPurchase,
+    excludeWholesale: row.exclude_wholesale !== undefined ? Boolean(row.exclude_wholesale) : true,
     createdAt: row.created_at || new Date().toISOString(),
   };
 }
@@ -331,7 +334,11 @@ export async function deleteCoupon(id: string): Promise<{ success: boolean; erro
 export async function validateCoupon(
   rawCode: string,
   subtotal: number,
-  phone?: string
+  phone?: string,
+  options?: {
+    eligibleSubtotal?: number;
+    hasOnlyWholesale?: boolean;
+  }
 ): Promise<{
   valid: boolean;
   message: string;
@@ -341,6 +348,7 @@ export async function validateCoupon(
     value: number;
     description: string;
     firstPurchaseOnly?: boolean;
+    excludeWholesale?: boolean;
   };
   discountAmount?: number;
 }> {
@@ -361,6 +369,15 @@ export async function validateCoupon(
   }
 
   const isFirstPurchaseCoupon = matched.firstPurchaseOnly === true || matched.code === 'PRIMEIRACOMPRA';
+  const shouldExcludeWholesale = isFirstPurchaseCoupon || matched.excludeWholesale !== false;
+
+  // Bloqueia uso em carrinho que contém apenas itens de atacado (desconto progressivo)
+  if (shouldExcludeWholesale && options?.hasOnlyWholesale) {
+    return {
+      valid: false,
+      message: 'O cupom de 1ª compra não é aplicável em produtos de atacado (que já possuem desconto progressivo).',
+    };
+  }
 
   if (isFirstPurchaseCoupon && phone) {
     const hasPrevious = await hasCustomerCompletedOrders(phone);
@@ -386,22 +403,30 @@ export async function validateCoupon(
     }
   }
 
-  if (matched.minOrderValue && subtotal < matched.minOrderValue) {
+  // Base de cálculo: se o cupom não for cumulativo com atacado, valida sobre o subtotal elegível
+  const effectiveSubtotal =
+    shouldExcludeWholesale && typeof options?.eligibleSubtotal === 'number'
+      ? options.eligibleSubtotal
+      : subtotal;
+
+  if (matched.minOrderValue && effectiveSubtotal < matched.minOrderValue) {
     const minFormatted = matched.minOrderValue.toLocaleString('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     });
     return {
       valid: false,
-      message: `Este cupom é válido para pedidos a partir de ${minFormatted}.`,
+      message: `Este cupom é válido para pedidos a partir de ${minFormatted} em produtos participantes.`,
     };
   }
 
   let discountAmount = 0;
-  if (matched.type === 'percentage') {
-    discountAmount = Number(((subtotal * matched.value) / 100).toFixed(2));
-  } else {
-    discountAmount = Math.min(matched.value, subtotal);
+  if (effectiveSubtotal > 0) {
+    if (matched.type === 'percentage') {
+      discountAmount = Number(((effectiveSubtotal * matched.value) / 100).toFixed(2));
+    } else {
+      discountAmount = Math.min(matched.value, effectiveSubtotal);
+    }
   }
 
   return {
@@ -413,6 +438,7 @@ export async function validateCoupon(
       value: matched.value,
       description: matched.description || '',
       firstPurchaseOnly: isFirstPurchaseCoupon,
+      excludeWholesale: shouldExcludeWholesale,
     },
     discountAmount,
   };

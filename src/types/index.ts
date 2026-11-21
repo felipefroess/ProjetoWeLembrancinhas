@@ -146,5 +146,6 @@ export interface AppliedCoupon {
   value: number;
   description?: string;
   firstPurchaseOnly?: boolean;
+  excludeWholesale?: boolean;
 }
 
