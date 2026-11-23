@@ -520,3 +520,16 @@
   background-color: #F5EDE4;
   border-color: #6D4C3D;
 }
+
+@media (max-width: 640px) {
+  .saveButton {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+  .formInput,
+  .formTextarea,
+  .formSelect {
+    font-size: 16px;
+  }
+}

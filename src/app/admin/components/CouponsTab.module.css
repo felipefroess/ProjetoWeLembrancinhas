@@ -811,3 +811,36 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+@media (max-width: 640px) {
+  .newCouponButton {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+  .searchBox {
+    max-width: 100%;
+    width: 100%;
+  }
+  .searchInput,
+  .formInput,
+  .formSelect,
+  .formTextarea {
+    font-size: 16px;
+  }
+  .modalFooter {
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+  }
+  .modalFooter button {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+}

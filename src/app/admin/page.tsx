@@ -37,7 +37,8 @@ import {
   Download,
   Users,
   RefreshCw,
-  Tag
+  Tag,
+  Menu
 } from 'lucide-react';
 import { Product, Category, ProductVariation, CustomFieldDefinition, QuantityDiscount } from '@/types';
 import OrdersProductionTab from './components/OrdersProductionTab';
@@ -63,6 +64,7 @@ export default function AdminDashboardPage() {
 
   // Aba Principal do Admin (Dashboard ou Produtos)
   const [mainTab, setMainTab] = useState<'pedidos' | 'clientes' | 'produtos' | 'ajustes' | 'cupons' | 'dashboard' | 'calculadora'>('pedidos');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isCalculatorModalOpen, setIsCalculatorModalOpen] = useState(false);
   const [ordersCount, setOrdersCount] = useState<number>(0);
   const [customersCount, setCustomersCount] = useState<number>(0);
@@ -975,70 +977,23 @@ export default function AdminDashboardPage() {
         {/* Barra de Navegação Superior */}
         <header className={styles.topBar}>
           <div className={styles.brandGroup}>
-            <div className={styles.mobileNavTabs}>
-              <button
-                type="button"
-                onClick={() => setMainTab('pedidos')}
-                className={`${styles.mobileTabBtn} ${mainTab === 'pedidos' ? styles.mobileTabBtnActive : ''}`}
-              >
-                <ClipboardList size={14} />
-                <span>Pedidos ({ordersCount})</span>
-              </button>
+            {/* Botão Hambúrguer Mobile */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className={styles.mobileHamburgerBtn}
+              aria-label="Abrir menu de navegação"
+            >
+              <Menu size={22} />
+            </button>
 
-              <button
-                type="button"
-                onClick={() => setMainTab('produtos')}
-                className={`${styles.mobileTabBtn} ${mainTab === 'produtos' ? styles.mobileTabBtnActive : ''}`}
-              >
-                <Package size={14} />
-                <span>Produtos ({products.length})</span>
-              </button>
+            {/* Logo Mobile */}
+            <Link href="/" className={styles.mobileHeaderBrand}>
+              <span className={styles.mobileBrandScript}>Wê</span>
+              <span className={styles.mobileBrandSerif}>Lembrancinhas</span>
+            </Link>
 
-              <button
-                type="button"
-                onClick={() => setMainTab('ajustes')}
-                className={`${styles.mobileTabBtn} ${mainTab === 'ajustes' ? styles.mobileTabBtnActive : ''}`}
-              >
-                <Sliders size={14} />
-                <span>Ajustes</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setMainTab('cupons')}
-                className={`${styles.mobileTabBtn} ${mainTab === 'cupons' ? styles.mobileTabBtnActive : ''}`}
-              >
-                <Ticket size={14} />
-                <span>Cupons ({couponsCount})</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setMainTab('clientes')}
-                className={`${styles.mobileTabBtn} ${mainTab === 'clientes' ? styles.mobileTabBtnActive : ''}`}
-              >
-                <Users size={14} />
-                <span>Clientes ({customersCount})</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setMainTab('dashboard')}
-                className={`${styles.mobileTabBtn} ${mainTab === 'dashboard' ? styles.mobileTabBtnActive : ''}`}
-              >
-                <LayoutDashboard size={14} />
-                <span>Dashboard</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setMainTab('calculadora')}
-                className={`${styles.mobileTabBtn} ${mainTab === 'calculadora' ? styles.mobileTabBtnActive : ''}`}
-              >
-                <Calculator size={14} />
-                <span>Calculadora</span>
-              </button>
-            </div>
+            {/* Título Desktop da Aba */}
             <div className={styles.desktopTabTitle}>
               <h2 className={styles.topBarHeading}>
                 {mainTab === 'pedidos' ? 'Fila de Produção & Pedidos' : mainTab === 'clientes' ? 'Fichas de Clientes & Fidelidade' : mainTab === 'produtos' ? 'Gerenciamento de Produtos' : mainTab === 'ajustes' ? 'Ajustes & Configurações da Loja' : mainTab === 'cupons' ? 'Cupons de Desconto & Promoções' : mainTab === 'dashboard' ? 'Dashboard & Métricas' : 'Calculadora de Custos & Preço Sugerido'}
@@ -1047,16 +1002,226 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className={styles.topActions}>
-            <Link href="/" target="_blank" className={styles.storeLink}>
-              <ExternalLink size={14} />
-              <span>Ver Loja</span>
+            <Link href="/" target="_blank" className={styles.storeLink} title="Ver Loja Virtual">
+              <ExternalLink size={15} />
+              <span className={styles.actionBtnLabel}>Ver Loja</span>
             </Link>
             <button onClick={handleLogout} className={styles.logoutBtn} title="Encerrar sessão">
-              <LogOut size={14} />
-              <span>Sair</span>
+              <LogOut size={15} />
+              <span className={styles.actionBtnLabel}>Sair</span>
             </button>
           </div>
         </header>
+
+        {/* Barra de Abas Horizontais com Swipe Touch no Mobile */}
+        <nav className={styles.mobileSubTabBar}>
+          <button
+            type="button"
+            onClick={() => setMainTab('pedidos')}
+            className={`${styles.mobileSubTabPill} ${mainTab === 'pedidos' ? styles.mobileSubTabPillActive : ''}`}
+          >
+            <ClipboardList size={15} />
+            <span>Pedidos</span>
+            {ordersCount > 0 && <span className={styles.mobilePillBadge}>{ordersCount}</span>}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMainTab('produtos')}
+            className={`${styles.mobileSubTabPill} ${mainTab === 'produtos' ? styles.mobileSubTabPillActive : ''}`}
+          >
+            <Package size={15} />
+            <span>Produtos</span>
+            <span className={styles.mobilePillBadge}>{products.length}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMainTab('ajustes')}
+            className={`${styles.mobileSubTabPill} ${mainTab === 'ajustes' ? styles.mobileSubTabPillActive : ''}`}
+          >
+            <Sliders size={15} />
+            <span>Ajustes</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMainTab('cupons')}
+            className={`${styles.mobileSubTabPill} ${mainTab === 'cupons' ? styles.mobileSubTabPillActive : ''}`}
+          >
+            <Ticket size={15} />
+            <span>Cupons</span>
+            {couponsCount > 0 && <span className={styles.mobilePillBadge}>{couponsCount}</span>}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMainTab('clientes')}
+            className={`${styles.mobileSubTabPill} ${mainTab === 'clientes' ? styles.mobileSubTabPillActive : ''}`}
+          >
+            <Users size={15} />
+            <span>Clientes</span>
+            {customersCount > 0 && <span className={styles.mobilePillBadge}>{customersCount}</span>}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMainTab('dashboard')}
+            className={`${styles.mobileSubTabPill} ${mainTab === 'dashboard' ? styles.mobileSubTabPillActive : ''}`}
+          >
+            <LayoutDashboard size={15} />
+            <span>Dashboard</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMainTab('calculadora')}
+            className={`${styles.mobileSubTabPill} ${mainTab === 'calculadora' ? styles.mobileSubTabPillActive : ''}`}
+          >
+            <Calculator size={15} />
+            <span>Calculadora</span>
+          </button>
+        </nav>
+
+        {/* Drawer Lateral Mobile */}
+        {mobileMenuOpen && (
+          <div className={styles.mobileDrawerOverlay} onClick={() => setMobileMenuOpen(false)}>
+            <aside
+              className={styles.mobileDrawerContent}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className={styles.mobileDrawerHeader}>
+                <div className={styles.sidebarBrand} style={{ marginBottom: 0, paddingBottom: 0, borderBottom: 'none' }}>
+                  <Link href="/" className={styles.sidebarLogoLockup} onClick={() => setMobileMenuOpen(false)}>
+                    <span className={styles.sidebarLogoScript}>Wê</span>
+                    <span className={styles.sidebarLogoSerif}>Lembrancinhas</span>
+                  </Link>
+                  <span className={styles.adminTag}>Painel Administrativo</span>
+                </div>
+                <button
+                  type="button"
+                  className={styles.mobileDrawerCloseBtn}
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label="Fechar menu"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className={styles.mobileDrawerBody}>
+                <div className={styles.sidebarSectionLabel}>Menu Principal</div>
+                <nav className={styles.sidebarNav}>
+                  <button
+                    type="button"
+                    onClick={() => { setMainTab('pedidos'); setMobileMenuOpen(false); }}
+                    className={`${styles.sidebarNavItem} ${mainTab === 'pedidos' ? styles.sidebarNavItemActive : ''}`}
+                  >
+                    <ClipboardList size={18} />
+                    <span>Pedidos & Produção</span>
+                    {ordersCount > 0 && <span className={styles.counterPill}>{ordersCount}</span>}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setMainTab('produtos'); setMobileMenuOpen(false); }}
+                    className={`${styles.sidebarNavItem} ${mainTab === 'produtos' ? styles.sidebarNavItemActive : ''}`}
+                  >
+                    <Package size={18} />
+                    <span>Gerenciamento de Produtos</span>
+                    <span className={styles.counterPill}>{products.length}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setMainTab('ajustes'); setMobileMenuOpen(false); }}
+                    className={`${styles.sidebarNavItem} ${mainTab === 'ajustes' ? styles.sidebarNavItemActive : ''}`}
+                  >
+                    <Sliders size={18} />
+                    <span>Ajustes da Loja</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setMainTab('cupons'); setMobileMenuOpen(false); }}
+                    className={`${styles.sidebarNavItem} ${mainTab === 'cupons' ? styles.sidebarNavItemActive : ''}`}
+                  >
+                    <Ticket size={18} />
+                    <span>Cupons de Desconto</span>
+                    {couponsCount > 0 && <span className={styles.counterPill}>{couponsCount}</span>}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setMainTab('clientes'); setMobileMenuOpen(false); }}
+                    className={`${styles.sidebarNavItem} ${mainTab === 'clientes' ? styles.sidebarNavItemActive : ''}`}
+                  >
+                    <Users size={18} />
+                    <span>Fichas de Clientes</span>
+                    {customersCount > 0 && <span className={styles.counterPill}>{customersCount}</span>}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setMainTab('dashboard'); setMobileMenuOpen(false); }}
+                    className={`${styles.sidebarNavItem} ${mainTab === 'dashboard' ? styles.sidebarNavItemActive : ''}`}
+                  >
+                    <LayoutDashboard size={18} />
+                    <span>Dashboard</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setMainTab('calculadora'); setMobileMenuOpen(false); }}
+                    className={`${styles.sidebarNavItem} ${mainTab === 'calculadora' ? styles.sidebarNavItemActive : ''}`}
+                  >
+                    <Calculator size={18} />
+                    <span>Calculadora de Preços</span>
+                  </button>
+                </nav>
+
+                <div className={styles.mobileDrawerFooter}>
+                  <div className={styles.sidebarStatusBox}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.25rem' }}>
+                      <span style={{ fontSize: '0.6875rem', color: '#8C7A6B', fontWeight: 600 }}>STATUS DA LOJA</span>
+                      <span className={isStoreOnline ? styles.onlineBadge : styles.offlineBadge}>
+                        <span className={isStoreOnline ? styles.onlineDot : styles.offlineDot} /> {isStoreOnline ? 'Online' : 'Offline'}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={toggleStoreOnline}
+                      disabled={updatingStoreStatus}
+                      className={styles.statusToggleBtn}
+                    >
+                      {isStoreOnline ? (
+                        <>
+                          <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', backgroundColor: '#FF4D4F' }} />
+                          <span>Deixar Offline</span>
+                        </>
+                      ) : (
+                        <>
+                          <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', backgroundColor: '#52C41A' }} />
+                          <span>Deixar Online</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <Link href="/" target="_blank" className={styles.sidebarLink} onClick={() => setMobileMenuOpen(false)}>
+                    <ExternalLink size={14} />
+                    <span>Ver Loja Virtual</span>
+                  </Link>
+
+                  <button onClick={handleLogout} className={styles.sidebarLogoutBtn} title="Encerrar sessão">
+                    <LogOut size={14} />
+                    <span>Sair do Painel</span>
+                  </button>
+                </div>
+              </div>
+            </aside>
+          </div>
+        )}
 
         {/* Conteúdo Principal */}
         <main className={styles.mainContent}>
@@ -1237,6 +1402,95 @@ export default function AdminDashboardPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Lista de Produtos em Cards para Telas Mobile */}
+        <div className={styles.mobileProductsList}>
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((p) => (
+              <div key={`mob-${p.id}`} className={styles.mobileProductCard}>
+                <div className={styles.mobileProductCardTop}>
+                  <img src={p.image} alt={p.name} className={styles.mobileProductThumb} />
+                  <div className={styles.mobileProductInfo}>
+                    <div className={styles.mobileProductNameRow}>
+                      <span className={styles.mobileProductName}>{p.name}</span>
+                    </div>
+
+                    <div className={styles.mobileBadgesRow}>
+                      <span className={styles.categoryBadge}>{p.category}</span>
+                      {p.isBestSeller && (
+                        <span className={styles.bestSellerTableBadge}>
+                          <Flame size={11} /> 1º Mais Vendido
+                        </span>
+                      )}
+                      {p.quantityDiscounts && p.quantityDiscounts.length > 0 && (
+                        <span className={styles.mobileAtacadoBadge} title={p.quantityDiscounts.map(d => `${d.minQuantity}+ un: R$ ${d.price}`).join(' | ')}>
+                          <Tag size={10} /> Atacado ({p.quantityDiscounts.length})
+                        </span>
+                      )}
+                    </div>
+
+                    <div className={styles.mobilePriceRow}>
+                      <span className={styles.mobilePrice}>
+                        {p.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
+                      <span className={styles.mobileLeadTime}>
+                        <Clock size={12} /> {p.leadTimeDays} dias úteis
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.mobileProductActionsRow}>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleBestSeller(p.id)}
+                    className={p.isBestSeller ? styles.mobileActionBtnActive : styles.mobileActionBtn}
+                    title={p.isBestSeller ? 'Clique para desmarcar como 1º' : 'Clique para destacar como 1º'}
+                  >
+                    <Flame size={15} />
+                    <span>{p.isBestSeller ? '1º da Loja' : 'Destacar'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadImage(p.image, `${p.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-capa.jpg`)}
+                    className={styles.mobileActionBtn}
+                    title="Baixar foto de capa"
+                  >
+                    <Download size={15} />
+                    <span>Baixar</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEditProduct(p)}
+                    className={styles.mobileActionBtnPrimary}
+                    title="Editar produto"
+                  >
+                    <Pencil size={15} />
+                    <span>Editar</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteProduct(p.id, p.name)}
+                    className={styles.mobileActionBtnDanger}
+                    title="Excluir produto"
+                  >
+                    <Trash2 size={15} />
+                    <span>Excluir</span>
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className={styles.mobileEmptyState}>
+              <Package size={36} color="#8C7A6B" />
+              <p style={{ fontWeight: 600, color: '#2D231E', margin: '0.5rem 0 0.25rem' }}>Nenhum produto encontrado</p>
+              <p style={{ fontSize: '0.8125rem', color: '#8C7A6B', margin: 0 }}>Tente alterar a busca ou filtro de categoria.</p>
+            </div>
+          )}
         </div>
             </section>
           )}

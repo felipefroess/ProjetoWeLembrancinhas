@@ -919,3 +919,29 @@
   border-radius: 0.65rem;
   cursor: pointer;
 }
+
+@media (max-width: 640px) {
+  .headerActions {
+    width: 100%;
+    flex-direction: column;
+  }
+  .newBtn,
+  .syncBtn {
+    width: 100%;
+    min-height: 44px;
+  }
+  .formInput,
+  .formTextarea,
+  .formSelect {
+    font-size: 16px;
+  }
+  .modalFooter {
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+  }
+  .modalFooter button {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+}

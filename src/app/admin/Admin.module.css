@@ -213,10 +213,183 @@
   display: block;
 }
 
-/* Navegação Mobile */
-.mobileNavTabs {
+/* Navegação Mobile e Header Responsivo */
+.mobileHamburgerBtn {
   display: none;
-  gap: 0.4rem;
+  background: none;
+  border: none;
+  color: #6D4C3D;
+  padding: 0.4rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.mobileHamburgerBtn:hover {
+  background-color: #F5EDE4;
+}
+
+.mobileHeaderBrand {
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.mobileBrandScript {
+  font-family: var(--font-logo-script);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #6D4C3D;
+  line-height: 0.9;
+}
+
+.mobileBrandSerif {
+  font-family: var(--font-logo-serif);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #050403;
+  letter-spacing: 0.02em;
+}
+
+.actionBtnLabel {
+  display: inline;
+}
+
+/* Sub-Barra de Abas Horizontais Fixa no Mobile */
+.mobileSubTabBar {
+  display: none;
+  gap: 0.45rem;
+  overflow-x: auto;
+  padding: 0.6rem 0.85rem;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  background-color: #FAF7F2;
+  border-bottom: 1px solid #E8DFD5;
+  position: sticky;
+  top: 56px;
+  z-index: 29;
+}
+
+.mobileSubTabBar::-webkit-scrollbar {
+  display: none;
+}
+
+.mobileSubTabPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6D4C3D;
+  background-color: #ffffff;
+  border: 1px solid #DACFBF;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.mobileSubTabPillActive {
+  background-color: #6D4C3D;
+  color: #ffffff !important;
+  border-color: #6D4C3D;
+  box-shadow: 0 2px 6px rgba(109, 76, 61, 0.25);
+}
+
+.mobilePillBadge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  background-color: #F5EDE4;
+  color: #6D4C3D;
+}
+
+.mobileSubTabPillActive .mobilePillBadge {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* Drawer Lateral de Menu para Mobile */
+.mobileDrawerOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  z-index: 100;
+  display: flex;
+  animation: drawerFadeIn 0.2s ease;
+}
+
+@keyframes drawerFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.mobileDrawerContent {
+  width: 290px;
+  max-width: 85vw;
+  background-color: #ffffff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+  animation: drawerSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+}
+
+@keyframes drawerSlideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.mobileDrawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid #F0E8DE;
+}
+
+.mobileDrawerCloseBtn {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  border: 1px solid #DACFBF;
+  background-color: #FAF7F2;
+  color: #6D4C3D;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobileDrawerCloseBtn:hover {
+  background-color: #EFE6DC;
+  color: #2D231E;
+}
+
+.mobileDrawerBody {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.mobileDrawerFooter {
+  padding-top: 1rem;
+  border-top: 1px solid #F0E8DE;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 @media (max-width: 860px) {
@@ -226,7 +399,13 @@
   .desktopTabTitle {
     display: none;
   }
-  .mobileNavTabs {
+  .mobileHamburgerBtn {
+    display: flex;
+  }
+  .mobileHeaderBrand {
+    display: flex;
+  }
+  .mobileSubTabBar {
     display: flex;
   }
   .adminWrapper {
@@ -234,25 +413,14 @@
   }
 }
 
-.mobileTabBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #6D4C3D;
-  background-color: #FAF7F2;
-  border: 1px solid #DACFBF;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.mobileTabBtnActive {
-  background-color: #6D4C3D;
-  color: #ffffff;
-  border-color: #6D4C3D;
+@media (max-width: 480px) {
+  .actionBtnLabel {
+    display: none;
+  }
+  .storeLink,
+  .logoutBtn {
+    padding: 0.5rem 0.65rem;
+  }
 }
 
 .productsSection {
@@ -3454,5 +3622,351 @@
   color: #B45309;
   border: 1px solid #F59E0B;
   transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   LISTA RESPONSIVA DE PRODUTOS PARA CELULAR (MOBILE PRODUCT CARDS)
+   ========================================================================== */
+.mobileProductsList {
+  display: none;
+}
+
+.mobileProductCard {
+  background-color: #ffffff;
+  border: 1px solid #E8DFD5;
+  border-radius: 1rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: 0 2px 8px rgba(109, 76, 61, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mobileProductCardTop {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+}
+
+.mobileProductThumb {
+  width: 4.75rem;
+  height: 4.75rem;
+  border-radius: 0.75rem;
+  object-fit: cover;
+  border: 1px solid #DACFBF;
+  background-color: #FAF7F2;
+  flex-shrink: 0;
+}
+
+.mobileProductInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.mobileProductNameRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.mobileProductName {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #2D231E;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.mobileBadgesRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.mobileAtacadoBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  background-color: #ECFDF5;
+  color: #065F46;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid #A7F3D0;
+}
+
+.mobilePriceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.2rem;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.mobilePrice {
+  font-family: var(--font-jakarta, var(--font-sans, 'Plus Jakarta Sans', sans-serif));
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: #6D4C3D;
+}
+
+.mobileLeadTime {
+  font-size: 0.75rem;
+  color: #8C7A6B;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 500;
+}
+
+.mobileProductActionsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.45rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #F0E8DE;
+}
+
+.mobileActionBtn,
+.mobileActionBtnActive,
+.mobileActionBtnPrimary,
+.mobileActionBtnDanger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.55rem 0.25rem;
+  border-radius: 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  border: 1px solid transparent;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobileActionBtn {
+  background-color: #FAF7F2;
+  color: #6D4C3D;
+  border-color: #DACFBF;
+}
+
+.mobileActionBtn:hover {
+  background-color: #F5EDE4;
+}
+
+.mobileActionBtnActive {
+  background-color: #FEF3C7;
+  color: #92400E;
+  border-color: #F59E0B;
+}
+
+.mobileActionBtnPrimary {
+  background-color: #6D4C3D;
+  color: #ffffff;
+  border-color: #6D4C3D;
+}
+
+.mobileActionBtnPrimary:hover {
+  background-color: #553A2D;
+}
+
+.mobileActionBtnDanger {
+  background-color: #FFF1F0;
+  color: #CF1322;
+  border-color: #FFCCC7;
+}
+
+.mobileActionBtnDanger:hover {
+  background-color: #FF4D4F;
+  color: #ffffff;
+}
+
+.mobileEmptyState {
+  background-color: #ffffff;
+  border: 1px dashed #DACFBF;
+  border-radius: 1.25rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   REGRAS RESPONSIVAS GERAIS PARA MOBILE (< 768px & < 640px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Tabela de Produtos Desktop oculta; Cards Mobile visíveis */
+  .tableCard {
+    display: none !important;
+  }
+  .mobileProductsList {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .headerRow {
+    gap: 0.85rem;
+  }
+  .pageHeading {
+    font-size: 1.4rem;
+  }
+  .pageSubheading {
+    font-size: 0.8125rem;
+  }
+  .newProductBtn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.85rem 1rem;
+    font-size: 0.9375rem;
+  }
+
+  /* Barra de Busca e Filtro de Produtos */
+  .searchFilterBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 0.85rem;
+  }
+  .searchBox {
+    width: 100%;
+    min-width: 0;
+  }
+  .searchInput {
+    font-size: 16px;
+  }
+  .filterControls {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .filterSelect {
+    flex: 1;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Kanban de Pedidos no Celular */
+  .ordersHeading {
+    font-size: 1.25rem;
+    flex-wrap: wrap;
+  }
+  .ordersHeaderRow {
+    padding: 1rem;
+    gap: 0.85rem;
+  }
+  .ordersHeaderActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .ordersControlsRow {
+    gap: 0.75rem;
+  }
+  .ordersSearchBox {
+    max-width: 100%;
+    width: 100%;
+  }
+  .ordersSearchInput {
+    font-size: 16px;
+  }
+  .ordersFilterPills {
+    padding-bottom: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+  .kanbanBoard {
+    grid-template-columns: repeat(4, 85vw);
+    gap: 0.85rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 1.25rem;
+  }
+  .kanbanColumn {
+    scroll-snap-align: center;
+    max-height: calc(100vh - 13rem);
+  }
+}
+
+@media (max-width: 640px) {
+  /* Modais no Celular */
+  .modalOverlay,
+  .orderModalOverlay {
+    padding: 0.35rem;
+  }
+
+  .modalCard,
+  .orderModalCard {
+    max-height: 96vh;
+    border-radius: 1rem;
+  }
+
+  .modalHeader,
+  .orderModalHeader {
+    padding: 0.85rem 1rem;
+  }
+
+  .modalTitle,
+  .orderModalTitle {
+    font-size: 1.15rem;
+  }
+
+  .modalTabsBar {
+    padding: 0.5rem 0.75rem;
+    -webkit-overflow-scrolling: touch;
+    gap: 0.35rem;
+  }
+
+  .modalTabBtn {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.65rem;
+  }
+
+  .modalBody,
+  .orderModalBody {
+    padding: 0.85rem;
+    gap: 1rem;
+  }
+
+  .sectionBox {
+    padding: 0.85rem;
+    border-radius: 0.75rem;
+  }
+
+  .modalFooter {
+    padding: 0.85rem 1rem;
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+  }
+
+  .modalFooter .cancelBtn,
+  .modalFooter .saveBtn {
+    width: 100%;
+    justify-content: center;
+    min-height: 46px;
+    font-size: 0.9375rem;
+  }
+
+  .orderModalFooter {
+    padding: 0.85rem 1rem;
+  }
+
+  /* Inputs com 16px para evitar zoom indesejado no iOS Safari */
+  .input,
+  .select,
+  .textarea {
+    font-size: 16px;
+  }
 }
 
