@@ -1,6 +1,7 @@
 # Wê Lembrancinhas — E-Commerce & Papelaria Afetiva
 
 > Sistema web desenvolvido para modernizar o funil de atendimento e vendas da **Wê Lembrancinhas** (Instagram [@welembrancinhas](https://instagram.com/welembrancinhas)), negócio artesanal de lembrancinhas personalizadas liderado por **Wenilze Fróes** em **Pouso Alegre - MG** e **Paraisópolis - MG**.
+> 
 > welembrancinhas.com.br
 ---
 
