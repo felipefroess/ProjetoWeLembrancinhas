@@ -874,6 +874,16 @@ export default function AdminDashboardPage() {
 
           <button
             type="button"
+            onClick={() => setMainTab('clientes')}
+            className={`${styles.sidebarNavItem} ${mainTab === 'clientes' ? styles.sidebarNavItemActive : ''}`}
+          >
+            <Users size={18} />
+            <span>Fichas de Clientes</span>
+            {customersCount > 0 && <span className={styles.counterPill}>{customersCount}</span>}
+          </button>
+
+          <button
+            type="button"
             onClick={() => setMainTab('produtos')}
             className={`${styles.sidebarNavItem} ${mainTab === 'produtos' ? styles.sidebarNavItemActive : ''}`}
           >
@@ -899,16 +909,6 @@ export default function AdminDashboardPage() {
             <Ticket size={18} />
             <span>Cupons de Desconto</span>
             {couponsCount > 0 && <span className={styles.counterPill}>{couponsCount}</span>}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setMainTab('clientes')}
-            className={`${styles.sidebarNavItem} ${mainTab === 'clientes' ? styles.sidebarNavItemActive : ''}`}
-          >
-            <Users size={18} />
-            <span>Fichas de Clientes</span>
-            {customersCount > 0 && <span className={styles.counterPill}>{customersCount}</span>}
           </button>
 
           <button
@@ -1027,6 +1027,16 @@ export default function AdminDashboardPage() {
 
           <button
             type="button"
+            onClick={() => setMainTab('clientes')}
+            className={`${styles.mobileSubTabPill} ${mainTab === 'clientes' ? styles.mobileSubTabPillActive : ''}`}
+          >
+            <Users size={15} />
+            <span>Clientes</span>
+            {customersCount > 0 && <span className={styles.mobilePillBadge}>{customersCount}</span>}
+          </button>
+
+          <button
+            type="button"
             onClick={() => setMainTab('produtos')}
             className={`${styles.mobileSubTabPill} ${mainTab === 'produtos' ? styles.mobileSubTabPillActive : ''}`}
           >
@@ -1052,16 +1062,6 @@ export default function AdminDashboardPage() {
             <Ticket size={15} />
             <span>Cupons</span>
             {couponsCount > 0 && <span className={styles.mobilePillBadge}>{couponsCount}</span>}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setMainTab('clientes')}
-            className={`${styles.mobileSubTabPill} ${mainTab === 'clientes' ? styles.mobileSubTabPillActive : ''}`}
-          >
-            <Users size={15} />
-            <span>Clientes</span>
-            {customersCount > 0 && <span className={styles.mobilePillBadge}>{customersCount}</span>}
           </button>
 
           <button
@@ -1123,6 +1123,16 @@ export default function AdminDashboardPage() {
 
                   <button
                     type="button"
+                    onClick={() => { setMainTab('clientes'); setMobileMenuOpen(false); }}
+                    className={`${styles.sidebarNavItem} ${mainTab === 'clientes' ? styles.sidebarNavItemActive : ''}`}
+                  >
+                    <Users size={18} />
+                    <span>Fichas de Clientes</span>
+                    {customersCount > 0 && <span className={styles.counterPill}>{customersCount}</span>}
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={() => { setMainTab('produtos'); setMobileMenuOpen(false); }}
                     className={`${styles.sidebarNavItem} ${mainTab === 'produtos' ? styles.sidebarNavItemActive : ''}`}
                   >
@@ -1148,16 +1158,6 @@ export default function AdminDashboardPage() {
                     <Ticket size={18} />
                     <span>Cupons de Desconto</span>
                     {couponsCount > 0 && <span className={styles.counterPill}>{couponsCount}</span>}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => { setMainTab('clientes'); setMobileMenuOpen(false); }}
-                    className={`${styles.sidebarNavItem} ${mainTab === 'clientes' ? styles.sidebarNavItemActive : ''}`}
-                  >
-                    <Users size={18} />
-                    <span>Fichas de Clientes</span>
-                    {customersCount > 0 && <span className={styles.counterPill}>{customersCount}</span>}
                   </button>
 
                   <button
