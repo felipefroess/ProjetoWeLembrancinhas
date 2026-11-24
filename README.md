@@ -1,20 +1,19 @@
-# 🌸 Wê Lembrancinhas — E-Commerce & Papelaria Afetiva
+# Wê Lembrancinhas — E-Commerce & Papelaria Afetiva
 
 > Sistema web desenvolvido para modernizar o funil de atendimento e vendas da **Wê Lembrancinhas** (Instagram [@welembrancinhas](https://instagram.com/welembrancinhas)), negócio artesanal de lembrancinhas personalizadas liderado por **Wenilze Fróes** em **Pouso Alegre - MG** e **Paraisópolis - MG**.
 ---
 
-## 🎯 1. O Problema de Negócio & Engenharia de Requisitos
+## 1. O Problema de Negócio & Engenharia de Requisitos
 
 No modelo anterior, as vendas eram realizadas 100% pelo Instagram Direct e WhatsApp de forma não estruturada:
 - ❌ **Sobrecarga de Atendimento:** Clientes perguntavam preços, prazos e fotos repetidamente.
 - ❌ **Falta de Dados Críticos:** O cliente esquecia de informar a data da festa, o tema ou a grafia do nome da criança.
-- ❌ **Atrito no Fechamento:** Fazer o orçamento manual de múltiplos itens demorava e gerava desistência.
+- ❌ **Atrito no Fechamento:** Fazer o orçamento manual demorava.
 
 ### A Solução Implementada
-- ✅ **Catálogo Digital com Filtros:** Baseado nos destaques do Instagram (Topos de Bolo, Caixas Milk Luxo, Batizado/Maternidade, Agendas e Datas Especiais).
-- ✅ **Motor de Personalização Reativo:** Cada item permite informar *Tema*, *Nome da Criança*, *Idade/Data Comemorativa*, *Cor dos Laços* e *Observações*.
-- ✅ **Carrinho Persistente com Validação de Quantidade Mínima:** Regras de negócio de lote mínimo de produção (ex: mínimo de 10 caixas milk).
-- ✅ **Checkout Conversacional Estruturado para WhatsApp:** Monta o pedido detalhado em Markdown nativo e abre a conversa oficial com um único clique.
+- ✅ **Catálogo Digital com Filtros:** Baseado nos destaques do Instagram (Topos de Bolo, Caixas Milk, Batizado/Maternidade, Agendas e Datas Especiais).
+- ✅ **Personalização:** Cada item permite informar *Tema*, *Nome da Criança*, *Idade/Data Comemorativa*, *Cor dos Laços* e *Observações*.
+- ✅ **Checkout Estruturado para WhatsApp:** Monta o pedido detalhado e é enviado a conversa oficial com um único clique.
 
 ---
 ### Tecnologias Utilizadas
