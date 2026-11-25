@@ -136,6 +136,33 @@
   background-color: #5A3E31;
 }
 
+.whatsappDirectButton {
+  margin-top: 1.25rem;
+  width: 100%;
+  max-width: 320px;
+  padding: 0.875rem 1.25rem;
+  border-radius: 9999px;
+  background-color: #25D366;
+  color: #ffffff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+  transition: all 0.2s ease;
+}
+
+.whatsappDirectButton:hover {
+  background-color: #20BA5A;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(37, 211, 102, 0.45);
+}
+
 .formBody {
   overflow-y: auto;
   padding: 1rem;

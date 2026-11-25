@@ -84,12 +84,17 @@ export async function uploadImageToStorage(
           Key: fileName,
           Body: buffer,
           ContentType: contentType,
+          CacheControl: 'public, max-age=31536000, immutable',
         })
       );
 
       let finalPublicUrl = '';
       if (config.publicUrl) {
-        finalPublicUrl = `${config.publicUrl.replace(/\/$/, '')}/${fileName}`;
+        let cleanBase = config.publicUrl.trim().replace(/\/$/, '');
+        if (!cleanBase.startsWith('http://') && !cleanBase.startsWith('https://')) {
+          cleanBase = `https://${cleanBase}`;
+        }
+        finalPublicUrl = `${cleanBase}/${fileName}`;
       } else if (config.endpoint.includes('r2.cloudflarestorage.com')) {
         finalPublicUrl = `https://${config.bucketName}.${config.endpoint.replace('https://', '')}/${fileName}`;
       } else {

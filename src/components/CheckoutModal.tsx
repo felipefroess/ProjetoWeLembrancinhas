@@ -7,6 +7,7 @@ import { DeliveryMethod } from '@/types';
 import confetti from 'canvas-confetti';
 import styles from './CheckoutModal.module.css';
 import { trackOrderToDatabase } from '@/lib/tracking';
+import { WhatsappIcon } from '@/components/WhatsappIcon';
 
 interface ShippingOption {
   id: number;
@@ -66,6 +67,7 @@ export function CheckoutModal() {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [generalNotes, setGeneralNotes] = useState('');
   const [isSent, setIsSent] = useState(false);
+  const [sentWhatsAppUrl, setSentWhatsAppUrl] = useState('');
   const [isStoreOnline, setIsStoreOnline] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCepInvalid, setIsCepInvalid] = useState(false);
@@ -335,9 +337,21 @@ export function CheckoutModal() {
     } catch {
     }
 
+    setSentWhatsAppUrl(url);
     setIsSent(true);
 
-    window.open(url, '_blank');
+    const isMobileOrInstagram =
+      typeof navigator !== 'undefined' &&
+      /Android|iPhone|iPad|iPod|Instagram|FB_IAB|FB4A|FBIOS/i.test(navigator.userAgent);
+
+    if (isMobileOrInstagram) {
+      window.location.href = url;
+    } else {
+      const newWin = window.open(url, '_blank');
+      if (!newWin || newWin.closed || typeof newWin.closed === 'undefined') {
+        window.location.href = url;
+      }
+    }
 
     clearCart();
 
@@ -399,8 +413,19 @@ export function CheckoutModal() {
               Pedido Pronto para Envio!
             </h4>
             <p className={styles.successText}>
-              Abrimos a conversa com a Wê no WhatsApp com todos os detalhes do seu pedido formatados. Basta clicar em <strong>Enviar</strong> no chat para combinarem a data e o pagamento!
+              Redirecionamos você para o WhatsApp da Wê com todos os detalhes do seu pedido formatados. Se a conversa não abriu automaticamente, toque no botão verde abaixo:
             </p>
+            {sentWhatsAppUrl && (
+              <a
+                href={sentWhatsAppUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.whatsappDirectButton}
+              >
+                <WhatsappIcon size={20} />
+                <span>Abrir conversa no WhatsApp</span>
+              </a>
+            )}
             <button
               onClick={handleFinish}
               className={styles.finishButton}

@@ -3,12 +3,30 @@ import { cookies } from 'next/headers';
 
 const COOKIE_NAME = 'we_admin_session';
 
+let memoryFallbackSecret: string | null = null;
+
 function getSecretKey(): string {
-  return (
-    process.env.ADMIN_SECRET_KEY ||
-    process.env.ADMIN_PASSWORD ||
-    'we-lembrancinhas-default-secret-salt-2026'
-  );
+  const configuredSecret = process.env.ADMIN_SECRET_KEY || process.env.ADMIN_PASSWORD;
+  if (configuredSecret && configuredSecret.trim().length >= 16) {
+    return configuredSecret.trim();
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    console.warn(
+      '⚠️ [AVISO DE SEGURANÇA] ADMIN_SECRET_KEY não configurada ou muito curta em produção! Configure uma chave de pelo menos 16 caracteres nas variáveis de ambiente.'
+    );
+  }
+
+  if (!memoryFallbackSecret) {
+    memoryFallbackSecret = crypto.randomBytes(32).toString('hex');
+  }
+  return memoryFallbackSecret;
+}
+
+export function safeTimingCompare(a: string, b: string): boolean {
+  const hashA = crypto.createHash('sha256').update(a).digest();
+  const hashB = crypto.createHash('sha256').update(b).digest();
+  return crypto.timingSafeEqual(hashA, hashB);
 }
 
 export function createSessionToken(username: string): string {
@@ -39,7 +57,7 @@ export function verifySessionToken(token: string | undefined): boolean {
     .update(encodedPayload)
     .digest('base64url');
 
-  if (signature !== expectedSignature) return false;
+  if (!safeTimingCompare(signature, expectedSignature)) return false;
 
   try {
     const payload = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString('utf8'));
