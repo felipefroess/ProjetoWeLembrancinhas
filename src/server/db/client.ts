@@ -1,20 +1,9 @@
 import 'server-only';
 import { neon, NeonQueryFunction } from '@neondatabase/serverless';
 
-/**
- * WE LEMBRANCINHAS - CONEXÃO COM POSTGRESQL (NEON)
- * 
- * Camada centralizada de acesso ao banco. Protegida por 'server-only',
- * garantindo que jamais seja importada acidentalmente em Client Components.
- */
-
 const rawDatabaseUrl = (process.env.DATABASE_URL || '').trim();
 
-/**
- * Verifica se a variável DATABASE_URL está configurada e válida.
- */
 export function isDbConfigured(): boolean {
-  // Durante o build estático (next build), evita chamadas externas que possam travar os workers
   if (process.env.NEXT_PHASE === 'phase-production-build') {
     return false;
   }
@@ -29,9 +18,6 @@ export function isDbConfigured(): boolean {
 
 let dbInstance: NeonQueryFunction<false, false> | null = null;
 
-/**
- * Retorna o cliente SQL do Neon (ou null se não configurado).
- */
 export function getDb(): NeonQueryFunction<false, false> | null {
   if (!isDbConfigured()) {
     return null;
@@ -44,10 +30,6 @@ export function getDb(): NeonQueryFunction<false, false> | null {
   return dbInstance;
 }
 
-/**
- * Helper tagged template para executar queries seguras com parametrização automática.
- * Exemplo: const rows = await sql`SELECT * FROM products WHERE id = ${id}`;
- */
 export async function sql<T = any>(
   strings: TemplateStringsArray,
   ...values: any[]

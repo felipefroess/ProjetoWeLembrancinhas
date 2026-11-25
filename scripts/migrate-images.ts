@@ -1,21 +1,8 @@
-/**
- * WE LEMBRANCINHAS - SCRIPT DE MIGRAÇÃO DE IMAGENS
- * 
- * Este script automatiza a migração de fotos locais (public/uploads/) e imagens
- * hospedadas no Supabase Storage para o novo Object Storage externo (Cloudflare R2 ou AWS S3).
- * Ao final, atualiza as URLs de todos os produtos no banco PostgreSQL (Neon) e nos arquivos locais.
- * 
- * Execução:
- *   npm run migrate:images
- *   ou: node scripts/migrate-images.ts
- */
-
 import fs from 'fs';
 import path from 'path';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { neon } from '@neondatabase/serverless';
 
-// 1. Carrega variáveis de ambiente de .env.local ou .env se existirem
 function loadEnvFile(fileName: string) {
   const envPath = path.join(process.cwd(), fileName);
   if (!fs.existsSync(envPath)) return;
@@ -40,7 +27,6 @@ function loadEnvFile(fileName: string) {
 loadEnvFile('.env.local');
 loadEnvFile('.env');
 
-// 2. Validação da configuração do S3/R2
 const accountId = (process.env.R2_ACCOUNT_ID || '').trim();
 const accessKeyId = (process.env.R2_ACCESS_KEY_ID || process.env.S3_ACCESS_KEY_ID || '').trim();
 const secretAccessKey = (process.env.R2_SECRET_ACCESS_KEY || process.env.S3_SECRET_ACCESS_KEY || '').trim();
@@ -110,7 +96,6 @@ async function fetchBufferFromUrl(url: string): Promise<Buffer> {
   return Buffer.from(arrayBuf);
 }
 
-// 3. Execução Principal
 async function runMigration() {
   console.log('========================================================================');
   console.log('🚀 INICIANDO MIGRAÇÃO DE IMAGENS PARA OBJECT STORAGE (R2 / S3)');
@@ -124,10 +109,8 @@ async function runMigration() {
     products = JSON.parse(fs.readFileSync(customProductsPath, 'utf-8'));
   }
 
-  // Mapeamento de URL antiga -> nova URL na CDN
   const urlMap = new Map<string, string>();
 
-  // Coleta todas as URLs ou caminhos de imagens referenciados
   function collectImageUrls(obj: any) {
     if (!obj || typeof obj !== 'object') return;
     if (typeof obj.image === 'string' && obj.image.trim()) {
@@ -159,7 +142,6 @@ async function runMigration() {
 
   products.forEach(collectImageUrls);
 
-  // Também inclui todos os arquivos presentes na pasta public/uploads/
   const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
   if (fs.existsSync(uploadsDir)) {
     const localFiles = fs.readdirSync(uploadsDir);
@@ -177,7 +159,6 @@ async function runMigration() {
   let errorCount = 0;
 
   for (const [oldUrl] of urlMap.entries()) {
-    // Se já estiver no novo bucket/CDN, ignora
     if (publicUrl && oldUrl.startsWith(publicUrl)) {
       urlMap.set(oldUrl, oldUrl);
       skippedCount++;
@@ -190,7 +171,6 @@ async function runMigration() {
       let mimeType = 'image/jpeg';
 
       if (oldUrl.startsWith('/uploads/') || oldUrl.startsWith('uploads/')) {
-        // Imagem local em public/uploads/
         const cleanName = oldUrl.replace(/^\/?uploads\//, '');
         const diskPath = path.join(process.cwd(), 'public', 'uploads', cleanName);
         if (!fs.existsSync(diskPath)) {
@@ -202,7 +182,6 @@ async function runMigration() {
         targetFileName = cleanName;
         mimeType = getMimeType(cleanName);
       } else if (oldUrl.startsWith('/images/')) {
-        // Imagem estática do catálogo padrão
         const cleanPath = oldUrl.replace(/^\//, '');
         const diskPath = path.join(process.cwd(), 'public', cleanPath);
         if (fs.existsSync(diskPath)) {
@@ -214,7 +193,6 @@ async function runMigration() {
           continue;
         }
       } else if (oldUrl.startsWith('http://') || oldUrl.startsWith('https://')) {
-        // Imagem remota (ex: Supabase Storage)
         console.log(`⬇️ Baixando imagem remota: ${oldUrl}`);
         buffer = await fetchBufferFromUrl(oldUrl);
         const urlObj = new URL(oldUrl);
@@ -242,7 +220,6 @@ async function runMigration() {
   console.log(`📊 Migração concluída: ${migratedCount} enviadas | ${skippedCount} ignoradas | ${errorCount} erros`);
   console.log('------------------------------------------------------------------------\n');
 
-  // 4. Atualiza as referências nos produtos
   function replaceUrls(obj: any) {
     if (!obj || typeof obj !== 'object') return;
     if (typeof obj.image === 'string' && urlMap.has(obj.image.trim()) && urlMap.get(obj.image.trim())) {
@@ -278,11 +255,9 @@ async function runMigration() {
 
   products.forEach(replaceUrls);
 
-  // Grava de volta em custom-products.json
   fs.writeFileSync(customProductsPath, JSON.stringify(products, null, 2), 'utf-8');
   console.log('💾 Arquivo local src/data/custom-products.json atualizado com as novas URLs.');
 
-  // 5. Se DATABASE_URL estiver configurada, atualiza no banco Neon também
   const rawDbUrl = (process.env.DATABASE_URL || '').trim();
   if (rawDbUrl && rawDbUrl.startsWith('postgres') && !rawDbUrl.includes('placeholder')) {
     try {

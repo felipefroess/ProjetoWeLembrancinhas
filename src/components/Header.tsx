@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { 
-  ShoppingBag, 
-  Search, 
-  X, 
-  ArrowRight, 
-  CornerDownLeft, 
-  FolderHeart 
+import {
+  ShoppingBag,
+  Search,
+  X,
+  ArrowRight,
+  CornerDownLeft,
+  FolderHeart
 } from 'lucide-react';
 import { InstagramIcon } from '@/components/InstagramIcon';
 import { useCart } from '@/context/CartContext';
@@ -56,14 +56,12 @@ export function Header({
   const desktopSearchRef = useRef<HTMLDivElement>(null);
   const mobileSearchRef = useRef<HTMLDivElement>(null);
 
-  // Mapeia categorias por id para obter seus nomes rapidamente
   const categoryNameMap = useMemo(() => {
     const map = new Map<string, string>();
     categories.forEach((c) => map.set(c.id, c.name));
     return map;
   }, [categories]);
 
-  // Filtra produtos relacionados em tempo real
   const { matchedProducts, totalMatches } = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) {
@@ -86,7 +84,6 @@ export function Header({
     };
   }, [products, searchQuery, categoryNameMap]);
 
-  // Filtra categorias relacionadas que batem com o termo
   const matchedCategories = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) return [];
@@ -95,7 +92,6 @@ export function Header({
       .slice(0, 3);
   }, [categories, searchQuery]);
 
-  // Fecha dropdown ao clicar fora do componente
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node;
@@ -113,7 +109,6 @@ export function Header({
     };
   }, []);
 
-  // Direciona direto para a seção de resultados no catálogo
   const handleGoToResults = () => {
     setIsDropdownOpen(false);
     if (document.activeElement instanceof HTMLElement) {
@@ -121,13 +116,12 @@ export function Header({
     }
     const catalogElement = document.getElementById('catalogo');
     if (catalogElement) {
-      const yOffset = -90; // compensa a altura do cabeçalho fixo
+      const yOffset = -90;
       const y = catalogElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
   };
 
-  // Trata teclado (Enter vai para resultados, Escape fecha menu)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -137,13 +131,11 @@ export function Header({
     }
   };
 
-  // Seleciona produto diretamente para personalização
   const handleProductClick = (product: Product) => {
     setIsDropdownOpen(false);
     openCustomizationModal(product);
   };
 
-  // Seleciona categoria no menu
   const handleCategoryClick = (catId: CategoryId) => {
     setIsDropdownOpen(false);
     setSearchQuery('');
@@ -158,7 +150,6 @@ export function Header({
     }
   };
 
-  // Renderizador do campo de busca e menu
   const renderSearchBox = (isMobile: boolean) => {
     const containerRef = isMobile ? mobileSearchRef : desktopSearchRef;
     const showDropdown = isDropdownOpen && searchQuery.trim().length > 0;
@@ -208,10 +199,8 @@ export function Header({
           </button>
         )}
 
-        {/* Menu Suspenso de Resultados Relacionados */}
         {showDropdown && (
           <div className={styles.dropdownMenu}>
-            {/* Categorias Sugeridas (se houver correspondência) */}
             {matchedCategories.length > 0 && (
               <div className={styles.dropdownSection}>
                 <div className={styles.dropdownSectionLabel}>Categorias Sugeridas</div>
@@ -231,7 +220,6 @@ export function Header({
               </div>
             )}
 
-            {/* Lista de Produtos Relacionados */}
             {matchedProducts.length > 0 ? (
               <div className={styles.dropdownProductsList}>
                 <div className={styles.dropdownSectionHeader}>
@@ -285,7 +273,6 @@ export function Header({
               </div>
             )}
 
-            {/* Rodapé: Atalho para ir direto aos resultados */}
             <div
               className={styles.dropdownFooter}
               onClick={handleGoToResults}
@@ -311,9 +298,8 @@ export function Header({
 
   return (
     <header className={styles.headerSticky}>
-      {/* Barra de Notificação Superior */}
       {topBanner?.enabled && topBanner?.text ? (
-        <div 
+        <div
           className={styles.topBanner}
           style={{
             backgroundColor: topBanner.bgColor || '#6D4C3D',
@@ -332,7 +318,6 @@ export function Header({
 
       <div className={styles.headerContainer}>
         <div className={styles.headerRow}>
-          {/* Logo e Nome da Loja */}
           <div className={styles.logoWrapper}>
             <a
               href="#"
@@ -344,12 +329,10 @@ export function Header({
             </a>
           </div>
 
-          {/* Campo de Busca (Desktop) */}
           <div className={styles.searchWrapperDesktop}>
             {renderSearchBox(false)}
           </div>
 
-          {/* Ações da Direita (Instagram e Carrinho) */}
           <div className={styles.actionsWrapper}>
             <a
               href={currentInstagramUrl}
@@ -362,7 +345,6 @@ export function Header({
               <span>@{currentInstagram}</span>
             </a>
 
-            {/* Botão do Carrinho */}
             <button
               onClick={openCart}
               className={styles.cartButton}
@@ -377,7 +359,6 @@ export function Header({
           </div>
         </div>
 
-        {/* Campo de Busca (Mobile) */}
         <div className={styles.searchWrapperMobile}>
           {renderSearchBox(true)}
         </div>

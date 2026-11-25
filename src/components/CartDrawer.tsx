@@ -36,11 +36,10 @@ export function CartDrawer() {
 
   return (
     <div className={styles.drawerOverlay}>
-      <div 
+      <div
         className={styles.drawerPanel}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Cabeçalho */}
         <div className={styles.drawerHeader}>
           <div className={styles.headerTitleWrapper}>
             <ShoppingBag className={styles.headerIcon} size={20} />
@@ -57,7 +56,6 @@ export function CartDrawer() {
           </button>
         </div>
 
-        {/* Lista de Itens */}
         <div className={styles.itemsList}>
           {items.length === 0 ? (
             <div className={styles.emptyCart}>
@@ -114,7 +112,6 @@ export function CartDrawer() {
                   </button>
                 </div>
 
-                {/* Detalhes de Personalização (renderiza apenas se houver dados) */}
                 {Boolean(
                   (item.customization.variation && item.customization.variation.trim()) ||
                   (item.customization.theme && item.customization.theme.trim()) ||
@@ -167,7 +164,6 @@ export function CartDrawer() {
                 </div>
                 )}
 
-                {/* Controle de Quantidade */}
                 <div className={styles.quantityRow}>
                   <span className={styles.quantityLabel}>Quantidade:</span>
                   <div className={styles.quantityControls}>
@@ -212,10 +208,8 @@ export function CartDrawer() {
           )}
         </div>
 
-        {/* Rodapé do Carrinho com Total e Ação */}
         {items.length > 0 && (
           <div className={styles.drawerFooter}>
-            {/* Linha de Total Estimado */}
             <div className={styles.totalRow}>
               <span className={styles.totalLabel}>
                 Total Estimado
@@ -225,7 +219,6 @@ export function CartDrawer() {
               </span>
             </div>
 
-            {/* Aviso de loja offline */}
             {!isStoreOnline ? (
               <div className={styles.storeOfflineNotice}>
                 <span className={styles.storeOfflineDot} />

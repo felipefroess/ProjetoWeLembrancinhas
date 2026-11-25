@@ -3,21 +3,21 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { 
+import {
   Calculator,
   Sliders,
   Ticket,
   LayoutDashboard,
   ClipboardList,
-  Plus, 
+  Plus,
   Pencil,
-  Trash2, 
-  ExternalLink, 
-  LogOut, 
-  Upload, 
-  X, 
-  Check, 
-  Package, 
+  Trash2,
+  ExternalLink,
+  LogOut,
+  Upload,
+  X,
+  Check,
+  Package,
   Sparkles,
   AlertCircle,
   TrendingUp,
@@ -62,7 +62,6 @@ export default function AdminDashboardPage() {
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // Aba Principal do Admin (Dashboard ou Produtos)
   const [mainTab, setMainTab] = useState<'pedidos' | 'clientes' | 'produtos' | 'ajustes' | 'cupons' | 'dashboard' | 'calculadora'>('pedidos');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isCalculatorModalOpen, setIsCalculatorModalOpen] = useState(false);
@@ -72,7 +71,6 @@ export default function AdminDashboardPage() {
   const [isStoreOnline, setIsStoreOnline] = useState<boolean>(true);
   const [updatingStoreStatus, setUpdatingStoreStatus] = useState<boolean>(false);
 
-  // Período selecionado no dashboard (semana, mes ou ano)
   const [period, setPeriod] = useState<AnalyticsPeriod>('mes');
   const [realStats, setRealStats] = useState<any>(null);
   const [isDbConfigured, setIsDbConfigured] = useState<boolean>(false);
@@ -98,12 +96,10 @@ export default function AdminDashboardPage() {
     }
   }, [period]);
 
-  // Busca inicial e ao trocar de período ou entrar na aba dashboard
   useEffect(() => {
     fetchStats();
   }, [fetchStats, mainTab]);
 
-  // Atualização ao vivo: polling a cada 5s na aba dashboard + foco da janela / visibilidade
   useEffect(() => {
     if (mainTab !== 'dashboard') return;
 
@@ -130,11 +126,9 @@ export default function AdminDashboardPage() {
     };
   }, [mainTab, period, fetchStats]);
 
-  // Filtros de busca na tabela do admin
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('todos');
 
-  // Formulário de Produto
   const [name, setName] = useState('');
   const [categoryId, setCategoryId] = useState('natal');
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -146,7 +140,6 @@ export default function AdminDashboardPage() {
   const [minQuantity, setMinQuantity] = useState('1');
   const [isBestSeller, setIsBestSeller] = useState(false);
 
-  // Gerenciamento de Fotos
   const [mainImage, setMainImage] = useState('');
   const [additionalImages, setAdditionalImages] = useState<string[]>([]);
   const [newAdditionalUrl, setNewAdditionalUrl] = useState('');
@@ -156,14 +149,12 @@ export default function AdminDashboardPage() {
     | { type: 'additional'; index: number; url: string; title: string }
     | { type: 'variation'; index: number; slot: 1 | 2; url: string; title: string }
   >(null);
-  
-  // Modelos / Variações
+
   const [hasVariations, setHasVariations] = useState(false);
   const [modalTab, setModalTab] = useState<'basico' | 'fotos' | 'modelos' | 'promocoes' | 'personalizacao'>('basico');
   const [variations, setVariations] = useState<Array<{ name: string; image: string; image2: string; description: string; price: string }>>([]);
   const [variationsNote, setVariationsNote] = useState('');
 
-  // Promoções & Atacado (Preço por Quantidade)
   const [originalPrice, setOriginalPrice] = useState('');
   const [quantityDiscounts, setQuantityDiscounts] = useState<Array<{ minQuantity: string; price: string }>>([]);
 
@@ -189,7 +180,6 @@ export default function AdminDashboardPage() {
     ]);
   };
 
-  // Opções de Personalização
   const [allowChildName, setAllowChildName] = useState(true);
   const [childNameRequired, setChildNameRequired] = useState(true);
   const [childNameLabel, setChildNameLabel] = useState('Nome na Lembrancinha');
@@ -204,7 +194,6 @@ export default function AdminDashboardPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const additionalFileInputRef = useRef<HTMLInputElement>(null);
 
-  // Verifica autenticação e carrega dados
   useEffect(() => {
     async function checkAuthAndLoad() {
       try {
@@ -335,7 +324,6 @@ export default function AdminDashboardPage() {
       setQuantityDiscounts([]);
     }
 
-    // Carrega fotos da publicação
     const primaryImg = product.image || (product.images && product.images[0]) || '';
     setMainImage(primaryImg);
 
@@ -350,7 +338,6 @@ export default function AdminDashboardPage() {
     }
     setNewAdditionalUrl('');
 
-    // Variações / Modelos
     setModalTab('basico');
     if (product.variations && product.variations.length > 0) {
       setHasVariations(true);
@@ -368,7 +355,6 @@ export default function AdminDashboardPage() {
       setVariations([]);
     }
 
-    // Configurações de personalização
     setVariationsNote(product.variationsNote || product.customizationSettings?.variationsNote || '');
     const cs = product.customizationSettings;
     setAllowChildName(cs?.allowChildName ?? true);
@@ -408,7 +394,6 @@ export default function AdminDashboardPage() {
     const willBeBestSeller = !current?.isBestSeller;
     const targetId = willBeBestSeller ? productId : null;
 
-    // Atualização otimista imediata na interface
     setProducts((prev) =>
       prev.map((p) => ({
         ...p,
@@ -473,7 +458,6 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Upload de múltiplas fotos para a galeria
   const handleAdditionalImagesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -524,7 +508,6 @@ export default function AdminDashboardPage() {
       document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
     } catch {
-      // Fallback: se houver bloqueio de rede ou CORS, abre direto para salvar
       window.open(url, '_blank');
     }
   };
@@ -607,7 +590,7 @@ export default function AdminDashboardPage() {
       const parsedPrice = parseFloat(price.replace(',', '.')) || 0;
       const parsedLeadTime = parseInt(leadTimeDays, 10) || 5;
       const parsedMinQty = parseInt(minQuantity, 10) || 1;
-      
+
       const finalCategory = isCreatingNewCategory
         ? newCategoryName.toLowerCase().replace(/[^a-z0-9]/g, '-')
         : categoryId;
@@ -638,7 +621,6 @@ export default function AdminDashboardPage() {
           })
         : [];
 
-      // Monta lista consolidada de fotos respeitando remoções
       const allImages: string[] = [];
       if (mainImage.trim()) {
         allImages.push(mainImage.trim());
@@ -764,7 +746,6 @@ export default function AdminDashboardPage() {
           setProducts((prev) => [...prev, data.product]);
         }
         handleCloseModal();
-        // Reseta campos
         setName('');
         setDescription('');
         setMainImage('');
@@ -785,7 +766,6 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Métricas do Dashboard calculadas para o período ativo com dados reais (zeradas quando não há registros)
   const baseAnalytics = getAnalyticsForPeriod(products, period);
   const analytics = realStats ? {
     ...baseAnalytics,
@@ -850,7 +830,6 @@ export default function AdminDashboardPage() {
 
   return (
     <div className={styles.adminWrapper}>
-      {/* Barra Lateral de Navegação (Sidebar) */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarBrand}>
           <Link href="/" className={styles.sidebarLogoLockup} title="Ir para a loja">
@@ -972,12 +951,9 @@ export default function AdminDashboardPage() {
         </div>
       </aside>
 
-      {/* Área de Conteúdo à Direita */}
       <div className={styles.mainContainer}>
-        {/* Barra de Navegação Superior */}
         <header className={styles.topBar}>
           <div className={styles.brandGroup}>
-            {/* Botão Hambúrguer Mobile */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
@@ -987,13 +963,11 @@ export default function AdminDashboardPage() {
               <Menu size={22} />
             </button>
 
-            {/* Logo Mobile */}
             <Link href="/" className={styles.mobileHeaderBrand}>
               <span className={styles.mobileBrandScript}>Wê</span>
               <span className={styles.mobileBrandSerif}>Lembrancinhas</span>
             </Link>
 
-            {/* Título Desktop da Aba */}
             <div className={styles.desktopTabTitle}>
               <h2 className={styles.topBarHeading}>
                 {mainTab === 'pedidos' ? 'Fila de Produção & Pedidos' : mainTab === 'clientes' ? 'Fichas de Clientes & Fidelidade' : mainTab === 'produtos' ? 'Gerenciamento de Produtos' : mainTab === 'ajustes' ? 'Ajustes & Configurações da Loja' : mainTab === 'cupons' ? 'Cupons de Desconto & Promoções' : mainTab === 'dashboard' ? 'Dashboard & Métricas' : 'Calculadora de Custos & Preço Sugerido'}
@@ -1013,7 +987,6 @@ export default function AdminDashboardPage() {
           </div>
         </header>
 
-        {/* Barra de Abas Horizontais com Swipe Touch no Mobile */}
         <nav className={styles.mobileSubTabBar}>
           <button
             type="button"
@@ -1083,7 +1056,6 @@ export default function AdminDashboardPage() {
           </button>
         </nav>
 
-        {/* Drawer Lateral Mobile */}
         {mobileMenuOpen && (
           <div className={styles.mobileDrawerOverlay} onClick={() => setMobileMenuOpen(false)}>
             <aside
@@ -1223,20 +1195,16 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* Conteúdo Principal */}
         <main className={styles.mainContent}>
-          {/* Aba 1: Gestão de Pedidos & Fila de Produção */}
           {mainTab === 'pedidos' && (
-            <OrdersProductionTab 
-              onOrderCountChange={setOrdersCount} 
+            <OrdersProductionTab
+              onOrderCountChange={setOrdersCount}
               onNavigateToCustomers={() => setMainTab('clientes')}
             />
           )}
 
-          {/* Aba 2: Gerenciamento de Produtos */}
           {mainTab === 'produtos' && (
             <section className={styles.productsSection}>
-              {/* Cabeçalho da Tabela de Catálogo */}
         <div className={styles.headerRow}>
           <div>
             <h2 className={styles.pageHeading}>Gerenciamento de Produtos</h2>
@@ -1251,7 +1219,6 @@ export default function AdminDashboardPage() {
           </button>
         </div>
 
-        {/* Barra de Filtro e Busca Rápida */}
         <div className={styles.searchFilterBar}>
           <div className={styles.searchBox}>
             <Search size={16} color="#8C7A6B" />
@@ -1293,7 +1260,6 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Tabela de Produtos */}
         <div className={styles.tableCard}>
           <table className={styles.productsTable}>
             <thead>
@@ -1404,7 +1370,6 @@ export default function AdminDashboardPage() {
           </table>
         </div>
 
-        {/* Lista de Produtos em Cards para Telas Mobile */}
         <div className={styles.mobileProductsList}>
           {filteredProducts.length > 0 ? (
             filteredProducts.map((p) => (
@@ -1495,17 +1460,14 @@ export default function AdminDashboardPage() {
             </section>
           )}
 
-          {/* Aba 3: Ajustes & Configurações da Loja */}
           {mainTab === 'ajustes' && (
             <StoreSettingsTab />
           )}
 
-          {/* Aba 4: Gestão de Cupons de Desconto */}
           {mainTab === 'cupons' && (
             <CouponsTab onCouponsCountChange={setCouponsCount} />
           )}
 
-          {/* Aba 5: Dashboard de Métricas */}
           {mainTab === 'dashboard' && (
             <section className={styles.dashboardSection}>
           <div className={styles.periodHeaderRow}>
@@ -1530,7 +1492,6 @@ export default function AdminDashboardPage() {
                 <span>Ao vivo{lastUpdated ? ` • ${lastUpdated}` : ''}</span>
               </button>
 
-              {/* Seletor de Período: Semana, Mês ou Ano */}
               <div className={styles.periodSelectorGroup}>
                 <button
                   type="button"
@@ -1562,9 +1523,7 @@ export default function AdminDashboardPage() {
               </div>
             </div>
           </div>
-          {/* Cards de KPIs Principais (Reativos ao Período Selecionado) */}
           <div className={styles.kpiGrid}>
-            {/* Card 1: Valor Total de Ganhos */}
             <div className={styles.kpiCard}>
               <div className={styles.kpiContent}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -1585,7 +1544,6 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Card 2: Quantidade de Lembrancinhas Vendidas */}
             <div className={styles.kpiCard}>
               <div className={styles.kpiContent}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -1604,7 +1562,6 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Card 3: Visitas no Site */}
             <div className={styles.kpiCard}>
               <div className={styles.kpiContent}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -1623,7 +1580,6 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Card 4: Produto com Mais Cliques */}
             <div className={styles.kpiCard}>
               <div className={styles.kpiContent}>
                 <span className={styles.kpiLabel}>Mais Clicado</span>
@@ -1640,9 +1596,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* Grid Analítica: Produtos Mais Vendidos & Produto com Mais Cliques em Detalhe */}
           <div className={styles.analyticsGrid}>
-            {/* Card 1: Ranking dos Produtos Mais Vendidos */}
             <div className={styles.analyticsCard}>
               <div className={styles.cardHeader}>
                 <h3 className={styles.cardTitle}>
@@ -1657,7 +1611,7 @@ export default function AdminDashboardPage() {
                 {analytics.topSellingProducts.length > 0 ? (
                   analytics.topSellingProducts.map((p: TopProductStat, idx: number) => (
                     <div key={p.id} className={styles.topSellerRow}>
-                      <div 
+                      <div
                         className={`${styles.rankBadge} ${
                           idx === 0 ? styles.rank1 : idx === 1 ? styles.rank2 : idx === 2 ? styles.rank3 : styles.rankOther
                         }`}
@@ -1697,7 +1651,6 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Card 2: Destaque de Engajamento e Produto Mais Clicado */}
             <div className={styles.analyticsCard}>
               <div className={styles.cardHeader}>
                 <h3 className={styles.cardTitle}>
@@ -1756,7 +1709,6 @@ export default function AdminDashboardPage() {
                 </p>
               )}
 
-              {/* Informações Operacionais Adicionais */}
               <div className={styles.infoRowsList} style={{ marginTop: '0.875rem' }}>
                 <div className={styles.infoRow}>
                   <span className={styles.infoRowLabel}>
@@ -1792,7 +1744,6 @@ export default function AdminDashboardPage() {
         </section>
           )}
 
-          {/* Aba 6: Calculadora de Custos & Preço Sugerido */}
           {mainTab === 'calculadora' && (
             <CostCalculatorTab onApplyPrice={(suggested) => {
               setPrice(suggested);
@@ -1801,14 +1752,12 @@ export default function AdminDashboardPage() {
             }} />
           )}
 
-          {/* Aba 7: Fichas de Clientes & Fidelidade */}
           {mainTab === 'clientes' && (
             <CustomersTab onCustomersCountChange={setCustomersCount} />
           )}
         </main>
       </div>
 
-      {/* Modal de Criação / Edição de Produto */}
       {isModalOpen && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalCard}>
@@ -1821,7 +1770,6 @@ export default function AdminDashboardPage() {
               </button>
             </div>
 
-            {/* Barra de Abas do Modal */}
             <div className={styles.modalTabsBar}>
               <button
                 type="button"
@@ -1881,13 +1829,11 @@ export default function AdminDashboardPage() {
             </div>
 
             <form onSubmit={handleSaveProduct} className={styles.modalBody}>
-              {/* Seção 1: Dados Básicos */}
               <div className={styles.sectionBox} id="modal-sec-basico">
                 <h4 className={styles.sectionTitle}>
                   <Package size={16} /> Dados Principais
                 </h4>
 
-                {/* Destaque: Produto Mais Vendido */}
                 <div className={styles.bestSellerToggleBox}>
                   <div className={styles.bestSellerToggleText}>
                     <div className={styles.bestSellerToggleHeader}>
@@ -2068,7 +2014,6 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Seção: Promoções & Descontos por Quantidade (Atacado) */}
               <div className={styles.sectionBox} id="modal-sec-promocoes">
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                   <h4 className={styles.sectionTitle} style={{ margin: 0 }}>
@@ -2101,7 +2046,6 @@ export default function AdminDashboardPage() {
                   Defina descontos progressivos para compras em maior volume. Por exemplo: 1 unidade a <strong>R$ {price || '9,90'}</strong>, a partir de 4 unidades a <strong>R$ 9,50 cada</strong> e a partir de 10 unidades a <strong>R$ 8,50 cada</strong>. O site calcula e aplica o desconto automaticamente na hora da compra!
                 </p>
 
-                {/* Preço Original Riscado (De / Por) */}
                 <div style={{ marginBottom: '1.2rem', padding: '0.85rem 1rem', backgroundColor: '#F9F6F0', borderRadius: '0.65rem', border: '1px solid #EFE4D8' }}>
                   <label className={styles.label} style={{ marginBottom: '0.3rem', display: 'block' }}>
                     Preço Original &quot;De / Por&quot; (Opcional - exibe preço riscado na loja)
@@ -2135,7 +2079,6 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
 
-                {/* Faixas de Quantidade */}
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
                     <label className={styles.label} style={{ margin: 0 }}>
@@ -2283,7 +2226,6 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Seção 2: Fotos com Remoção e Gerenciamento */}
               <div className={styles.sectionBox} id="modal-sec-fotos">
                 <h4 className={styles.sectionTitle}>
                   <Upload size={16} /> Fotos da Publicação
@@ -2292,7 +2234,6 @@ export default function AdminDashboardPage() {
                   Gerencie a foto de capa e as fotos secundárias do produto. Você pode adicionar ou remover qualquer foto a qualquer momento.
                 </p>
 
-                {/* 2.1 Foto Principal / Capa */}
                 <div className={styles.photoBlock}>
                   <span className={styles.photoBlockTitle}>
                     Foto Principal (Capa) <span className={styles.reqStar}>*</span>
@@ -2382,7 +2323,6 @@ export default function AdminDashboardPage() {
                   )}
                 </div>
 
-                {/* 2.2 Galeria de Fotos Adicionais */}
                 <div className={styles.photoBlock} style={{ marginTop: '1.25rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span className={styles.photoBlockTitle}>
@@ -2451,7 +2391,6 @@ export default function AdminDashboardPage() {
                     </div>
                   )}
 
-                  {/* Adicionar Foto à Galeria */}
                   <div className={styles.addGalleryRow}>
                     <label className={styles.uploadBtn}>
                       <Upload size={14} />
@@ -2487,7 +2426,6 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Seção 3: Modelos (Estilo Mercado Livre) */}
               <div className={styles.sectionBox} id="modal-sec-modelos">
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <h4 className={styles.sectionTitle}>
@@ -2545,7 +2483,6 @@ export default function AdminDashboardPage() {
                             />
                           </div>
 
-                          {/* Campo de Preço Específico do Modelo */}
                           <div className={styles.formField}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
                               <label className={styles.label} style={{ margin: 0, fontWeight: 700, color: '#4A3326' }}>
@@ -2575,7 +2512,6 @@ export default function AdminDashboardPage() {
                           </div>
                         </div>
 
-                        {/* Campo de Descrição Específica do Modelo */}
                         <div className={styles.formField} style={{ marginTop: '0.625rem', backgroundColor: '#FDFBF7', padding: '0.75rem', borderRadius: '0.625rem', border: '1px solid #E8DFD5' }}>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem', flexWrap: 'wrap', gap: '0.4rem' }}>
                             <label className={styles.label} style={{ margin: 0, fontWeight: 700, color: '#4A3326', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -2622,9 +2558,7 @@ export default function AdminDashboardPage() {
                           </span>
                         </div>
 
-                        {/* Fotos do Modelo (Até 2 Fotos: Principal e 2ª Foto) */}
                         <div className={styles.grid2} style={{ marginTop: '0.5rem' }}>
-                          {/* 1ª Foto do Modelo */}
                           <div className={styles.formField}>
                             <label className={styles.label}>1ª Foto do Modelo (Principal)</label>
                             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -2699,7 +2633,6 @@ export default function AdminDashboardPage() {
                             )}
                           </div>
 
-                          {/* 2ª Foto do Modelo */}
                           <div className={styles.formField}>
                             <label className={styles.label}>2ª Foto do Modelo (Opcional - Ângulo 2)</label>
                             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -2781,7 +2714,6 @@ export default function AdminDashboardPage() {
                       <Plus size={14} /> Adicionar Outro Modelo
                     </button>
 
-                    {/* Mensagem / Aviso abaixo dos Modelos na Loja */}
                     <div style={{ marginTop: '0.875rem', backgroundColor: '#FAF7F2', border: '1px solid #E8DFD5', borderRadius: '0.625rem', padding: '0.875rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.35rem' }}>
                         <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4A3326', display: 'flex', alignItems: 'center', gap: '0.35rem', margin: 0 }}>
@@ -2822,7 +2754,6 @@ export default function AdminDashboardPage() {
                 )}
               </div>
 
-              {/* Seção 4: Configuração de Personalização */}
               <div className={styles.sectionBox} id="modal-sec-personalizacao">
                 <h4 className={styles.sectionTitle}>
                   <AlertCircle size={16} /> Campos de Personalização do Cliente
@@ -2831,7 +2762,6 @@ export default function AdminDashboardPage() {
                   Escolha exatamente quais perguntas o cliente deve responder ao encomendar este produto.
                 </p>
 
-                {/* Switch: Nome na Lembrancinha */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <label className={styles.checkboxLabel}>
                     <input
@@ -2889,7 +2819,6 @@ export default function AdminDashboardPage() {
                   )}
                 </div>
 
-                {/* Switch: Cores de Laços/Fitas */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <label className={styles.checkboxLabel}>
                     <input
@@ -2924,7 +2853,6 @@ export default function AdminDashboardPage() {
                   )}
                 </div>
 
-                {/* Switch: Observações Especiais */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <label className={styles.checkboxLabel}>
                     <input
@@ -2952,7 +2880,6 @@ export default function AdminDashboardPage() {
                   )}
                 </div>
 
-                {/* Campos Extras Dinâmicos */}
                 {customFields.length > 0 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -2993,7 +2920,6 @@ export default function AdminDashboardPage() {
                           </button>
                         </div>
 
-                        {/* Botões para alternar entre "Para Escrever" e "Para Escolher" */}
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', backgroundColor: '#FFFFFF', padding: '0.45rem 0.625rem', borderRadius: '0.5rem', border: '1px solid #E8DFD5' }}>
                           <span style={{ fontSize: '0.71875rem', fontWeight: 700, color: '#4A3326', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                             <span>Tipo do Campo:</span>
@@ -3049,9 +2975,7 @@ export default function AdminDashboardPage() {
                           </div>
                         </div>
 
-                        {/* Conteúdo dependente do tipo do campo */}
                         {field.type !== 'select' ? (
-                          /* Modo 1: Texto Livre */
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.625rem' }}>
                             <div>
                               <label style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#553A2D', display: 'block', marginBottom: '0.25rem' }}>
@@ -3090,7 +3014,6 @@ export default function AdminDashboardPage() {
                             </div>
                           </div>
                         ) : (
-                          /* Modo 2: Lista de Escolha (Dropdown/Select) */
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.625rem' }}>
                               <div>
@@ -3149,7 +3072,6 @@ export default function AdminDashboardPage() {
                                 style={{ backgroundColor: '#FFFFFF' }}
                               />
 
-                              {/* Prévia visual das opções detectadas */}
                               <div style={{ marginTop: '0.35rem' }}>
                                 {field.options && field.options.filter(Boolean).length > 0 ? (
                                   <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.35rem' }}>
@@ -3186,7 +3108,6 @@ export default function AdminDashboardPage() {
                           </div>
                         )}
 
-                        {/* Caixa para definir se o campo é OBRIGATÓRIO */}
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.35rem', borderTop: '1px dashed #E8DFD5' }}>
                           <label className={styles.checkboxLabel} style={{ fontSize: '0.8125rem', margin: 0, cursor: 'pointer' }}>
                             <input
@@ -3219,7 +3140,6 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
 
-              {/* Rodapé do Modal */}
               <div className={styles.modalFooter}>
                 <button
                   type="button"
@@ -3235,8 +3155,8 @@ export default function AdminDashboardPage() {
                 >
                   <Check size={16} />
                   <span>
-                    {saving 
-                      ? (editingProductId ? 'Salvando Alterações...' : 'Publicando...') 
+                    {saving
+                      ? (editingProductId ? 'Salvando Alterações...' : 'Publicando...')
                       : (editingProductId ? 'Salvar Alterações' : 'Salvar e Publicar no Site')}
                   </span>
                 </button>
@@ -3246,17 +3166,16 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Modal Rápido da Calculadora de Custos */}
       {isCalculatorModalOpen && (
         <div className={styles.modalOverlay} onClick={() => setIsCalculatorModalOpen(false)}>
-          <div 
-            className={styles.modalCard} 
-            style={{ maxWidth: '64rem', maxHeight: '92vh', overflowY: 'auto', padding: '1.5rem' }} 
+          <div
+            className={styles.modalCard}
+            style={{ maxWidth: '64rem', maxHeight: '92vh', overflowY: 'auto', padding: '1.5rem' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.5rem' }}>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setIsCalculatorModalOpen(false)}
                 className={styles.closeBtn}
               >
@@ -3271,7 +3190,6 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Modal de Recorte e Ajuste de Imagens */}
       <ImageCropModal
         isOpen={Boolean(cropTarget)}
         imageUrl={cropTarget?.url || ''}

@@ -46,7 +46,6 @@ function writeLocalSettings(settings: StoreSettings): void {
     }
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2), 'utf8');
   } catch {
-    // Em ambientes somente leitura, ignora falha de escrita local
   }
 }
 
@@ -71,13 +70,9 @@ function writeLocalStatus(data: { isOnline: boolean }): void {
     }
     fs.writeFileSync(STATUS_FILE, JSON.stringify(data, null, 2), 'utf8');
   } catch {
-    // Em ambientes somente leitura, ignora falha de escrita local
   }
 }
 
-/**
- * Lê as configurações da loja no Neon (com auto-seed inicial e fallback local)
- */
 export async function getStoreSettings(): Promise<StoreSettings> {
   if (process.env.NEXT_PHASE === 'phase-production-build') {
     return readLocalSettings();
@@ -121,9 +116,6 @@ export async function getStoreSettings(): Promise<StoreSettings> {
   return readLocalSettings();
 }
 
-/**
- * Salva as configurações da loja no Neon e opcionalmente atualiza os prazos em lote
- */
 export async function updateStoreSettings(
   updates: Partial<StoreSettings>,
   applyLeadTimeToAllProducts = false
@@ -199,9 +191,6 @@ export async function updateStoreSettings(
   }
 }
 
-/**
- * Lê o status Online/Offline da loja no Neon
- */
 export async function getStoreStatus(): Promise<{ isOnline: boolean }> {
   if (isDbConfigured()) {
     try {
@@ -234,9 +223,6 @@ export async function getStoreStatus(): Promise<{ isOnline: boolean }> {
   return readLocalStatus();
 }
 
-/**
- * Atualiza o status Online/Offline da loja no Neon
- */
 export async function updateStoreStatus(isOnline: boolean): Promise<{ isOnline: boolean }> {
   const payload = { isOnline: Boolean(isOnline) };
 

@@ -1,4 +1,3 @@
-/* Estilos da Aba de Ajustes da Loja */
 .settingsContainer {
   display: flex;
   flex-direction: column;
@@ -7,7 +6,6 @@
   max-width: 56rem;
 }
 
-/* Cabeçalho */
 .headerRow {
   display: flex;
   flex-direction: column;
@@ -81,7 +79,6 @@
   cursor: not-allowed;
 }
 
-/* Alertas de Feedback */
 .alertSuccess {
   background-color: #F0FDF4;
   border: 1px solid #BBF7D0;
@@ -110,7 +107,6 @@
   animation: fadeIn 0.2s ease;
 }
 
-/* Seções / Cards */
 .settingsCard {
   background-color: #ffffff;
   border: 1px solid #E8DFD5;
@@ -152,7 +148,6 @@
   gap: 1.25rem;
 }
 
-/* Toggle Switch */
 .toggleRow {
   display: flex;
   align-items: center;
@@ -224,7 +219,6 @@
   transform: translateX(1.25rem);
 }
 
-/* Inputs & Form */
 .formGroup {
   display: flex;
   flex-direction: column;
@@ -264,7 +258,6 @@
   box-shadow: 0 0 0 2px rgba(109, 76, 61, 0.1);
 }
 
-/* Prévia da Faixa */
 .previewBox {
   display: flex;
   flex-direction: column;
@@ -294,7 +287,6 @@
   min-height: 2.25rem;
 }
 
-/* Modelos Prontos de Faixa */
 .templatesGrid {
   display: flex;
   flex-direction: column;
@@ -328,7 +320,6 @@
   transform: translateY(-1px);
 }
 
-/* Cores da Faixa */
 .colorPresets {
   display: flex;
   gap: 0.5rem;
@@ -355,7 +346,6 @@
   box-shadow: 0 0 0 2px #FAF7F2, 0 0 0 4px #6D4C3D;
 }
 
-/* Controle de Prazo de Produção */
 .leadTimeBox {
   display: flex;
   flex-direction: column;
@@ -478,7 +468,6 @@
   color: #B45309;
 }
 
-/* Linha de Canais de Contato */
 .contactGrid {
   display: grid;
   grid-template-columns: 1fr;

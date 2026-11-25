@@ -14,7 +14,6 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Se já estiver logado, redireciona diretamente ao painel
   useEffect(() => {
     async function checkExistingAuth() {
       try {

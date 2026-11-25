@@ -20,8 +20,7 @@ export function Footer() {
     <footer className={styles.footerContainer}>
       <div className={styles.innerWrap}>
         <div className={styles.columnsGrid}>
-          
-          {/* Coluna 1: Sobre a Loja */}
+
           <div>
             <div className={styles.brandHeader}>
               <a
@@ -48,7 +47,6 @@ export function Footer() {
             </a>
           </div>
 
-          {/* Coluna 2: Redes & Contato */}
           <div>
             <h4 className={styles.columnTitle}>
               Conecte-se Conosco
@@ -80,7 +78,6 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Rodapé inferior */}
         <div className={styles.bottomRow}>
           <p>© 2026 {storeName}. Todos os direitos reservados.</p>
           <a

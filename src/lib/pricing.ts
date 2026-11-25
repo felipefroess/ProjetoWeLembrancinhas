@@ -1,8 +1,5 @@
 import { Product, QuantityDiscount } from '@/types';
 
-/**
- * Retorna os descontos por quantidade ordenados decrescentemente pela quantidade mínima
- */
 export function getSortedQuantityDiscounts(product: Product): QuantityDiscount[] {
   if (!product.quantityDiscounts || !Array.isArray(product.quantityDiscounts)) {
     return [];
@@ -12,9 +9,6 @@ export function getSortedQuantityDiscounts(product: Product): QuantityDiscount[]
     .sort((a, b) => b.minQuantity - a.minQuantity);
 }
 
-/**
- * Retorna o preço unitário efetivo considerando variação e tabela de quantidade (promoção de volume/atacado)
- */
 export function calculateUnitPrice(
   product: Product,
   quantity: number,
@@ -27,19 +21,14 @@ export function calculateUnitPrice(
     return basePrice;
   }
 
-  // Encontra a faixa aplicável (maior minQuantity que seja <= quantity)
   const applicable = discounts.find((d) => quantity >= d.minQuantity);
   if (applicable && applicable.price > 0) {
-    // Se houver variação com preço específico e desconto percentual/relativo, ou desconto direto
     return applicable.price;
   }
 
   return basePrice;
 }
 
-/**
- * Retorna a próxima faixa de desconto para incentivar o cliente a adicionar mais unidades
- */
 export function getNextDiscountTier(
   product: Product,
   currentQuantity: number

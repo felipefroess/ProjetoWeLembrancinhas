@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStoreSettings, updateStoreSettings } from '@/lib/storeSettingsStore';
 
-// GET: Retornar as configurações atuais da loja
 export async function GET(request: NextRequest) {
   request.nextUrl.searchParams.get('t');
   try {
@@ -25,7 +24,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST: Salvar ou atualizar as configurações da loja
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

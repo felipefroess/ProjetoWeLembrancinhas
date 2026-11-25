@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { 
-  getAllCoupons, 
-  createCoupon, 
-  updateCoupon, 
-  deleteCoupon, 
-  validateCoupon 
+import {
+  getAllCoupons,
+  createCoupon,
+  updateCoupon,
+  deleteCoupon,
+  validateCoupon
 } from '@/lib/couponsStore';
 
-// GET: Retornar lista de todos os cupons cadastrados
 export async function GET() {
   try {
     const coupons = await getAllCoupons();
@@ -21,12 +20,10 @@ export async function GET() {
   }
 }
 
-// POST: Criar novo cupom (admin) OU Validar cupom (carrinho/checkout)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Se a requisição veio do painel Admin para criar cupom
     if (body.action === 'create') {
       const result = await createCoupon({
         code: body.code,
@@ -53,7 +50,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Caso padrão: Validação do cupom feita no carrinho ou checkout
     const rawCode = (body.code || '').trim();
     const subtotal = Number(body.subtotal) || 0;
     const phone = body.phone ? String(body.phone).trim() : undefined;
@@ -85,7 +81,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PATCH: Atualizar cupom existente (ex: ativar/desativar, alterar valor ou data)
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
@@ -120,7 +115,6 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
-// DELETE: Excluir um cupom
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

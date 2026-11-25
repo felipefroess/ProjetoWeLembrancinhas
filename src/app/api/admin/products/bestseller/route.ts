@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { productId } = await request.json(); // string (id do produto) ou null (para desmarcar)
+    const { productId } = await request.json();
     const allProducts = await getAllProducts();
 
     for (const p of allProducts) {

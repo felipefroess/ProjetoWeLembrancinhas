@@ -1,20 +1,14 @@
 import { Category, Product } from '@/types';
 
-/**
- * Definição de eventos comemorativos do calendário brasileiro para lembrancinhas
- */
 export interface SeasonalEventDefinition {
   id: string;
   name: string;
-  month: number; // 1 a 12
-  day: number;   // 1 a 31
-  graceDays?: number; // Dias após a data em que o evento ainda tem relevância
-  keywords: string[]; // Palavras-chave para identificar categorias e produtos
+  month: number;
+  day: number;
+  graceDays?: number;
+  keywords: string[];
 }
 
-/**
- * Cálculo da Páscoa (Algoritmo de Meeus/Butcher) válido para qualquer ano
- */
 function getEasterDate(year: number): { month: number; day: number } {
   const a = year % 19;
   const b = Math.floor(year / 100);
@@ -33,9 +27,6 @@ function getEasterDate(year: number): { month: number; day: number } {
   return { month, day };
 }
 
-/**
- * Dia das Mães no Brasil (2º domingo de maio)
- */
 function getMothersDay(year: number): { month: number; day: number } {
   let count = 0;
   for (let day = 1; day <= 14; day++) {
@@ -48,9 +39,6 @@ function getMothersDay(year: number): { month: number; day: number } {
   return { month: 5, day: 10 };
 }
 
-/**
- * Dia dos Pais no Brasil (2º domingo de agosto)
- */
 function getFathersDay(year: number): { month: number; day: number } {
   let count = 0;
   for (let day = 1; day <= 14; day++) {
@@ -63,9 +51,6 @@ function getFathersDay(year: number): { month: number; day: number } {
   return { month: 8, day: 10 };
 }
 
-/**
- * Retorna todos os eventos sazonais com as datas calculadas para o ano em questão
- */
 export function getSeasonalEventsForYear(year: number): SeasonalEventDefinition[] {
   const easter = getEasterDate(year);
   const mothers = getMothersDay(year);
@@ -147,9 +132,6 @@ export function getSeasonalEventsForYear(year: number): SeasonalEventDefinition[
   ];
 }
 
-/**
- * Calcula a distância em dias até a próxima ocorrência do evento
- */
 export function getDaysUntilEvent(event: SeasonalEventDefinition, refDate: Date): number {
   const currentYear = refDate.getFullYear();
   const eventDateThisYear = new Date(currentYear, event.month - 1, event.day, 23, 59, 59);
@@ -159,7 +141,6 @@ export function getDaysUntilEvent(event: SeasonalEventDefinition, refDate: Date)
     const diffMs = eventDateThisYear.getTime() - refDate.getTime();
     return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
   } else {
-    // Evento já passou este ano; calcula para o próximo ano
     const eventsNextYear = getSeasonalEventsForYear(currentYear + 1);
     const evNext = eventsNextYear.find(e => e.id === event.id) || event;
     const eventDateNextYear = new Date(currentYear + 1, evNext.month - 1, evNext.day, 23, 59, 59);
@@ -168,12 +149,6 @@ export function getDaysUntilEvent(event: SeasonalEventDefinition, refDate: Date)
   }
 }
 
-/**
- * Retorna uma pontuação de proximidade para uma categoria:
- * - 'todos': -1 (sempre no início)
- * - eventos sazonais: número de dias até o evento (menor = mais próximo = maior prioridade)
- * - categorias atemporais (maternidade, batizado, etc.): 150 dias de base
- */
 export function getCategoryProximityScore(
   category: { id: string; name?: string },
   refDate: Date
@@ -202,18 +177,9 @@ export function getCategoryProximityScore(
     return minDays;
   }
 
-  // Categorias atemporais (maternidade, batizado, casamento, aniversários)
-  // Ficam logo após os eventos imediatos (~60-90 dias) e à frente de datas distantes (180+ dias)
   return 150;
 }
 
-/**
- * Ordena as categorias de forma inteligente pelo evento comemorativo mais próximo:
- * 1. 'Todos os Mimos' (sempre no topo)
- * 2. Evento sazonal mais próximo do momento (ex: Natal nos meses de out/nov/dez)
- * 3. Próximos eventos e categorias permanentes (cadernos, maternidade)
- * 4. Eventos que já passaram este ano
- */
 export function sortCategoriesBySeasonalProximity(
   categories: Category[],
   refDate?: Date | null
@@ -226,11 +192,6 @@ export function sortCategoriesBySeasonalProximity(
   });
 }
 
-/**
- * Ordena a lista de produtos quando a visão geral "Todos os Mimos" está ativa:
- * - Produtos do evento mais próximo aparecem primeiro!
- * - Mantém produtos populares/destaque no topo de cada grupo.
- */
 export function sortProductsBySeasonalProximity(
   products: Product[],
   categoryNameMap?: Map<string, string>,
@@ -248,7 +209,6 @@ export function sortProductsBySeasonalProximity(
       return scoreA - scoreB;
     }
 
-    // Desempate dentro da mesma categoria: populares e destaques primeiro
     if (a.popular && !b.popular) return -1;
     if (!a.popular && b.popular) return 1;
     if (a.featured && !b.featured) return -1;
@@ -258,9 +218,6 @@ export function sortProductsBySeasonalProximity(
   });
 }
 
-/**
- * Retorna o evento sazonal que está ativo ou mais próximo no momento
- */
 export function getTopUpcomingSeasonalEvent(refDate?: Date | null): {
   event: SeasonalEventDefinition;
   daysUntil: number;
@@ -281,11 +238,6 @@ export function getTopUpcomingSeasonalEvent(refDate?: Date | null): {
   return topEvent ? { event: topEvent, daysUntil: minDays } : null;
 }
 
-/**
- * Retorna o ID do ÚNICO produto que deve receber o selo 'Mais Pedido':
- * - Obrigatoriamente da categoria do evento comemorativo mais próximo (ex: Natal agora).
- * - Seleciona apenas 1 produto principal dessa categoria para exclusividade e atratividade real.
- */
 export function getSeasonalTopProductId(
   products: Product[],
   categoryNameMap?: Map<string, string>,
@@ -306,13 +258,11 @@ export function getSeasonalTopProductId(
     });
 
     if (seasonalProducts.length > 0) {
-      // Retorna o produto principal (destaque/popular ou 1º cadastrado do evento)
       const best = seasonalProducts.find((p) => p.featured) || seasonalProducts[0];
       return best.id;
     }
   }
 
-  // Fallback: 1º produto destacado
   const fallback = products.find((p) => p.featured) || products[0];
   return fallback ? fallback.id : null;
 }

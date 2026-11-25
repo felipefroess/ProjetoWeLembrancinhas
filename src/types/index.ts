@@ -1,13 +1,9 @@
-/**
- * Modelagem de Domínio da Wê Lembrancinhas
- */
-
-export type CategoryId = 
+export type CategoryId =
   | 'todos'
   | 'natal'
   | 'dia-dos-professores'
   | 'cadernos'
-  | (string & {}); // Permite novas categorias dinâmicas criadas no painel admin
+  | (string & {});
 
 export interface Category {
   id: CategoryId;
@@ -31,27 +27,27 @@ export interface CustomFieldDefinition {
   type: 'text' | 'textarea' | 'select';
   required?: boolean;
   placeholder?: string;
-  options?: string[]; // Opções quando o tipo for 'select'
-  optionsText?: string; // Helper para edição no painel
+  options?: string[];
+  optionsText?: string;
 }
 
 export interface CustomizationSettings {
-  allowChildName?: boolean;      // Solicita nome na lembrancinha (padrão: true)
-  childNameLabel?: string;       // Rótulo customizável (ex: "Nome da Criança", "Nome do Casal")
-  childNamePlaceholder?: string; // Exemplo/placeholder dentro da caixa (ex: "Ex: Professora Leandra, Luís...")
-  notesPlaceholder?: string;     // Exemplo/placeholder de observações
-  childNameRequired?: boolean;   // Se o nome é obrigatório (padrão: true)
-  allowRibbonColors?: boolean;   // Oferece opções de laços/fitas
-  ribbonColorRequired?: boolean; // Se a escolha da fita é obrigatória
-  ribbonColors?: string[];       // Cores disponíveis
-  allowNotes?: boolean;          // Campo de observações especiais (padrão: true)
-  variationsNote?: string;       // Mensagem/aviso exibido abaixo dos modelos
-  customFields?: CustomFieldDefinition[]; // Campos extras flexíveis
+  allowChildName?: boolean;
+  childNameLabel?: string;
+  childNamePlaceholder?: string;
+  notesPlaceholder?: string;
+  childNameRequired?: boolean;
+  allowRibbonColors?: boolean;
+  ribbonColorRequired?: boolean;
+  ribbonColors?: string[];
+  allowNotes?: boolean;
+  variationsNote?: string;
+  customFields?: CustomFieldDefinition[];
 }
 
 export interface QuantityDiscount {
-  minQuantity: number; // Quantidade mínima para atingir o desconto
-  price: number; // Preço unitário para esta faixa
+  minQuantity: number;
+  price: number;
 }
 
 export interface CustomizationOptions {
@@ -61,7 +57,7 @@ export interface CustomizationOptions {
   ribbonColor?: string;
   variation?: string;
   notes?: string;
-  customFieldValues?: Record<string, string>; // Respostas dos campos extras
+  customFieldValues?: Record<string, string>;
 }
 
 export interface Product {
@@ -70,33 +66,33 @@ export interface Product {
   category: CategoryId;
   description: string;
   price: number;
-  originalPrice?: number; // Preço original para exibir riscado ("De R$ X por R$ Y")
+  originalPrice?: number;
   minQuantity: number;
-  quantityDiscounts?: QuantityDiscount[]; // Promoções por quantidade (ex: 4 un por R$ 9,50 cada, 10 un por R$ 8,50 cada)
+  quantityDiscounts?: QuantityDiscount[];
   image: string;
   images?: string[];
   variations?: ProductVariation[];
-  variationsNote?: string; // Mensagem/aviso exibido abaixo dos modelos (ex: Enviar fotos pelo WhatsApp)
-  leadTimeDays: number; // Prazo de produção em dias úteis
+  variationsNote?: string;
+  leadTimeDays: number;
   popular?: boolean;
   featured?: boolean;
-  isBestSeller?: boolean; // ⭐ Definido no painel admin como Mais Vendido (aparece em 1º com selo na loja)
-  unit: string; // "unidade", "kit", "cento"
+  isBestSeller?: boolean;
+  unit: string;
   availableRibbonColors?: string[];
   customizationSettings?: CustomizationSettings;
 }
 
 export interface CartItem {
-  cartItemId: string; // Identificador único (id do produto + hash das customizações)
+  cartItemId: string;
   id?: string;
   product: Product;
   quantity: number;
   customization: CustomizationOptions;
   subtotal: number;
-  unitPrice?: number; // Preço unitário aplicado (com ou sem promoção de volume)
+  unitPrice?: number;
 }
 
-export type DeliveryMethod = 
+export type DeliveryMethod =
   | 'retirada-pouso-alegre'
   | 'retirada-paraisopolis'
   | 'entrega-correios';
@@ -115,7 +111,7 @@ export interface CustomerOrderData {
   shippingDeliveryDays?: number;
 }
 
-export type OrderStatus = 
+export type OrderStatus =
   | 'em_analise'
   | 'em_producao'
   | 'pronto'

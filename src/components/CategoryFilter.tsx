@@ -12,21 +12,19 @@ interface CategoryFilterProps {
   categories?: Category[];
 }
 
-export function CategoryFilter({ 
-  selectedCategory, 
+export function CategoryFilter({
+  selectedCategory,
   onSelectCategory,
-  categories = CATEGORIES 
+  categories = CATEGORIES
 }: CategoryFilterProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  // Verifica se há conteúdo para rolar à esquerda ou à direita
   const checkScroll = useCallback(() => {
     const el = listRef.current;
     if (!el) return;
     const { scrollLeft, scrollWidth, clientWidth } = el;
-    // Se o scroll estiver em 2px ou menos, considera que está 100% no início absoluto
     setCanScrollLeft(scrollLeft > 2);
     setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 4);
   }, []);
@@ -39,7 +37,6 @@ export function CategoryFilter({
     el.addEventListener('scroll', checkScroll, { passive: true });
     window.addEventListener('resize', checkScroll);
 
-    // Revalidação após renderização e layout
     const timer = setTimeout(checkScroll, 100);
 
     return () => {
@@ -49,14 +46,12 @@ export function CategoryFilter({
     };
   }, [checkScroll, categories]);
 
-  // Rola para a direção desejada garantindo ir até o limite absoluto (0 na esquerda)
   const handleScroll = (direction: 'left' | 'right') => {
     const el = listRef.current;
     if (!el) return;
     const scrollAmount = Math.max(280, Math.floor(el.clientWidth * 0.7));
 
     if (direction === 'left') {
-      // Se estiver próximo do início, crava exatamente no 0 para que "Todos os Mimos" fique 100% visível
       if (el.scrollLeft <= scrollAmount + 40) {
         el.scrollTo({ left: 0, behavior: 'smooth' });
       } else {
@@ -83,7 +78,6 @@ export function CategoryFilter({
     const el = listRef.current;
     if (!el) return;
 
-    // Se clicar em "Todos os Mimos", rola 100% para o início absoluto
     if (catId === 'todos') {
       el.scrollTo({ left: 0, behavior: 'smooth' });
     }
@@ -92,8 +86,7 @@ export function CategoryFilter({
   return (
     <div className={styles.filterSection}>
       <div className={styles.container}>
-        
-        {/* Título de seção com controles de navegação opcionais no cabeçalho */}
+
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>
             Categorias em Destaque
@@ -127,11 +120,9 @@ export function CategoryFilter({
           </div>
         </div>
 
-        {/* Lista com scroll horizontal de categorias */}
         <div ref={listRef} className={styles.categoriesList}>
           {categories.map((cat, index) => {
             const isSelected = selectedCategory === cat.id;
-            // A 1ª categoria temática após "Todos os Mimos" é o evento comemorativo mais próximo do ano
             const isUpcomingHighlight = index === 1 && cat.id !== 'todos';
             const isNatal = cat.id === 'natal';
 

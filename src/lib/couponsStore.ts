@@ -11,10 +11,10 @@ export interface AdminCoupon {
   value: number;
   description?: string;
   minOrderValue?: number;
-  expiresAt?: string | null; // Formato YYYY-MM-DD ou ISO
+  expiresAt?: string | null;
   isActive: boolean;
-  firstPurchaseOnly?: boolean; // Válido apenas na 1ª compra do cliente
-  excludeWholesale?: boolean;  // Não cumulativo com produtos de atacado / desconto por quantidade
+  firstPurchaseOnly?: boolean;
+  excludeWholesale?: boolean;
   createdAt: string;
 }
 
@@ -99,15 +99,12 @@ function mapRowToCoupon(row: any): AdminCoupon {
   };
 }
 
-/**
- * Lê os cupons do Neon (com auto-seed inicial e fallback local)
- */
 export async function getAllCoupons(): Promise<AdminCoupon[]> {
   if (isDbConfigured()) {
     try {
       const rows = await sql<any>`
-        SELECT 
-          id, code, type, value, description, min_order_value, 
+        SELECT
+          id, code, type, value, description, min_order_value,
           expires_at, is_active, first_purchase_only, created_at
         FROM public.coupons
         ORDER BY created_at DESC
@@ -149,9 +146,6 @@ export async function getAllCoupons(): Promise<AdminCoupon[]> {
   return readLocalCoupons();
 }
 
-/**
- * Cria um novo cupom no Neon
- */
 export async function createCoupon(data: {
   code: string;
   type: 'percentage' | 'fixed';
@@ -229,9 +223,6 @@ export async function createCoupon(data: {
   return { success: true, coupon: newCoupon };
 }
 
-/**
- * Atualiza um cupom existente no Neon
- */
 export async function updateCoupon(
   id: string,
   updates: Partial<Omit<AdminCoupon, 'id' | 'createdAt'>>
@@ -298,9 +289,6 @@ export async function updateCoupon(
   return { success: true, coupon: updatedCoupon };
 }
 
-/**
- * Deleta um cupom por ID no Neon
- */
 export async function deleteCoupon(id: string): Promise<{ success: boolean; error?: string }> {
   const existing = await getAllCoupons();
   const filtered = existing.filter((c) => c.id !== id);
@@ -328,9 +316,6 @@ export async function deleteCoupon(id: string): Promise<{ success: boolean; erro
   return { success: true };
 }
 
-/**
- * Valida o cupom para uso no checkout / carrinho
- */
 export async function validateCoupon(
   rawCode: string,
   subtotal: number,
@@ -371,7 +356,6 @@ export async function validateCoupon(
   const isFirstPurchaseCoupon = matched.firstPurchaseOnly === true || matched.code === 'PRIMEIRACOMPRA';
   const shouldExcludeWholesale = isFirstPurchaseCoupon || matched.excludeWholesale !== false;
 
-  // Bloqueia uso em carrinho que contém apenas itens de atacado (desconto progressivo)
   if (shouldExcludeWholesale && options?.hasOnlyWholesale) {
     return {
       valid: false,
@@ -403,7 +387,6 @@ export async function validateCoupon(
     }
   }
 
-  // Base de cálculo: se o cupom não for cumulativo com atacado, valida sobre o subtotal elegível
   const effectiveSubtotal =
     shouldExcludeWholesale && typeof options?.eligibleSubtotal === 'number'
       ? options.eligibleSubtotal

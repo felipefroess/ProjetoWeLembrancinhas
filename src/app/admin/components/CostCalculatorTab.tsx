@@ -1,19 +1,19 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { 
-  Calculator, 
-  Sparkles, 
-  RotateCcw, 
-  Copy, 
-  Check, 
-  TrendingUp, 
-  Clock, 
-  Layers, 
-  DollarSign, 
-  Package, 
-  Gift, 
-  Percent, 
+import {
+  Calculator,
+  Sparkles,
+  RotateCcw,
+  Copy,
+  Check,
+  TrendingUp,
+  Clock,
+  Layers,
+  DollarSign,
+  Package,
+  Gift,
+  Percent,
   ArrowRight,
   Info
 } from 'lucide-react';
@@ -88,30 +88,23 @@ interface CostCalculatorTabProps {
 }
 
 export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabProps) {
-  // Materiais (por unidade)
   const [paperCost, setPaperCost] = useState<number | ''>(1.80);
   const [ribbonCost, setRibbonCost] = useState<number | ''>(0.90);
   const [treatCost, setTreatCost] = useState<number | ''>(2.00);
   const [packagingCost, setPackagingCost] = useState<number | ''>(0.70);
   const [extrasCost, setExtrasCost] = useState<number | ''>(0.40);
 
-  // Mão de Obra
   const [productionMinutes, setProductionMinutes] = useState<number | ''>(15);
   const [hourlyRate, setHourlyRate] = useState<number | ''>(25.00);
 
-  // Custos Indiretos (Energia, lâminas de corte, perdas)
   const [indirectPercent, setIndirectPercent] = useState<number>(5);
 
-  // Margem de Lucro Desejada
   const [profitMargin, setProfitMargin] = useState<number>(60);
 
-  // Preço customizado / arredondado
   const [customOverridePrice, setCustomOverridePrice] = useState<number | null>(null);
 
-  // Feedback de cópia
   const [copied, setCopied] = useState(false);
 
-  // Cálculos dinâmicos
   const calculations = useMemo(() => {
     const paper = Number(paperCost) || 0;
     const ribbon = Number(ribbonCost) || 0;
@@ -129,10 +122,8 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
     const indirectCost = directCost * (indirectPercent / 100);
     const totalUnitCost = directCost + indirectCost;
 
-    // Preço sugerido com margem
     const rawSuggestedPrice = totalUnitCost * (1 + profitMargin / 100);
 
-    // Arredondamentos comerciais comuns (ex: 14.90 ou 15.00)
     const roundedPoint90 = Math.max(0.9, Math.ceil(rawSuggestedPrice) - 0.10);
     const roundedPoint00 = Math.max(1, Math.ceil(rawSuggestedPrice));
 
@@ -165,7 +156,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
     customOverridePrice,
   ]);
 
-  // Aplicar modelo pré-configurado
   const handleApplyPreset = (preset: PresetItem) => {
     setPaperCost(preset.paper);
     setRibbonCost(preset.ribbon);
@@ -177,7 +167,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
     setCustomOverridePrice(null);
   };
 
-  // Resetar valores
   const handleReset = () => {
     setPaperCost('');
     setRibbonCost('');
@@ -191,14 +180,12 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
     setCustomOverridePrice(null);
   };
 
-  // Copiar preço
   const handleCopyPrice = (priceVal: number) => {
     navigator.clipboard.writeText(priceVal.toFixed(2));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Simulação de lotes (1, 10, 20, 50, 100 unidades)
   const batchSimulation = useMemo(() => {
     const quantities = [1, 10, 25, 50, 100];
     return quantities.map((qty) => {
@@ -211,7 +198,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
 
   return (
     <div className={styles.calculatorContainer}>
-      {/* Cabeçalho */}
       <div className={styles.headerRow}>
         <div className={styles.headingWrapper}>
           <h2 className={styles.heading}>
@@ -231,7 +217,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
         </button>
       </div>
 
-      {/* Modelos Prontos de Precificação */}
       <div className={styles.presetTemplatesBar}>
         <span className={styles.presetLabel}> Modelos Sugeridos:
         </span>
@@ -250,11 +235,8 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
         </div>
       </div>
 
-      {/* Grid Principal */}
       <div className={styles.mainLayout}>
-        {/* Coluna da Esquerda: Insumos e Mão de Obra */}
         <div className={styles.inputsColumn}>
-          {/* Card 1: Materiais e Insumos */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <div className={styles.cardHeaderTitle}>
@@ -268,7 +250,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
 
             <div className={styles.cardBody}>
               <div className={styles.materialGrid}>
-                {/* Papel / Acrílico / Base */}
                 <div className={styles.fieldGroup}>
                   <label className={styles.fieldLabel}>
                     <span>Papelaria / Acrílico / Lata</span>
@@ -291,7 +272,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
                   </div>
                 </div>
 
-                {/* Fitas, Laços e Aviamentos */}
                 <div className={styles.fieldGroup}>
                   <label className={styles.fieldLabel}>
                     <span>Fitas, Laços & Aviamentos</span>
@@ -314,7 +294,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
                   </div>
                 </div>
 
-                {/* Doces / Chocolates / Sabonetes */}
                 <div className={styles.fieldGroup}>
                   <label className={styles.fieldLabel}>
                     <span>Doces / Sabonetes (Recheio)</span>
@@ -337,7 +316,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
                   </div>
                 </div>
 
-                {/* Embalagem e Tags */}
                 <div className={styles.fieldGroup}>
                   <label className={styles.fieldLabel}>
                     <span>Embalagem & Tag</span>
@@ -361,7 +339,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
                 </div>
               </div>
 
-              {/* Outros Insumos (Cola quente, fita banana) */}
               <div className={styles.fieldGroup}>
                 <label className={styles.fieldLabel}>
                   <span>Outros Insumos e Detalhes</span>
@@ -386,7 +363,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
             </div>
           </div>
 
-          {/* Card 2: Mão de Obra & Tempo de Trabalho */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <div className={styles.cardHeaderTitle}>
@@ -400,7 +376,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
 
             <div className={styles.cardBody}>
               <div className={styles.laborRow}>
-                {/* Tempo por unidade */}
                 <div className={styles.fieldGroup}>
                   <label className={styles.fieldLabel}>
                     <span>Tempo Gasto por Peça</span>
@@ -461,7 +436,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
                   </div>
                 </div>
 
-                {/* Valor da Hora de Trabalho */}
                 <div className={styles.fieldGroup}>
                   <label className={styles.fieldLabel}>
                     <span>Valor da Sua Hora</span>
@@ -490,7 +464,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
             </div>
           </div>
 
-          {/* Card 3: Margem de Lucro Desejada */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <div className={styles.cardHeaderTitle}>
@@ -519,7 +492,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
                 ))}
               </div>
 
-              {/* Custos Indiretos (Energia / Lâminas de corte) */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid #F0E8DE' }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#4A3B32' }}>
@@ -553,9 +525,7 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
           </div>
         </div>
 
-        {/* Coluna da Direita: Preço Sugerido & Simulador */}
         <div className={styles.resultsColumn}>
-          {/* Card Principal de Preço Sugerido */}
           <div className={styles.priceCard}>
             <div className={styles.priceCardHeader}>
               <span className={styles.priceCardTag}>
@@ -585,7 +555,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
               <strong>+ R$ {calculations.netProfit.toFixed(2).replace('.', ',')}</strong>
             </div>
 
-            {/* Arredondamento Rápido */}
             <div className={styles.roundingBox}>
               <span className={styles.roundingLabel}>Arredondamento Comercial (Psicológico):</span>
               <div className={styles.roundingButtonsRow}>
@@ -616,7 +585,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
               </div>
             </div>
 
-            {/* Botão de Aplicar ao Produto se for modal */}
             {onApplyPrice && (
               <button
                 type="button"
@@ -629,7 +597,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
             )}
           </div>
 
-          {/* Card Detalhamento de Custos */}
           <div className={styles.breakdownCard}>
             <span className={styles.breakdownTitle}>Detalhamento de Custos (CPV)</span>
 
@@ -670,7 +637,6 @@ export default function CostCalculatorTab({ onApplyPrice }: CostCalculatorTabPro
             </div>
           </div>
 
-          {/* Card Simulador de Encomendas em Lote */}
           <div className={styles.simulatorCard}>
             <span className={styles.breakdownTitle}>Simulação de Encomendas (Kits)</span>
 

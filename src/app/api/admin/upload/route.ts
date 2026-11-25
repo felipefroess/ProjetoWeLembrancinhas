@@ -23,7 +23,6 @@ export async function POST(request: Request) {
     let contentType = file.type || 'image/jpeg';
     let cleanExt = path.extname(file.name).toLowerCase() || '.jpg';
 
-    // Tenta carregar sharp dinamicamente para otimização se instalado, senão usa o buffer diretamente
     let buffer = rawBuffer;
     try {
       // @ts-ignore
@@ -45,15 +44,12 @@ export async function POST(request: Request) {
         cleanExt = '.jpg';
       }
     } catch {
-      // Sharp opcional não instalado; preserva buffer original
       buffer = rawBuffer;
     }
 
-    // Sanitiza o nome do arquivo e adiciona timestamp único
     const baseName = path.basename(file.name, path.extname(file.name)).replace(/[^a-zA-Z0-9.-]/g, '_').toLowerCase();
     const uniqueFileName = `${Date.now()}-${baseName}${cleanExt}`;
 
-    // Envia diretamente para o Object Storage externo (R2 / S3 com fallback)
     const uploadResult = await uploadImageToStorage(buffer, uniqueFileName, contentType);
 
     if (!uploadResult.success) {

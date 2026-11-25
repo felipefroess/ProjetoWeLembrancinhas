@@ -1,4 +1,3 @@
-/* Estilos da Aba de Gerenciamento de Cupons */
 .couponsContainer {
   display: flex;
   flex-direction: column;
@@ -6,7 +5,6 @@
   width: 100%;
 }
 
-/* Cabeçalho da Seção */
 .headerRow {
   display: flex;
   flex-direction: column;
@@ -75,7 +73,6 @@
   transform: translateY(-1px);
 }
 
-/* Métricas Rápidas */
 .metricsGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -132,7 +129,6 @@
   text-overflow: ellipsis;
 }
 
-/* Barra de Filtros e Busca */
 .filtersBar {
   display: flex;
   flex-direction: column;
@@ -223,7 +219,6 @@
   color: #ffffff;
 }
 
-/* Grade de Cupons */
 .couponsGrid {
   display: grid;
   grid-template-columns: 1fr;
@@ -242,7 +237,6 @@
   }
 }
 
-/* Card Estilo Voucher */
 .couponCard {
   background-color: #ffffff;
   border: 1px solid #E8DFD5;
@@ -329,7 +323,6 @@
   border-color: #FDE68A;
 }
 
-/* Divisor com picote tipo cupom */
 .couponDivider {
   display: flex;
   align-items: center;
@@ -364,7 +357,6 @@
   border-bottom: 1px solid #E8DFD5;
 }
 
-/* Corpo do Cupom */
 .couponCardBody {
   padding: 0.875rem 1.125rem;
   display: flex;
@@ -437,7 +429,6 @@
   font-size: 0.6875rem;
 }
 
-/* Rodapé do Card com Ações */
 .couponCardFooter {
   padding: 0.75rem 1.125rem;
   background-color: #FAF7F2;
@@ -542,7 +533,6 @@
   color: #ffffff;
 }
 
-/* Estado Vazio */
 .emptyState {
   background-color: #ffffff;
   border: 2px dashed #DACFBF;
@@ -572,7 +562,6 @@
   max-width: 24rem;
 }
 
-/* Modal de Cupom */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -711,7 +700,6 @@
   background-color: #E8DFD5;
 }
 
-/* Seletor de Tipo de Desconto */
 .typeSelector {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -740,7 +728,6 @@
   color: #ffffff;
 }
 
-/* Atalhos de tempo de cupom */
 .presetDatesRow {
   display: flex;
   gap: 0.35rem;

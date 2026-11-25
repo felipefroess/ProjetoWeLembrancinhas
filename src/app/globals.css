@@ -55,7 +55,6 @@ input, textarea, select {
   font-family: inherit;
 }
 
-/* Previne zoom indesejado no iOS / Safari ao focar em qualquer campo de formulário */
 @media screen and (max-width: 768px) {
   input[type="text"],
   input[type="tel"],

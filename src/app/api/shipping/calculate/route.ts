@@ -57,7 +57,6 @@ export async function POST(request: NextRequest) {
 
     const addressInfo = await lookupViaCep(toCep);
 
-    // Se o CEP tiver 8 dígitos numéricos mas não for encontrado nos Correios/ViaCEP
     if (!addressInfo) {
       return NextResponse.json(
         {
@@ -87,7 +86,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Estimativa segura de caixa/peso para lembrancinhas artesanais
     const estimatedWeight = Number(
       Math.min(25, Math.max(0.3, totalUnits * 0.045)).toFixed(2)
     );

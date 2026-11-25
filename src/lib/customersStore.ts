@@ -9,7 +9,7 @@ export interface CustomerPurchase {
   item: string;
   quantity?: number;
   amount: number;
-  date: string; // YYYY-MM-DD
+  date: string;
   notes?: string;
 }
 
@@ -86,7 +86,6 @@ function writeLocalCustomers(customers: CustomerRecord[]): void {
     }
     fs.writeFileSync(DATA_FILE, JSON.stringify(customers, null, 2), 'utf-8');
   } catch {
-    // Em ambientes somente leitura, ignora falha de escrita local
   }
 }
 
@@ -409,7 +408,6 @@ function formatBrazilDateYMD(iso?: string): string {
       return dt.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
     }
   } catch {
-    // Fallback
   }
   return (iso || new Date().toISOString()).slice(0, 10);
 }

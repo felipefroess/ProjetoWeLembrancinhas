@@ -39,8 +39,7 @@ const schemaSql = fs.readFileSync(schemaPath, 'utf-8');
 
 async function main() {
   console.log('🔄 Conectando ao Neon e aplicando schema...');
-  
-  // Remove comentários SQL de linha e divide por ponto e vírgula
+
   const cleanedSql = schemaSql
     .split('\n')
     .map((line) => line.replace(/--.*$/, ''))
@@ -57,9 +56,9 @@ async function main() {
   }
 
   const tables = await sql`
-    SELECT table_name 
-    FROM information_schema.tables 
-    WHERE table_schema = 'public' 
+    SELECT table_name
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
     ORDER BY table_name
   `;
 

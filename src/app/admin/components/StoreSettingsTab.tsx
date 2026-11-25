@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Sliders, 
-  Megaphone, 
-  Clock, 
-  MessageCircle, 
-Save, 
-  Check, 
-  AlertCircle, 
+import {
+  Sliders,
+  Megaphone,
+  Clock,
+  MessageCircle,
+Save,
+  Check,
+  AlertCircle,
   ExternalLink,
   Sparkles,
   RefreshCw,
@@ -40,7 +40,6 @@ const COLOR_PRESETS = [
 export default function StoreSettingsTab() {
   const { settings, loading, updateSettings } = useStoreSettings();
 
-  // Estados locais do formulário
   const [bannerEnabled, setBannerEnabled] = useState(true);
   const [bannerText, setBannerText] = useState('');
   const [bannerLink, setBannerLink] = useState('#catalogo');
@@ -58,7 +57,6 @@ export default function StoreSettingsTab() {
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  // Sincroniza com as configurações recebidas
   useEffect(() => {
     if (settings) {
       setBannerEnabled(settings.topBanner?.enabled ?? true);
@@ -75,7 +73,6 @@ export default function StoreSettingsTab() {
     }
   }, [settings]);
 
-  // Salvar alterações
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setSaving(true);
@@ -111,7 +108,7 @@ export default function StoreSettingsTab() {
           ? 'Configurações salvas e prazo propagado para todos os produtos com sucesso!'
           : 'Configurações da loja salvas com sucesso!',
       });
-      setApplyLeadTimeToAllProducts(false); // Reseta após aplicar
+      setApplyLeadTimeToAllProducts(false);
       setTimeout(() => setFeedback(null), 4000);
     } else {
       setFeedback({
@@ -121,19 +118,16 @@ export default function StoreSettingsTab() {
     }
   };
 
-  // Atalhos de Prazo
   const setLeadTime = (days: number) => {
     setDefaultLeadTimeDays(days);
   };
 
-  // Testar WhatsApp
   const handleTestWhatsapp = () => {
     const cleanNum = whatsappNumber.replace(/\D/g, '');
     const numWithDDI = cleanNum.startsWith('55') ? cleanNum : `55${cleanNum}`;
     window.open(`https://wa.me/${numWithDDI}?text=Ol%C3%A1%21+Teste+de+configura%C3%A7%C3%A3o+da+W%C3%AA+Lembrancinhas.`, '_blank');
   };
 
-  // Testar Instagram
   const handleTestInstagram = () => {
     const handle = instagram.replace(/^@/, '').trim();
     window.open(`https://instagram.com/${handle}`, '_blank');
@@ -141,7 +135,6 @@ export default function StoreSettingsTab() {
 
   return (
     <div className={styles.settingsContainer}>
-      {/* Cabeçalho */}
       <div className={styles.headerRow}>
         <div className={styles.headingWrapper}>
           <h2 className={styles.heading}>
@@ -175,7 +168,6 @@ export default function StoreSettingsTab() {
         </button>
       </div>
 
-      {/* Alerta de Feedback */}
       {feedback && (
         <div className={feedback.type === 'success' ? styles.alertSuccess : styles.alertError}>
           {feedback.type === 'success' ? <Check size={18} /> : <AlertCircle size={18} />}
@@ -183,7 +175,6 @@ export default function StoreSettingsTab() {
         </div>
       )}
 
-      {/* CARD 1: Faixa de Aviso no Topo do Site */}
       <div className={styles.settingsCard}>
         <div className={styles.cardHeader}>
           <div className={styles.cardHeaderTitle}>
@@ -214,7 +205,6 @@ export default function StoreSettingsTab() {
             </span>
           </div>
 
-          {/* Campo da Mensagem */}
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>
               <span>Mensagem da Faixa</span>
@@ -230,7 +220,6 @@ export default function StoreSettingsTab() {
             />
           </div>
 
-          {/* Modelos Prontos de Mensagem */}
           <div className={styles.templatesGrid}>
             <label className={styles.formLabel}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -255,7 +244,6 @@ export default function StoreSettingsTab() {
             </div>
           </div>
 
-          {/* Cor e Estilo da Faixa */}
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>
               <span>Cor de Fundo da Faixa</span>
@@ -277,7 +265,6 @@ export default function StoreSettingsTab() {
             </div>
           </div>
 
-          {/* Prévia da Faixa em Tempo Real */}
           <div className={styles.previewBox}>
             <span className={styles.previewLabel}>Prévia em tempo real no site:</span>
             {bannerEnabled && bannerText.trim() ? (
@@ -299,7 +286,6 @@ export default function StoreSettingsTab() {
         </div>
       </div>
 
-      {/* CARD 2: Prazo de Produção Geral (Picos de Demanda) */}
       <div className={styles.settingsCard}>
         <div className={styles.cardHeader}>
           <div className={styles.cardHeaderTitle}>
@@ -316,7 +302,6 @@ export default function StoreSettingsTab() {
             </div>
 
             <div className={styles.leadTimeControlsRow}>
-              {/* Stepper +/- */}
               <div className={styles.stepperWrapper}>
                 <button
                   type="button"
@@ -342,7 +327,6 @@ export default function StoreSettingsTab() {
               </span>
             </div>
 
-            {/* Atalhos Rápidos de Épocas */}
             <div className={styles.leadTimePresets}>
               <button
                 type="button"
@@ -374,7 +358,6 @@ export default function StoreSettingsTab() {
               </button>
             </div>
 
-            {/* Checkbox inteligente de aplicação em lote */}
             <label className={styles.checkboxNotice}>
               <input
                 type="checkbox"
@@ -394,7 +377,6 @@ export default function StoreSettingsTab() {
         </div>
       </div>
 
-      {/* CARD 3: Contatos & Redes Sociais */}
       <div className={styles.settingsCard}>
         <div className={styles.cardHeader}>
           <div className={styles.cardHeaderTitle}>
@@ -405,7 +387,6 @@ export default function StoreSettingsTab() {
 
         <div className={styles.cardBody}>
           <div className={styles.contactGrid}>
-            {/* WhatsApp */}
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>
                 <span>WhatsApp Oficial da Loja</span>
@@ -434,7 +415,6 @@ export default function StoreSettingsTab() {
               </span>
             </div>
 
-            {/* Instagram */}
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>
                 <span>Instagram Oficial</span>
@@ -465,7 +445,6 @@ export default function StoreSettingsTab() {
           </div>
 
           <div className={styles.contactGrid}>
-            {/* Nome da Loja */}
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>
                 <span>Nome da Loja</span>
@@ -478,7 +457,6 @@ export default function StoreSettingsTab() {
               />
             </div>
 
-            {/* Nome da Artesã */}
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>
                 <span>Nome da Artesã / Responsável</span>
@@ -494,7 +472,6 @@ export default function StoreSettingsTab() {
         </div>
       </div>
 
-      {/* Botão de Salvar Rodapé */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '0.5rem' }}>
         <button
           type="button"

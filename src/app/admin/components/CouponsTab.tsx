@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
+import {
   Ticket,
   Plus,
   Search,
@@ -46,16 +46,13 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive' | 'expired'>('all');
-  
-  // Controle de Cópia
+
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-  // Modal de Criação / Edição
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState<CouponItem | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Campos do Formulário
   const [formCode, setFormCode] = useState('');
   const [formType, setFormType] = useState<'percentage' | 'fixed'>('percentage');
   const [formValue, setFormValue] = useState<number | ''>(10);
@@ -67,11 +64,9 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
   const [formFirstPurchaseOnly, setFormFirstPurchaseOnly] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Modal de Confirmação de Exclusão
   const [deletingCoupon, setDeletingCoupon] = useState<CouponItem | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Carregar cupons do backend
   const loadCoupons = async () => {
     try {
       setLoading(true);
@@ -91,7 +86,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
     loadCoupons();
   }, []);
 
-  // Notifica o pai sobre a contagem de cupons ativos
   useEffect(() => {
     const activeCount = coupons.filter((c) => {
       if (!c.isActive) return false;
@@ -105,7 +99,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
     onCouponsCountChange?.(activeCount);
   }, [coupons, onCouponsCountChange]);
 
-  // Função auxiliar para verificar expiração
   const isCouponExpired = (coupon: CouponItem): boolean => {
     if (!coupon.expiresAt) return false;
     const exp = new Date(coupon.expiresAt);
@@ -113,7 +106,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
     return Date.now() > exp.getTime();
   };
 
-  // Dias restantes até expirar
   const getDaysUntilExpiry = (coupon: CouponItem): number | null => {
     if (!coupon.expiresAt) return null;
     const exp = new Date(coupon.expiresAt);
@@ -122,17 +114,14 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   };
 
-  // Filtragem dos cupons
   const filteredCoupons = useMemo(() => {
     return coupons.filter((coupon) => {
       const expired = isCouponExpired(coupon);
 
-      // Filtro de status
       if (statusFilter === 'active' && (!coupon.isActive || expired)) return false;
       if (statusFilter === 'inactive' && coupon.isActive) return false;
       if (statusFilter === 'expired' && !expired) return false;
 
-      // Busca por texto
       if (searchTerm.trim()) {
         const term = searchTerm.toLowerCase();
         const codeMatch = coupon.code.toLowerCase().includes(term);
@@ -144,18 +133,15 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
     });
   }, [coupons, statusFilter, searchTerm]);
 
-  // Métricas
   const metrics = useMemo(() => {
     const total = coupons.length;
     const active = coupons.filter((c) => c.isActive && !isCouponExpired(c)).length;
-    
-    // Maior porcentagem
+
     const percentages = coupons
       .filter((c) => c.type === 'percentage')
       .map((c) => c.value);
     const maxPercent = percentages.length > 0 ? Math.max(...percentages) : 0;
 
-    // Cupons expirando em breve (nos próximos 7 dias)
     const expiringSoon = coupons.filter((c) => {
       if (!c.isActive || !c.expiresAt) return false;
       const days = getDaysUntilExpiry(c);
@@ -165,18 +151,15 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
     return { total, active, maxPercent, expiringSoon };
   }, [coupons]);
 
-  // Copiar código com feedback
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
     setTimeout(() => setCopiedCode(null), 2000);
   };
 
-  // Alternar status ativo/inativo
   const handleToggleActive = async (coupon: CouponItem) => {
     const nextStatus = !coupon.isActive;
-    
-    // Atualização otimista
+
     setCoupons((prev) =>
       prev.map((c) => (c.id === coupon.id ? { ...c, isActive: nextStatus } : c))
     );
@@ -189,7 +172,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
       });
       const data = await res.json();
       if (!data.success) {
-        // Reverte se falhou
         setCoupons((prev) =>
           prev.map((c) => (c.id === coupon.id ? { ...c, isActive: !nextStatus } : c))
         );
@@ -203,7 +185,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
     }
   };
 
-  // Abrir modal de criação
   const handleOpenCreateModal = () => {
     setEditingCoupon(null);
     setFormCode('');
@@ -219,7 +200,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
     setIsModalOpen(true);
   };
 
-  // Abrir modal de edição
   const handleOpenEditModal = (coupon: CouponItem) => {
     setEditingCoupon(coupon);
     setFormCode(coupon.code);
@@ -235,7 +215,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
     setIsModalOpen(true);
   };
 
-  // Atalhos de data de validade
   const setExpiryDays = (days: number) => {
     const date = new Date();
     date.setDate(date.getDate() + days);
@@ -250,7 +229,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
     setFormHasExpiry(true);
   };
 
-  // Gerar código promocional sugerido
   const generateSuggestedCode = () => {
     const prefixes = ['WE', 'MIMO', 'PROMO', 'FESTA', 'ESPECIAL'];
     const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
@@ -258,7 +236,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
     setFormCode(`${randomPrefix}${val}`);
   };
 
-  // Salvar cupom (Criar ou Atualizar)
   const handleSaveCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
@@ -288,7 +265,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
 
     try {
       if (editingCoupon) {
-        // Atualização
         const res = await fetch('/api/coupons', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -315,7 +291,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
           setFormError(data.error || 'Erro ao atualizar cupom.');
         }
       } else {
-        // Criação
         const res = await fetch('/api/coupons', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -347,7 +322,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
     }
   };
 
-  // Excluir cupom
   const handleDeleteConfirm = async () => {
     if (!deletingCoupon) return;
     setDeleting(true);
@@ -372,7 +346,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
 
   return (
     <div className={styles.couponsContainer}>
-      {/* Cabeçalho */}
       <div className={styles.headerRow}>
         <div className={styles.headerTitleWrapper}>
           <h2 className={styles.heading}>
@@ -396,7 +369,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
         </button>
       </div>
 
-      {/* Cards de Métricas */}
       <div className={styles.metricsGrid}>
         <div className={styles.metricCard}>
           <div className={styles.metricIconBox} style={{ backgroundColor: '#F5EDE4', color: '#6D4C3D' }}>
@@ -439,7 +411,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
         </div>
       </div>
 
-      {/* Barra de Filtros e Busca */}
       <div className={styles.filtersBar}>
         <div className={styles.searchBox}>
           <Search size={16} className={styles.searchIcon} />
@@ -495,7 +466,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
         </div>
       </div>
 
-      {/* Grade de Cupons */}
       {loading ? (
         <div className={styles.emptyState}>
           <RefreshCw size={28} className="animate-spin text-[#8C7A6B]" />
@@ -535,7 +505,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                 key={coupon.id}
                 className={`${styles.couponCard} ${(!coupon.isActive || expired) ? styles.couponCardDisabled : ''}`}
               >
-                {/* Topo do Voucher */}
                 <div className={styles.couponCardTop}>
                   <div className={styles.couponCodeBox}>
                     <div className={styles.couponCode}>
@@ -568,21 +537,18 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                   </div>
                 </div>
 
-                {/* Picote Decorativo */}
                 <div className={styles.couponDivider}>
                   <div className={styles.couponPunchHoleLeft} />
                   <div className={styles.couponDashedLine} />
                   <div className={styles.couponPunchHoleRight} />
                 </div>
 
-                {/* Conteúdo do Voucher */}
                 <div className={styles.couponCardBody}>
                   <p className={styles.couponDescription}>
                     {coupon.description || 'Desconto aplicável em produtos do carrinho.'}
                   </p>
 
                   <div className={styles.couponDetailsList}>
-                    {/* Validade / Tempo */}
                     <div className={styles.couponDetailItem}>
                       <Clock size={13} />
                       {expired ? (
@@ -606,7 +572,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                       )}
                     </div>
 
-                    {/* Regra de Pedido Mínimo */}
                     <div className={styles.couponDetailItem}>
                       <Gift size={13} />
                       <span>
@@ -616,7 +581,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                       </span>
                     </div>
 
-                    {/* Regra de Primeira Compra */}
                     {(coupon.firstPurchaseOnly || coupon.code === 'PRIMEIRACOMPRA') && (
                       <div className={styles.couponDetailItem}>
                         <ShieldCheck size={13} style={{ color: '#B45309' }} />
@@ -626,7 +590,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                       </div>
                     )}
 
-                    {/* Regra de Não Cumulativo com Atacado */}
                     {(coupon.firstPurchaseOnly || coupon.code === 'PRIMEIRACOMPRA' || coupon.excludeWholesale !== false) && (
                       <div className={styles.couponDetailItem}>
                         <Zap size={13} style={{ color: '#047857' }} />
@@ -638,9 +601,7 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                   </div>
                 </div>
 
-                {/* Rodapé com Ações */}
                 <div className={styles.couponCardFooter}>
-                  {/* Interruptor Ativar/Desativar */}
                   <label className={styles.toggleSwitch} title={coupon.isActive ? 'Cupom ativo no site' : 'Cupom pausado'}>
                     <input
                       type="checkbox"
@@ -651,7 +612,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                     <span>{coupon.isActive ? 'Ativo' : 'Pausado'}</span>
                   </label>
 
-                  {/* Botões de Ação */}
                   <div className={styles.cardActionButtons}>
                     <button
                       type="button"
@@ -679,7 +639,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
         </div>
       )}
 
-      {/* Modal de Criação / Edição */}
       {isModalOpen && (
         <div className={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
           <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
@@ -704,7 +663,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                 </div>
               )}
 
-              {/* Código do Cupom */}
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>
                   Código do Cupom <span style={{ color: '#DC2626' }}>*</span>
@@ -732,7 +690,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                 </div>
               </div>
 
-              {/* Tipo de Desconto */}
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Tipo de Desconto</label>
                 <div className={styles.typeSelector}>
@@ -756,7 +713,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                 </div>
               </div>
 
-              {/* Valor do Desconto */}
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>
                   {formType === 'percentage' ? 'Porcentagem de Desconto (%)' : 'Valor do Desconto (R$)'} <span style={{ color: '#DC2626' }}>*</span>
@@ -774,12 +730,11 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                 />
               </div>
 
-              {/* Tempo do Cupom (Validade) */}
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>
                   Tempo de Validade do Cupom
                 </label>
-                
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.5rem' }}>
                   <input
                     type="checkbox"
@@ -826,7 +781,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                 )}
               </div>
 
-              {/* Pedido Mínimo */}
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>
                   Valor Mínimo do Pedido (Opcional)
@@ -843,7 +797,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                 />
               </div>
 
-              {/* Descrição */}
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>
                   Descrição ou Observação (Opcional)
@@ -858,7 +811,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                 />
               </div>
 
-              {/* Regra de 1ª Compra */}
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.625rem', paddingTop: '0.25rem' }}>
                 <input
                   type="checkbox"
@@ -875,7 +827,6 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                 </label>
               </div>
 
-              {/* Status Inicial */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', paddingTop: '0.25rem' }}>
                 <input
                   type="checkbox"
@@ -910,18 +861,17 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
         </div>
       )}
 
-      {/* Modal de Confirmação de Exclusão */}
       {deletingCoupon && (
         <div className={styles.modalOverlay} onClick={() => setDeletingCoupon(null)}>
           <div className={styles.modalCard} style={{ maxWidth: '24rem', padding: '1.5rem', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ width: '3rem', height: '3rem', borderRadius: '50%', backgroundColor: '#FEE2E2', color: '#DC2626', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto' }}>
               <Trash2 size={24} />
             </div>
-            
+
             <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#2D231E', marginBottom: '0.5rem' }}>
               Excluir Cupom?
             </h3>
-            
+
             <p style={{ fontSize: '0.8125rem', color: '#6D5B50', marginBottom: '1.5rem' }}>
               Tem certeza que deseja apagar o cupom <strong>{deletingCoupon.code}</strong>? Os clientes não poderão mais utilizá-lo.
             </p>

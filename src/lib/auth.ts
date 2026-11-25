@@ -43,7 +43,6 @@ export function verifySessionToken(token: string | undefined): boolean {
 
   try {
     const payload = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString('utf8'));
-    // Sessão válida por 7 dias
     const maxAge = 7 * 24 * 60 * 60 * 1000;
     if (Date.now() - payload.timestamp > maxAge) {
       return false;
@@ -69,7 +68,7 @@ export async function setSessionCookie(username: string) {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 7, // 7 dias
+    maxAge: 60 * 60 * 24 * 7,
   });
 }
 

@@ -7,7 +7,6 @@
   font-family: var(--font-sans);
 }
 
-/* Sidebar na Esquerda */
 .sidebar {
   width: 260px;
   background-color: #ffffff;
@@ -192,7 +191,6 @@
   color: #ffffff;
 }
 
-/* Área Principal à Direita */
 .mainContainer {
   flex: 1;
   min-width: 0;
@@ -213,7 +211,6 @@
   display: block;
 }
 
-/* Navegação Mobile e Header Responsivo */
 .mobileHamburgerBtn {
   display: none;
   background: none;
@@ -259,7 +256,6 @@
   display: inline;
 }
 
-/* Sub-Barra de Abas Horizontais Fixa no Mobile */
 .mobileSubTabBar {
   display: none;
   gap: 0.45rem;
@@ -316,7 +312,6 @@
   color: #ffffff;
 }
 
-/* Drawer Lateral de Menu para Mobile */
 .mobileDrawerOverlay {
   position: fixed;
   inset: 0;
@@ -592,7 +587,6 @@
   transform: translateY(-1px);
 }
 
-/* Tabela de Produtos */
 .tableCard {
   background-color: #ffffff;
   border: 1px solid #DACFBF;
@@ -740,7 +734,6 @@
   color: #ffffff;
 }
 
-/* Modal de Criação de Produto */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -933,7 +926,6 @@
   border: 1px solid #DACFBF;
 }
 
-/* Switch / Checkbox */
 .checkboxLabel {
   display: flex;
   align-items: center;
@@ -951,7 +943,6 @@
   cursor: pointer;
 }
 
-/* Lista de Variações */
 .variationsList {
   display: flex;
   flex-direction: column;
@@ -1052,8 +1043,6 @@
   align-self: flex-end;
 }
 
-
-/* Gerenciamento de Fotos no Admin */
 .photoBlock {
   background-color: #FAF7F2;
   border: 1px solid #E8DFD5;
@@ -1475,8 +1464,6 @@
   border-color: #FF4D4F;
 }
 
-
-/* Dashboard & Métricas Analíticas */
 .dashboardSection {
   margin-bottom: 2rem;
 }
@@ -1722,7 +1709,6 @@
   background-color: #F6FFED;
 }
 
-/* Barra de Filtro e Busca de Produtos */
 .searchFilterBar {
   display: flex;
   flex-wrap: wrap;
@@ -1781,8 +1767,6 @@
   font-weight: 600;
 }
 
-
-/* Seletor de Período do Dashboard */
 .periodHeaderRow {
   display: flex;
   flex-wrap: wrap;
@@ -1843,7 +1827,6 @@
   margin-left: 0.5rem;
 }
 
-/* Produtos Mais Vendidos (Ranking) */
 .topSellersList {
   display: flex;
   flex-direction: column;
@@ -1968,7 +1951,6 @@
   border-radius: 9999px;
 }
 
-/* Card de Produto Mais Clicado */
 .mostClickedCard {
   background: linear-gradient(135deg, #FAF7F2 0%, #FFFFFF 100%);
   border: 1px solid #E8DFD5;
@@ -2065,7 +2047,6 @@
   margin-top: 0.15rem;
 }
 
-/* Status do Banco de Dados Supabase */
 .databaseStatusBadge {
   display: inline-flex;
   align-items: center;
@@ -2118,7 +2099,6 @@
   line-height: 1.4;
 }
 
-/* Abas do Modal de Edição/Criação de Produtos */
 .modalTabsBar {
   display: flex;
   align-items: center;
@@ -2181,10 +2161,6 @@
   border-radius: 9999px;
   padding: 0.15rem 0.5rem;
 }
-
-/* ==========================================================================
-   GESTÃO DE PEDIDOS & FILA DE PRODUÇÃO (KANBAN)
-   ========================================================================== */
 
 .ordersSection {
   display: flex;
@@ -2285,7 +2261,6 @@
   border-color: #C89B6D;
 }
 
-/* Barra de Filtros e Busca de Pedidos */
 .ordersControlsRow {
   display: flex;
   flex-direction: column;
@@ -2368,7 +2343,6 @@
   box-shadow: 0 2px 6px rgba(109, 76, 61, 0.2);
 }
 
-/* Quadro Kanban */
 .kanbanBoard {
   display: grid;
   grid-template-columns: repeat(4, minmax(280px, 1fr));
@@ -2429,7 +2403,6 @@
   margin: 0;
 }
 
-/* Cores específicas de cada coluna */
 .colAguardando .columnTitleWithIcon {
   color: #5B21B6;
 }
@@ -2470,7 +2443,6 @@
   color: #4B5563;
 }
 
-/* Lista de Cards da Coluna */
 .columnCardsList {
   padding: 0.875rem;
   display: flex;
@@ -2488,7 +2460,6 @@
   font-style: italic;
 }
 
-/* Card Individual do Pedido no Kanban */
 .kanbanCard {
   background-color: #ffffff;
   border: 1px solid #E8DFD5;
@@ -2599,7 +2570,6 @@
   50% { border-color: #EF4444; }
 }
 
-/* Resumo da Personalização no Card */
 .cardCustomizationBox {
   background-color: #FAF8F5;
   border: 1px solid #EDE5DB;
@@ -2678,7 +2648,6 @@
   font-style: italic;
 }
 
-/* Rodapé do Card com Ações Rápidas */
 .cardFooter {
   display: flex;
   flex-direction: column;
@@ -2704,7 +2673,6 @@
   color: #8C7A6B;
 }
 
-/* Botões de Ação no Card */
 .cardActionsRow {
   display: flex;
   align-items: center;
@@ -2734,7 +2702,6 @@
   border-color: #6D4C3D;
 }
 
-/* Botão de WhatsApp "Avisar que está pronto" */
 .whatsappReadyBtn {
   width: 100%;
   display: inline-flex;
@@ -2779,7 +2746,6 @@
   border-color: #25D366;
 }
 
-/* Controles de Transição de Etapa */
 .cardStageControls {
   display: flex;
   align-items: center;
@@ -2824,10 +2790,6 @@
   color: #ffffff;
   border-color: #6D4C3D;
 }
-
-/* ==========================================================================
-   MODAL DE DETALHES DA PERSONALIZAÇÃO EM 1 CLIQUE
-   ========================================================================== */
 
 .orderModalOverlay {
   position: fixed;
@@ -2942,7 +2904,6 @@
   border-color: #6D4C3D;
 }
 
-/* Bloco de Itens do Pedido no Modal */
 .modalSectionHeading {
   font-size: 1rem;
   font-weight: 700;
@@ -3007,7 +2968,6 @@
   font-weight: 600;
 }
 
-/* Grid de Especificações da Personalização */
 .modalSpecsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -3080,7 +3040,6 @@
   font-family: monospace;
 }
 
-/* Dados do Cliente e Entrega */
 .modalCustomerGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -3110,7 +3069,6 @@
   color: #2D231E;
 }
 
-/* Barra de Ações Rápidas no Rodapé do Modal */
 .orderModalFooter {
   padding: 1.25rem 1.5rem;
   background-color: #FAF7F2;
@@ -3195,7 +3153,6 @@
   border-color: #6D4C3D;
 }
 
-/* Modo Tabela de Pedidos */
 .ordersTableView {
   background-color: #ffffff;
   border: 1px solid #DACFBF;
@@ -3231,7 +3188,6 @@
   background-color: #FCFBF9;
 }
 
-/* Botões de exclusão de pedidos */
 .deleteOrderBtn {
   width: 1.625rem;
   height: 1.625rem;
@@ -3317,9 +3273,6 @@
   border-color: #6D4C3D;
 }
 
-/* ==========================================================================
-   FEEDBACK DE SINCRONIZAÇÃO AUTOMÁTICA COM FICHA DE CLIENTES
-   ========================================================================== */
 .customerSyncToast {
   display: flex;
   align-items: center;
@@ -3464,9 +3417,6 @@
   background-color: #14532D;
 }
 
-/* ========================================================
-   Destaque: Produto Mais Vendido (Admin)
-   ======================================================== */
 .bestSellerToggleBox {
   display: flex;
   align-items: center;
@@ -3563,7 +3513,6 @@
   transform: translateX(1.25rem);
 }
 
-/* Badge na tabela de produtos */
 .bestSellerTableBadge {
   display: inline-flex;
   align-items: center;
@@ -3579,7 +3528,6 @@
   vertical-align: middle;
 }
 
-/* Botões de Ação de Mais Vendido na Tabela */
 .bestSellerBtnActive {
   display: inline-flex;
   align-items: center;
@@ -3624,9 +3572,6 @@
   transform: translateY(-1px);
 }
 
-/* ==========================================================================
-   LISTA RESPONSIVA DE PRODUTOS PARA CELULAR (MOBILE PRODUCT CARDS)
-   ========================================================================== */
 .mobileProductsList {
   display: none;
 }
@@ -3805,11 +3750,8 @@
   justify-content: center;
 }
 
-/* ==========================================================================
-   REGRAS RESPONSIVAS GERAIS PARA MOBILE (< 768px & < 640px)
-   ========================================================================== */
 @media (max-width: 768px) {
-  /* Tabela de Produtos Desktop oculta; Cards Mobile visíveis */
+
   .tableCard {
     display: none !important;
   }
@@ -3835,7 +3777,6 @@
     font-size: 0.9375rem;
   }
 
-  /* Barra de Busca e Filtro de Produtos */
   .searchFilterBar {
     flex-direction: column;
     align-items: stretch;
@@ -3859,7 +3800,6 @@
     padding: 0.5rem 0.75rem;
   }
 
-  /* Kanban de Pedidos no Celular */
   .ordersHeading {
     font-size: 1.25rem;
     flex-wrap: wrap;
@@ -3900,7 +3840,7 @@
 }
 
 @media (max-width: 640px) {
-  /* Modais no Celular */
+
   .modalOverlay,
   .orderModalOverlay {
     padding: 0.35rem;
@@ -3962,7 +3902,6 @@
     padding: 0.85rem 1rem;
   }
 
-  /* Inputs com 16px para evitar zoom indesejado no iOS Safari */
   .input,
   .select,
   .textarea {

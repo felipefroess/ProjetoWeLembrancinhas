@@ -31,7 +31,6 @@ export default function HomePage() {
   useEffect(() => {
     setClientDate(new Date());
 
-    // Desativa a restauração automática do navegador e garante que a página sempre inicie no topo ao recarregar
     if (typeof window !== "undefined") {
       if ("scrollRestoration" in history) {
         history.scrollRestoration = "manual";
@@ -50,7 +49,6 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    // 1. Hidratação instantânea do cache local do navegador (0ms de delay visual)
     try {
       const cachedCategories = localStorage.getItem("we_cached_categories");
       if (cachedCategories) {
@@ -67,10 +65,8 @@ export default function HomePage() {
         }
       }
     } catch {
-      // Ignora erro de parsing e usa dados embutidos
     }
 
-    // 2. Revalidação em segundo plano sem travar a interface
     async function fetchDynamicData() {
       try {
         const res = await fetch(`/api/products?t=${Date.now()}`, {
@@ -102,7 +98,6 @@ export default function HomePage() {
 
     fetchDynamicData();
 
-    // Revalida automaticamente quando a aba ganha foco
     const handleFocus = () => {
       fetchDynamicData();
     };
@@ -113,16 +108,12 @@ export default function HomePage() {
     };
   }, []);
 
-  // Mapeia nomes das categorias para consulta rápida
   const categoryNameMap = useMemo(() => {
     const map = new Map<string, string>();
     categoriesList.forEach((c) => map.set(c.id, c.name));
     return map;
   }, [categoriesList]);
 
-  // Identifica o produto que recebe o selo de 'Mais Vendido':
-  // 1. Prioridade total para o produto configurado manualmente no painel admin (isBestSeller)
-  // 2. Se nenhum for marcado, usa o produto do evento sazonal mais próximo do calendário
   const mostRequestedProductId = useMemo(() => {
     const manualBestSeller = productsList.find((p) => p.isBestSeller);
     if (manualBestSeller) return manualBestSeller.id;
@@ -134,7 +125,6 @@ export default function HomePage() {
     return sortCategoriesBySeasonalProximity(categoriesList, clientDate);
   }, [categoriesList, clientDate]);
 
-  // Filtro performático combinando categoria, busca e ordenação
   const filteredProducts = useMemo(() => {
     const list = productsList.filter((product) => {
       const matchesCategory =
@@ -150,14 +140,12 @@ export default function HomePage() {
     });
 
     let sortedList: Product[];
-    // Quando "Todos os Mimos" está selecionado, os produtos do evento mais próximo aparecem primeiro
     if (selectedCategory === "todos") {
       sortedList = sortProductsBySeasonalProximity(list, categoryNameMap, clientDate);
     } else {
       sortedList = [...list];
     }
 
-    // ⭐ O produto marcado como 'Mais Vendido' (isBestSeller) SEMPRE é o primeiro produto a aparecer no catálogo!
     const bestSellerId = productsList.find((p) => p.isBestSeller)?.id;
     if (bestSellerId) {
       sortedList.sort((a, b) => {
@@ -170,7 +158,6 @@ export default function HomePage() {
     return sortedList;
   }, [productsList, selectedCategory, searchQuery, categoryNameMap, clientDate]);
 
-  // Escolhe a classe de grid de acordo com o número de itens
   const gridClass =
     filteredProducts.length === 1
       ? styles.productsGridSingle
@@ -180,7 +167,6 @@ export default function HomePage() {
 
   return (
     <div className={styles.pageWrapper}>
-      {/* Barra de Navegação */}
       <Header
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -189,10 +175,8 @@ export default function HomePage() {
         onSelectCategory={setSelectedCategory}
       />
 
-      {/* Hero Section */}
       <HeroBanner />
 
-      {/* Filtro de Categorias */}
       <div id="catalogo">
         <CategoryFilter
           selectedCategory={selectedCategory}
@@ -201,9 +185,7 @@ export default function HomePage() {
         />
       </div>
 
-      {/* Catálogo de Produtos */}
       <main className={styles.mainCatalog}>
-        {/* Cabeçalho da Seção de Produtos */}
         <div className={styles.catalogHeader}>
           <div>
             <h2 className={styles.catalogTitle}>
@@ -232,7 +214,6 @@ export default function HomePage() {
           </span>
         </div>
 
-        {/* Grade de Produtos */}
         {filteredProducts.length > 0 ? (
           <div className={gridClass}>
             {filteredProducts.map((product) => (
@@ -245,7 +226,6 @@ export default function HomePage() {
             ))}
           </div>
         ) : (
-          /* Estado Vazio de Busca */
           <div className={styles.emptyStateCard}>
             <div className={styles.emptyIconCircle}>
               <PackageSearch size={28} />
@@ -271,13 +251,11 @@ export default function HomePage() {
         )}
       </main>
 
-      {/* Modais e Componentes Globais */}
       <ProductModal />
       <CartDrawer />
       <CheckoutModal />
       <WhatsappButton />
 
-      {/* Rodapé */}
       <Footer />
     </div>
   );
