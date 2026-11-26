@@ -3,14 +3,6 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import fs from 'fs/promises';
 import path from 'path';
 
-/**
- * WE LEMBRANCINHAS - OBJECT STORAGE (CLOUDFLARE R2 / S3 COMPATÍVEL)
- * 
- * Camada de upload de imagens que envia arquivos diretamente para um Object Storage
- * externo (como Cloudflare R2 ou AWS S3) e retorna apenas a URL pública HTTPS para ser
- * salva no banco de dados.
- */
-
 interface UploadResult {
   success: boolean;
   url: string;
@@ -72,10 +64,6 @@ function getS3Client(): S3Client | null {
   return s3ClientInstance;
 }
 
-/**
- * Faz o upload de um buffer de imagem para o Object Storage externo (R2/S3)
- * ou realiza fallback local caso o storage ainda não tenha sido configurado no ambiente.
- */
 export async function uploadImageToStorage(
   buffer: Buffer,
   fileName: string,
@@ -83,7 +71,6 @@ export async function uploadImageToStorage(
 ): Promise<UploadResult> {
   const config = getS3Config();
 
-  // 1. Envio para Cloudflare R2 ou AWS S3 (Produção / Recomendado)
   if (config.isConfigured) {
     try {
       const client = getS3Client();
@@ -97,12 +84,17 @@ export async function uploadImageToStorage(
           Key: fileName,
           Body: buffer,
           ContentType: contentType,
+          CacheControl: 'public, max-age=31536000, immutable',
         })
       );
 
       let finalPublicUrl = '';
       if (config.publicUrl) {
-        finalPublicUrl = `${config.publicUrl.replace(/\/$/, '')}/${fileName}`;
+        let cleanBase = config.publicUrl.trim().replace(/\/$/, '');
+        if (!cleanBase.startsWith('http://') && !cleanBase.startsWith('https://')) {
+          cleanBase = `https://${cleanBase}`;
+        }
+        finalPublicUrl = `${cleanBase}/${fileName}`;
       } else if (config.endpoint.includes('r2.cloudflarestorage.com')) {
         finalPublicUrl = `https://${config.bucketName}.${config.endpoint.replace('https://', '')}/${fileName}`;
       } else {
@@ -116,7 +108,6 @@ export async function uploadImageToStorage(
       };
     } catch (err: any) {
       console.error('Erro ao enviar imagem para o Object Storage (R2/S3):', err);
-      // Se falhar a conexão com o bucket em desenvolvimento, registra e prossegue
       return {
         success: false,
         url: '',
@@ -126,7 +117,6 @@ export async function uploadImageToStorage(
     }
   }
 
-  // 2. Fallback de Desenvolvimento: Armazena em public/uploads localmente
   try {
     const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
     await fs.mkdir(uploadsDir, { recursive: true });

@@ -7,9 +7,6 @@ import { sql, isDbConfigured } from '@/server/db/client';
 const ORDERS_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'orders.json');
 const DELETED_ORDERS_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'deleted-orders.json');
 
-/**
- * Normaliza status legados ou com variações de escrita para o padrão do Kanban
- */
 export function normalizeStatus(status?: string): OrderStatus {
   if (!status) return 'em_analise';
   const s = status.toLowerCase().trim().replace('-', '_');
@@ -88,9 +85,6 @@ function writeLocalOrders(orders: ProductionOrder[]): void {
   }
 }
 
-/**
- * Tenta sincronizar pedidos que foram criados localmente para o Neon
- */
 async function syncUnsyncedOrdersToNeon(orders: ProductionOrder[]): Promise<void> {
   if (!isDbConfigured() || orders.length === 0) return;
 
@@ -117,14 +111,10 @@ async function syncUnsyncedOrdersToNeon(orders: ProductionOrder[]): Promise<void
         ON CONFLICT (id) DO NOTHING
       `;
     } catch {
-      // Ignora falha silenciosa para não travar a aplicação
     }
   }
 }
 
-/**
- * Busca todos os pedidos no Neon (com fallback e espelhamento local)
- */
 export async function getAllProductionOrders(): Promise<{ orders: ProductionOrder[]; source: 'neon' | 'local' }> {
   const deletedIds = readDeletedOrderIds();
   const localOrders = readLocalOrders().filter(
@@ -134,7 +124,7 @@ export async function getAllProductionOrders(): Promise<{ orders: ProductionOrde
   if (isDbConfigured()) {
     try {
       const dbOrders = await sql<any>`
-        SELECT 
+        SELECT
           id, customer_name, customer_phone, event_date, delivery_method,
           delivery_address, general_notes, total_units, total_amount,
           coupon_code, discount_amount, subtotal_amount, status, items,
@@ -166,7 +156,6 @@ export async function getAllProductionOrders(): Promise<{ orders: ProductionOrde
             updated_at: o.updated_at || undefined,
           }));
 
-        // Mescla pedidos locais que ainda não existam no Neon
         const dbIds = new Set(normalizedDbOrders.map((o) => String(o.id)));
         const unsyncedLocal = localOrders.filter((local) => {
           if (dbIds.has(String(local.id))) return false;
@@ -206,9 +195,6 @@ export async function getAllProductionOrders(): Promise<{ orders: ProductionOrde
   return { orders: sorted, source: 'local' };
 }
 
-/**
- * Salva um novo pedido com UUID seguro no Neon e espelho local
- */
 export async function createProductionOrder(orderData: {
   customerName: string;
   customerPhone?: string;
@@ -279,9 +265,6 @@ export async function createProductionOrder(orderData: {
   return newOrder;
 }
 
-/**
- * Atualiza o status e/ou notas de produção de um pedido no Neon
- */
 export async function updateProductionOrderStatus(
   orderId: string,
   newStatus: OrderStatus,
@@ -338,11 +321,19 @@ export async function updateProductionOrderStatus(
             general_notes: data.general_notes || '',
             total_units: Number(data.total_units) || 0,
             total_amount: Number(data.total_amount) || 0,
+            coupon_code: data.coupon_code || undefined,
+            discount_amount: data.discount_amount !== null && data.discount_amount !== undefined ? Number(data.discount_amount) : undefined,
+            subtotal_amount: data.subtotal_amount !== null && data.subtotal_amount !== undefined ? Number(data.subtotal_amount) : undefined,
             status: normalizeStatus(data.status),
             items: Array.isArray(data.items) ? data.items : [],
             created_at: data.created_at || nowIso,
             updated_at: data.updated_at || nowIso,
           };
+
+          if (index === -1) {
+            currentOrders.unshift(updatedOrder);
+            writeLocalOrders(currentOrders);
+          }
         }
       }
     } catch (err) {
@@ -353,9 +344,6 @@ export async function updateProductionOrderStatus(
   return updatedOrder;
 }
 
-/**
- * Remove permanentemente um pedido do painel, do arquivo local e do Neon
- */
 export async function deleteProductionOrder(orderId: string): Promise<boolean> {
   addDeletedOrderId(orderId);
 

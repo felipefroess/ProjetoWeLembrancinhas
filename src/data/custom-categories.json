@@ -18,5 +18,10 @@
     "id": "teste",
     "name": "teste",
     "description": "Produtos da categoria teste"
+  },
+  {
+    "id": "teasdf",
+    "name": "teasdf",
+    "description": "Produtos da categoria teasdf"
   }
 ]

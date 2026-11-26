@@ -31,7 +31,6 @@ function writeJsonFile<T>(filePath: string, data: T): void {
     }
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
   } catch {
-    // Em ambientes serverless somente leitura, ignora falha de escrita local
   }
 }
 
@@ -69,9 +68,6 @@ async function setDeletedDefaultProductIds(ids: Set<string>): Promise<void> {
   }
 }
 
-/**
- * Retorna todos os produtos (padrão + cadastrados no painel / Neon)
- */
 export async function getAllProducts(): Promise<Product[]> {
   if (isDbConfigured()) {
     try {
@@ -83,7 +79,6 @@ export async function getAllProducts(): Promise<Product[]> {
         .map((r) => r.data)
         .filter((p) => p && p.id);
 
-      // Migração/Seed inicial automática dos produtos do JSON local na primeira execução no Neon
       if (customProducts.length === 0) {
         const meta = await getSeedMeta();
         if (!meta.productsSeeded) {
@@ -127,9 +122,6 @@ export async function getAllProducts(): Promise<Product[]> {
   return [...filteredDefault, ...customProducts];
 }
 
-/**
- * Salva ou atualiza um produto no Neon
- */
 export async function saveProduct(product: Product): Promise<Product> {
   if (isDbConfigured()) {
     const nowIso = new Date().toISOString();
@@ -154,7 +146,6 @@ export async function saveProduct(product: Product): Promise<Product> {
     }
   }
 
-  // Mantém cópia local em ambiente de desenvolvimento
   const customProducts = readJsonFile<Product[]>(CUSTOM_PRODUCTS_PATH, []);
   const existingIndex = customProducts.findIndex((p) => p.id === product.id);
   if (existingIndex >= 0) {
@@ -167,9 +158,6 @@ export async function saveProduct(product: Product): Promise<Product> {
   return product;
 }
 
-/**
- * Exclui um produto cadastrado no Neon
- */
 export async function deleteProduct(productId: string): Promise<boolean> {
   let deletedFromNeon = false;
 
@@ -197,9 +185,6 @@ export async function deleteProduct(productId: string): Promise<boolean> {
   return deletedFromNeon || customProducts.length !== beforeLen;
 }
 
-/**
- * Atualiza o prazo de produção de todos os produtos cadastrados
- */
 export async function updateAllCustomProductsLeadTime(leadTimeDays: number): Promise<void> {
   const safeDays = Math.max(1, Number(leadTimeDays));
 
@@ -230,9 +215,6 @@ export async function updateAllCustomProductsLeadTime(leadTimeDays: number): Pro
   }
 }
 
-/**
- * Retorna todas as categorias (padrão + dinâmicas)
- */
 export async function getAllCategories(): Promise<Category[]> {
   if (isDbConfigured()) {
     try {
@@ -285,9 +267,6 @@ export async function getAllCategories(): Promise<Category[]> {
   return [...filteredDefault, ...customCategories];
 }
 
-/**
- * Salva uma nova categoria no Neon
- */
 export async function saveCategory(category: Category): Promise<Category> {
   if (isDbConfigured()) {
     try {

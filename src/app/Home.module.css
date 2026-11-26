@@ -1,4 +1,3 @@
-/* Estilos da Página Principal (HomePage) */
 .pageWrapper {
   min-height: 100vh;
   width: 100%;
@@ -11,7 +10,6 @@
   font-family: var(--font-sans, system-ui, sans-serif);
 }
 
-/* Seção Exclusiva do Catálogo com Fundo Floral Personalizado */
 .catalogSection {
   width: 100%;
   flex: 1;
@@ -54,7 +52,6 @@
   }
 }
 
-/* Cabeçalho da Seção de Produtos */
 .catalogHeader {
   display: flex;
   flex-direction: column;
@@ -114,7 +111,6 @@
   }
 }
 
-/* Grades de Produtos */
 .productsGridSingle {
   max-width: 24rem;
 }
@@ -156,7 +152,6 @@
   }
 }
 
-/* Estado Vazio de Busca */
 .emptyStateCard {
   text-align: center;
   padding: 4rem 2rem;

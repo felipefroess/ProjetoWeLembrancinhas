@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
+import {
   ClipboardList,
   Search,
   RefreshCw,
@@ -224,7 +224,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
     onOrderCountChange?.(orders.length);
   }, [orders.length, onOrderCountChange]);
 
-  // Busca inicial e atualização dos pedidos sem cache
   const loadOrders = async (silent = false) => {
     if (!silent) setRefreshing(true);
     try {
@@ -239,24 +238,37 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
         }
       }
 
-      // Verificação de contingência: restaura pedidos offline salvos em localStorage se existirem
       try {
         const backupKey = 'we_backup_orders';
         const stored = typeof window !== 'undefined' ? localStorage.getItem(backupKey) : null;
         if (stored) {
           const backupList = JSON.parse(stored);
           if (Array.isArray(backupList) && backupList.length > 0) {
+            const failedBackups: unknown[] = [];
             for (const backupOrder of backupList) {
-              fetch('/api/orders', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(backupOrder),
-              }).catch(() => {});
+              try {
+                const syncRes = await fetch('/api/orders', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(backupOrder),
+                });
+                if (!syncRes.ok) {
+                  failedBackups.push(backupOrder);
+                }
+              } catch {
+                failedBackups.push(backupOrder);
+              }
             }
+            if (failedBackups.length === 0) {
+              localStorage.removeItem(backupKey);
+            } else {
+              localStorage.setItem(backupKey, JSON.stringify(failedBackups));
+            }
+          } else {
+            localStorage.removeItem(backupKey);
           }
         }
       } catch {
-        // Ignora erro de contingência
       }
     } catch (err) {
       console.error('Erro ao carregar pedidos:', err);
@@ -266,7 +278,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
     }
   };
 
-  // Sincronização ao vivo: Polling a cada 10s + Foco da aba / visibilidade
   useEffect(() => {
     loadOrders();
 
@@ -294,7 +305,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Exclusão / Cancelamento de pedido
   const handleDeleteOrder = async (orderId: string, customerName?: string) => {
     const shortCode = orderId.slice(-6).toUpperCase();
     const confirmed = window.confirm(
@@ -321,7 +331,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
     }
   };
 
-  // Atualização rápida de status (com atualização otimista)
   const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
     setUpdatingId(orderId);
     setOrders((prev) =>
@@ -371,7 +380,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
     }
   };
 
-  // Disparo WhatsApp de pedido pronto
   const handleWhatsAppReady = (order: ProductionOrder) => {
     const msg = `Olá ${order.customer_name}! Sua encomenda da Wê Lembrancinhas está pronta para envio/retirada!`;
     const url = formatWhatsAppUrl(order.customer_phone, msg);
@@ -393,14 +401,11 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
     window.open(url, '_blank');
   };
 
-  // Filtros aplicados
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
-      // Filtro de status
       if (statusFilter !== 'todos' && order.status !== statusFilter) {
         return false;
       }
-      // Filtro de busca textual
       if (!searchQuery.trim()) return true;
       const q = searchQuery.toLowerCase();
       const matchName = order.customer_name?.toLowerCase().includes(q);
@@ -530,7 +535,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
 
   return (
     <section className={styles.ordersSection}>
-      {/* Cabeçalho da Aba de Pedidos */}
       <div className={styles.ordersHeaderRow}>
         <div>
           <h2 className={styles.ordersHeading}>
@@ -561,7 +565,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
         </div>
 
         <div className={styles.ordersHeaderActions}>
-          {/* Alternador de Modo de Visualização */}
           <div className={styles.viewModeToggle}>
             <button
               type="button"
@@ -608,7 +611,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
             </button>
           </div>
 
-          {/* Botão de Atualizar */}
           <button
             type="button"
             onClick={() => loadOrders()}
@@ -622,7 +624,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
         </div>
       </div>
 
-      {/* Alerta de Confirmação de Sincronização com a Ficha de Clientes */}
       {syncedCustomerToast && (
         <div className={styles.customerSyncToast}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
@@ -651,9 +652,7 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
         </div>
       )}
 
-      {/* Controles de Busca e Filtros de Status */}
       <div className={styles.ordersControlsRow}>
-        {/* Campo de Busca */}
         <div className={styles.ordersSearchBox}>
           <Search size={16} className={styles.ordersSearchIcon} />
           <input
@@ -665,7 +664,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
           />
         </div>
 
-        {/* Pílulas de Filtro de Status */}
         <div className={styles.ordersFilterPills}>
           <button
             type="button"
@@ -695,7 +693,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
         </div>
       </div>
 
-      {/* Visualização: QUADRO KANBAN */}
       {viewMode === 'kanban' && (
         <div className={styles.kanbanBoard}>
           {STAGES.map((col) => {
@@ -703,7 +700,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
 
             return (
               <div key={col.id} className={`${styles.kanbanColumn} ${col.colClass}`}>
-                {/* Cabeçalho da Coluna */}
                 <div className={styles.columnHeader}>
                   <div className={styles.columnTitleRow}>
                     <div className={styles.columnTitleWithIcon}>
@@ -715,7 +711,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                   <p className={styles.columnSubtitle}>{col.subtitle}</p>
                 </div>
 
-                {/* Lista de Cards da Coluna */}
                 <div className={styles.columnCardsList}>
                   {colOrders.length === 0 ? (
                     <div className={styles.emptyColumnNotice}>Nenhum pedido nesta etapa</div>
@@ -727,7 +722,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
 
                       return (
                         <div key={order.id} className={styles.kanbanCard}>
-                          {/* Topo do Card: Código, Entrega & Botão Excluir */}
                           <div className={styles.cardTopRow}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                               <span className={styles.orderIdBadge}>#{orderShortId}</span>
@@ -742,7 +736,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                               </span>
                             </div>
 
-                            {/* Botão de Remover Pedido */}
                             <button
                               type="button"
                               onClick={() => handleDeleteOrder(order.id, order.customer_name)}
@@ -753,7 +746,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                             </button>
                           </div>
 
-                          {/* Seção do Cliente & Contato */}
                           <div className={styles.cardCustomerSection}>
                             <span className={styles.cardCustomerName}>{order.customer_name}</span>
                             {order.customer_phone && (
@@ -768,7 +760,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                             )}
                           </div>
 
-                          {/* Data do Evento / Aniversário */}
                           {order.event_date && (
                             <div className={styles.cardEventDateRow}>
                               <Calendar size={13} />
@@ -776,7 +767,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                             </div>
                           )}
 
-                          {/* Apenas o Produto (Sem observações no card, apenas em Ver Detalhes) */}
                           {firstItem && (
                             <div className={styles.cardCustomizationBox}>
                               <div className={styles.cardItemHeader}>
@@ -798,7 +788,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                             </div>
                           )}
 
-                          {/* Rodapé com Valores e Ações Rápidas */}
                           <div className={styles.cardFooter}>
                             <div className={styles.cardTotalRow}>
                               <span className={styles.cardTotalValue}>
@@ -809,7 +798,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                               </span>
                             </div>
 
-                            {/* Indicador de Pedido Concluído e Arquivado na Ficha de Clientes */}
                             {col.id === 'entregue' && (
                               <div className={styles.cardDeliveredSyncedBadge}>
                                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -832,7 +820,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                               </div>
                             )}
 
-                            {/* Botão de Notificação via WhatsApp */}
                             {col.id === 'pronto' ? (
                               <button
                                 type="button"
@@ -875,7 +862,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                               </button>
                             )}
 
-                            {/* Controles de Transição de Etapa */}
                             <div className={styles.cardStageControls}>
                               <button
                                 type="button"
@@ -914,7 +900,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
         </div>
       )}
 
-      {/* Visualização: TABELA / LISTA */}
       {viewMode === 'tabela' && (
         <div className={styles.ordersTableView}>
           <table className={styles.ordersTable}>
@@ -1696,7 +1681,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
       {selectedOrder && (
         <div className={styles.orderModalOverlay} onClick={() => setSelectedOrder(null)}>
           <div className={styles.orderModalCard} onClick={(e) => e.stopPropagation()}>
-            {/* Cabeçalho do Modal */}
             <div className={styles.orderModalHeader}>
               <div className={styles.orderModalTitleGroup}>
                 <h3 className={styles.orderModalTitle}>
@@ -1719,9 +1703,7 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
               </button>
             </div>
 
-            {/* Conteúdo do Modal */}
             <div className={styles.orderModalBody}>
-              {/* Barra de Status & Transição Rápida */}
               <div className={styles.orderStatusBanner}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#6D4C3D' }}>
@@ -1754,7 +1736,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                 </div>
               </div>
 
-              {/* Aviso no Modal quando Pedido estiver Entregue */}
               {selectedOrder.status === 'entregue' && (
                 <div className={styles.modalDeliveredNotice}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
@@ -1776,7 +1757,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                 </div>
               )}
 
-              {/* Seção: Itens & Personalização Solicitada */}
               <div>
                 <h4 className={styles.modalSectionHeading}>
                   <Tag size={16} color="#6D4C3D" />
@@ -1810,7 +1790,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                             </div>
                           </div>
 
-                          {/* Grid com os Detalhes da Personalização */}
                           <div className={styles.modalSpecsGrid}>
                             <div className={styles.specBox}>
                               <span className={styles.specLabel}>Modelo / Variação</span>
@@ -1840,7 +1819,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                               </span>
                             </div>
 
-                            {/* Campos Adicionais Customizados */}
                             {cust.customFieldValues &&
                               Object.entries(cust.customFieldValues).map(([k, val]) => (
                                 <div key={k} className={styles.specBox}>
@@ -1850,21 +1828,18 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                               ))}
                           </div>
 
-                          {/* Observações específicas do item */}
                           {cust.notes && (
                             <div className={styles.itemNotesBox}>
                               <strong>Observações do Produto:</strong> {cust.notes}
                             </div>
                           )}
 
-                          {/* Observações gerais do pedido em baixo da obs do produto */}
                           {selectedOrder.general_notes && (
                             <div className={styles.itemNotesBox} style={{ marginTop: cust.notes ? '0.5rem' : '0' }}>
                               <strong>Observações Gerais do Pedido:</strong> {selectedOrder.general_notes}
                             </div>
                           )}
 
-                          {/* Informação do Cupom de Desconto Utilizado */}
                           {selectedOrder.coupon_code && (
                             <div className={styles.itemCouponBox} style={{ marginTop: '0.5rem' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -1892,7 +1867,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                 </div>
               </div>
 
-              {/* Seção: Dados de Entrega & Cliente */}
               <div>
                 <h4 className={styles.modalSectionHeading}>
                   <MapPin size={16} color="#6D4C3D" />
@@ -1944,7 +1918,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                   </div>
                 </div>
 
-                {/* Endereço de Entrega Completo */}
                 {selectedOrder.delivery_address && (
                   <div className={styles.customerDetailBox} style={{ marginTop: '0.75rem' }}>
                     <span className={styles.customerBoxLabel}>Endereço Completo de Envio</span>
@@ -1954,10 +1927,8 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
               </div>
             </div>
 
-            {/* Rodapé do Modal com Botões de Ação Rápida */}
             <div className={styles.orderModalFooter}>
               <div className={styles.modalWhatsAppActions}>
-                {/* Botão Principal: Avisar que está pronto */}
                 <button
                   type="button"
                   onClick={() => handleWhatsAppReady(selectedOrder)}
@@ -1968,7 +1939,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                   <span>Avisar que está pronto</span>
                 </button>
 
-                {/* Conversar no WhatsApp */}
                 <button
                   type="button"
                   onClick={() => handleWhatsAppContact(selectedOrder)}
@@ -1979,7 +1949,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                   <span>💬 Falar no WhatsApp</span>
                 </button>
 
-                {/* Botão Cancelar / Remover Pedido */}
                 <button
                   type="button"
                   onClick={() => handleDeleteOrder(selectedOrder.id, selectedOrder.customer_name)}
@@ -1991,7 +1960,6 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
                 </button>
               </div>
 
-              {/* Botão Imprimir Ficha de Produção */}
               <button
                 type="button"
                 onClick={() => window.print()}

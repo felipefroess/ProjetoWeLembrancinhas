@@ -18,7 +18,6 @@ export function ProductCard({ product, isMostRequested, categoryName }: ProductC
   const [selectedVariation, setSelectedVariation] = useState<ProductVariation | null>(null);
   const [currentImage, setCurrentImage] = useState<string>(product.image);
 
-  // Nome da categoria legível para exibição na caixa do produto
   const resolvedCategoryName =
     categoryName ||
     CATEGORIES.find((c) => c.id === product.category)?.name ||
@@ -28,7 +27,6 @@ export function ProductCard({ product, isMostRequested, categoryName }: ProductC
           : product.category.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '))
       : '');
 
-  // Mantém a imagem atualizada caso as propriedades do produto mudem
   useEffect(() => {
     setCurrentImage(product.image);
     setSelectedVariation(null);
@@ -39,8 +37,8 @@ export function ProductCard({ product, isMostRequested, categoryName }: ProductC
   const variationPrices = (product.variations || [])
     .map((v) => (typeof v.price === 'number' ? v.price : parseFloat(String(v.price || 0))))
     .filter((p): p is number => typeof p === 'number' && !isNaN(p) && p > 0);
-  
-  const minPrice = variationPrices.length > 0 ? Math.min(rawProductPrice, ...variationPrices) : rawProductPrice;
+
+  const minPrice = variationPrices.length > 0 ? Math.min(...variationPrices) : rawProductPrice;
   const hasVaryingPrices = variationPrices.length > 0 && (Math.min(...variationPrices) !== Math.max(...variationPrices, rawProductPrice));
 
   const displayPrice = selectedVariation && typeof selectedVariation.price === 'number' && selectedVariation.price > 0
@@ -80,8 +78,7 @@ export function ProductCard({ product, isMostRequested, categoryName }: ProductC
 
   return (
     <div className={styles.productCard}>
-      {/* Container da Imagem com Tag - Clicável para abrir personalização */}
-      <div 
+      <div
         className={styles.imageContainer}
         onClick={handleOpenModal}
         role="button"
@@ -101,7 +98,6 @@ export function ProductCard({ product, isMostRequested, categoryName }: ProductC
           loading="lazy"
         />
 
-        {/* Badges superiores */}
         <div className={styles.badgesWrapper}>
           {(isMostRequested || product.isBestSeller) && (
             <span className={styles.popularBadge}>
@@ -129,7 +125,6 @@ export function ProductCard({ product, isMostRequested, categoryName }: ProductC
           )}
         </div>
 
-        {/* Categoria do Produto (substituiu o antigo "5 dias úteis") */}
         {resolvedCategoryName && (
           <div className={styles.categoryBadge} title={`Categoria: ${resolvedCategoryName}`}>
             <Tag size={10} className={styles.categoryIcon} />
@@ -138,7 +133,6 @@ export function ProductCard({ product, isMostRequested, categoryName }: ProductC
         )}
       </div>
 
-      {/* Conteúdo do Card */}
       <div className={styles.cardContent}>
         <div>
           <h3 className={styles.productName}>
@@ -148,7 +142,6 @@ export function ProductCard({ product, isMostRequested, categoryName }: ProductC
             {displayDescription}
           </p>
 
-          {/* Miniaturas de variação estilo Mercado Livre */}
           {product.variations && product.variations.length > 0 && (
             <div className={styles.variationsRow}>
               <span className={styles.variationsLabel}>Modelos:</span>
@@ -173,7 +166,6 @@ export function ProductCard({ product, isMostRequested, categoryName }: ProductC
           )}
         </div>
 
-        {/* Preço e Botão */}
         <div className={styles.cardFooter}>
           <div>
             {Boolean(product.originalPrice && product.originalPrice > displayPrice) && (

@@ -17,10 +17,10 @@ const StoreSettingsContext = createContext<StoreSettingsContextType | undefined>
 
 const CACHE_KEY = 'we_cached_store_settings';
 
-export function StoreSettingsProvider({ 
+export function StoreSettingsProvider({
   children,
   initialSettings,
-}: { 
+}: {
   children: React.ReactNode;
   initialSettings?: StoreSettings;
 }) {
@@ -45,18 +45,19 @@ export function StoreSettingsProvider({
   }, []);
 
   useEffect(() => {
-    // Hidratação rápida via localStorage se disponível
-    try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed && typeof parsed === 'object') {
-          setSettings((prev) => ({ ...prev, ...parsed }));
+    queueMicrotask(() => {
+      try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && typeof parsed === 'object') {
+            setSettings((prev) => ({ ...prev, ...parsed }));
+          }
         }
-      }
-    } catch {}
+      } catch {}
 
-    fetchSettings();
+      fetchSettings();
+    });
   }, [fetchSettings]);
 
   const updateSettings = async (

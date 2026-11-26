@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { 
-  getAllCoupons, 
-  createCoupon, 
-  updateCoupon, 
-  deleteCoupon, 
-  validateCoupon 
+import { isAuthenticated } from '@/lib/auth';
+import {
+  getAllCoupons,
+  createCoupon,
+  updateCoupon,
+  deleteCoupon,
+  validateCoupon
 } from '@/lib/couponsStore';
 
-// GET: Retornar lista de todos os cupons cadastrados
 export async function GET() {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ success: false, error: 'Não autorizado.' }, { status: 401 });
+  }
   try {
     const coupons = await getAllCoupons();
     return NextResponse.json({ success: true, coupons });
@@ -21,13 +24,14 @@ export async function GET() {
   }
 }
 
-// POST: Criar novo cupom (admin) OU Validar cupom (carrinho/checkout)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Se a requisição veio do painel Admin para criar cupom
     if (body.action === 'create') {
+      if (!(await isAuthenticated())) {
+        return NextResponse.json({ success: false, error: 'Não autorizado.' }, { status: 401 });
+      }
       const result = await createCoupon({
         code: body.code,
         type: body.type,
@@ -53,7 +57,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Caso padrão: Validação do cupom feita no carrinho ou checkout
     const rawCode = (body.code || '').trim();
     const subtotal = Number(body.subtotal) || 0;
     const phone = body.phone ? String(body.phone).trim() : undefined;
@@ -65,11 +68,14 @@ export async function POST(request: NextRequest) {
       hasOnlyWholesale,
     });
     if (!validation.valid) {
-      return NextResponse.json({
-        success: false,
-        valid: false,
-        message: validation.message,
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          valid: false,
+          message: validation.message,
+        },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json({
@@ -85,8 +91,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PATCH: Atualizar cupom existente (ex: ativar/desativar, alterar valor ou data)
 export async function PATCH(request: NextRequest) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ success: false, error: 'Não autorizado.' }, { status: 401 });
+  }
   try {
     const body = await request.json();
     const { id, ...updates } = body;
@@ -120,8 +128,10 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
-// DELETE: Excluir um cupom
 export async function DELETE(request: NextRequest) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ success: false, error: 'Não autorizado.' }, { status: 401 });
+  }
   try {
     const { searchParams } = new URL(request.url);
     let id = searchParams.get('id');

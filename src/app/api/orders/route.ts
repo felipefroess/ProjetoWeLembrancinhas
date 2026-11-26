@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
-import { 
-  getAllProductionOrders, 
-  createProductionOrder, 
-  updateProductionOrderStatus, 
-  deleteProductionOrder 
+import { isAuthenticated } from '@/lib/auth';
+import {
+  getAllProductionOrders,
+  createProductionOrder,
+  updateProductionOrderStatus,
+  deleteProductionOrder
 } from '@/lib/ordersStore';
 import { syncOrderToCustomerCard } from '@/lib/customersStore';
 import { isDbConfigured } from '@/server/db/client';
@@ -16,16 +17,21 @@ const NO_CACHE_HEADERS = {
   'Surrogate-Control': 'no-store',
 };
 
-// GET: Buscar pedidos para o painel Admin e Kanban
-export async function GET(request: Request) {
+export async function GET() {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json(
+      { success: false, error: 'Não autorizado' },
+      { status: 401, headers: NO_CACHE_HEADERS }
+    );
+  }
   try {
     const { orders, source } = await getAllProductionOrders();
     return NextResponse.json(
-      { 
-        success: true, 
-        orders, 
+      {
+        success: true,
+        orders,
         configured: isDbConfigured(),
-        source 
+        source
       },
       {
         headers: NO_CACHE_HEADERS,
@@ -34,13 +40,12 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Erro ao buscar pedidos:', error);
     return NextResponse.json(
-      { success: false, error: 'Erro ao buscar pedidos' }, 
+      { success: false, error: 'Erro ao buscar pedidos' },
       { status: 500, headers: NO_CACHE_HEADERS }
     );
   }
 }
 
-// POST: Salvar pedido gerado no checkout ou cadastrado manualmente
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -63,11 +68,12 @@ export async function POST(request: Request) {
 
     if (!customerName) {
       return NextResponse.json(
-        { success: false, error: 'Nome do cliente é obrigatório' }, 
+        { success: false, error: 'Nome do cliente é obrigatório' },
         { status: 400, headers: NO_CACHE_HEADERS }
       );
     }
 
+    const isAdmin = await isAuthenticated();
     const created = await createProductionOrder({
       customerName,
       customerPhone,
@@ -81,10 +87,9 @@ export async function POST(request: Request) {
       discountAmount: discountAmount !== undefined ? Number(discountAmount) : undefined,
       subtotalAmount: subtotalAmount !== undefined ? Number(subtotalAmount) : undefined,
       items: items || [],
-      status: status as OrderStatus,
+      status: isAdmin ? (status as OrderStatus) : undefined,
     });
 
-    // Se o pedido já nascer ou for cadastrado como entregue, arquiva na ficha do cliente
     let customerSyncResult: any = null;
     if (created.status === 'entregue') {
       try {
@@ -95,9 +100,9 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { 
-        success: true, 
-        orderId: created.id, 
+      {
+        success: true,
+        orderId: created.id,
         order: created,
         saved: true,
         customerSynced: Boolean(customerSyncResult && customerSyncResult.action !== 'skipped'),
@@ -111,24 +116,29 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Erro ao processar pedido:', error);
     return NextResponse.json(
-      { success: false, error: 'Erro interno' }, 
+      { success: false, error: 'Erro interno' },
       { status: 500, headers: NO_CACHE_HEADERS }
     );
   }
 }
 
-// PATCH: Atualizar status ou observações de um pedido no Kanban
 export async function PATCH(request: Request) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json(
+      { success: false, error: 'Não autorizado' },
+      { status: 401, headers: NO_CACHE_HEADERS }
+    );
+  }
   try {
     const body = await request.json();
     const { id, status, generalNotes } = body;
 
     if (!id || !status) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'ID e status são obrigatórios para atualização' 
-        }, 
+        {
+          success: false,
+          error: 'ID e status são obrigatórios para atualização'
+        },
         { status: 400, headers: NO_CACHE_HEADERS }
       );
     }
@@ -136,12 +146,11 @@ export async function PATCH(request: Request) {
     const updated = await updateProductionOrderStatus(id, status as OrderStatus, generalNotes);
     if (!updated) {
       return NextResponse.json(
-        { success: false, error: 'Pedido não encontrado' }, 
+        { success: false, error: 'Pedido não encontrado' },
         { status: 404, headers: NO_CACHE_HEADERS }
       );
     }
 
-    // Se o pedido foi colocado como ENTREGUE, envia e salva permanentemente na ficha do cliente
     let customerSyncResult: {
       action: 'created_customer' | 'added_purchase' | 'updated_purchase' | 'skipped';
       customer?: any;
@@ -156,8 +165,8 @@ export async function PATCH(request: Request) {
     }
 
     return NextResponse.json(
-      { 
-        success: true, 
+      {
+        success: true,
         order: updated,
         customerSynced: Boolean(customerSyncResult && customerSyncResult.action !== 'skipped'),
         customerAction: customerSyncResult?.action,
@@ -168,21 +177,26 @@ export async function PATCH(request: Request) {
   } catch (error) {
     console.error('Erro ao atualizar status do pedido:', error);
     return NextResponse.json(
-      { success: false, error: 'Erro ao atualizar pedido' }, 
+      { success: false, error: 'Erro ao atualizar pedido' },
       { status: 500, headers: NO_CACHE_HEADERS }
     );
   }
 }
 
-// DELETE: Remover um pedido
 export async function DELETE(request: Request) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json(
+      { success: false, error: 'Não autorizado' },
+      { status: 401, headers: NO_CACHE_HEADERS }
+    );
+  }
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) {
       return NextResponse.json(
-        { success: false, error: 'ID do pedido não informado' }, 
+        { success: false, error: 'ID do pedido não informado' },
         { status: 400, headers: NO_CACHE_HEADERS }
       );
     }
@@ -195,7 +209,7 @@ export async function DELETE(request: Request) {
   } catch (error) {
     console.error('Erro ao remover pedido:', error);
     return NextResponse.json(
-      { success: false, error: 'Erro ao remover pedido' }, 
+      { success: false, error: 'Erro ao remover pedido' },
       { status: 500, headers: NO_CACHE_HEADERS }
     );
   }

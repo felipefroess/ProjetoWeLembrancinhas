@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isAuthenticated } from '@/lib/auth';
 import { sql, isDbConfigured } from '@/server/db/client';
 import { AnalyticsPeriod, TopProductStat } from '@/lib/analytics';
 import { getAllProductionOrders } from '@/lib/ordersStore';
@@ -68,6 +69,9 @@ function aggregateOrders(
 }
 
 export async function GET(request: NextRequest) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+  }
   const period = (request.nextUrl.searchParams.get('period') || 'mes') as AnalyticsPeriod;
   try {
     const now = new Date();
@@ -116,7 +120,6 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Executa as consultas de métricas no Neon em paralelo com queries parametrizadas
     const [
       visitsRows,
       prevVisitsRows,
@@ -125,28 +128,28 @@ export async function GET(request: NextRequest) {
       clicks,
     ] = await Promise.all([
       sql<{ count: number }>`
-        SELECT COUNT(*)::int as count 
-        FROM public.page_views 
+        SELECT COUNT(*)::int as count
+        FROM public.page_views
         WHERE created_at >= ${isoStart}::timestamptz
       `,
       sql<{ count: number }>`
-        SELECT COUNT(*)::int as count 
-        FROM public.page_views 
+        SELECT COUNT(*)::int as count
+        FROM public.page_views
         WHERE created_at >= ${prevIsoStart}::timestamptz AND created_at < ${isoStart}::timestamptz
       `,
       sql<any>`
-        SELECT * 
-        FROM public.orders 
+        SELECT *
+        FROM public.orders
         WHERE created_at >= ${isoStart}::timestamptz AND status != 'cancelado'
       `,
       sql<{ total_amount: number; total_units: number }>`
-        SELECT total_amount, total_units 
-        FROM public.orders 
+        SELECT total_amount, total_units
+        FROM public.orders
         WHERE created_at >= ${prevIsoStart}::timestamptz AND created_at < ${isoStart}::timestamptz AND status != 'cancelado'
       `,
       sql<{ product_id: string; product_name: string; category: string }>`
-        SELECT product_id, product_name, category 
-        FROM public.product_clicks 
+        SELECT product_id, product_name, category
+        FROM public.product_clicks
         WHERE created_at >= ${isoStart}::timestamptz
       `,
     ]);

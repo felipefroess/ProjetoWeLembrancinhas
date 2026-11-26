@@ -86,7 +86,6 @@
   }
 }
 
-/* Área de Visualização / Corte */
 .stageContainer {
   flex: 1;
   background-color: #231B17;
@@ -137,7 +136,6 @@
   touch-action: none;
 }
 
-/* Grade regra dos terços */
 .gridLinesH1,
 .gridLinesH2,
 .gridLinesV1,
@@ -175,7 +173,6 @@
   width: 1px;
 }
 
-/* Alças de redimensionamento */
 .handle {
   position: absolute;
   width: 14px;
@@ -208,7 +205,6 @@
   font-weight: 600;
 }
 
-/* Barra Lateral de Controles */
 .sidebar {
   width: 100%;
   background-color: #FAF7F2;

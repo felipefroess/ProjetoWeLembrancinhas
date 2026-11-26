@@ -34,7 +34,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Campos obrigatórios ausentes' }, { status: 400 });
     }
 
-    // Se o usuário digitou uma categoria nova, garante que ela é registrada
     if (body.newCategoryName) {
       await saveCategory({
         id: product.category,
@@ -43,7 +42,6 @@ export async function POST(request: Request) {
       });
     }
 
-    // Se marcado como Mais Vendido, garante exclusividade desmarcando dos demais produtos
     if (product.isBestSeller) {
       const allExisting = await getAllProducts();
       for (const p of allExisting) {

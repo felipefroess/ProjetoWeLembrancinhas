@@ -65,14 +65,12 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
   const [syncingOrders, setSyncingOrders] = useState(false);
   const [syncFeedback, setSyncFeedback] = useState<{ text: string; isError?: boolean } | null>(null);
 
-  // Modal Criar / Editar Ficha de Cliente
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<CustomerRecord | null>(null);
   const [custName, setCustName] = useState('');
   const [custPhone, setCustPhone] = useState('');
   const [custInstagram, setCustInstagram] = useState('');
   const [custNotes, setCustNotes] = useState('');
-  // Primeira compra opcional ao cadastrar cliente novo
   const [initItem, setInitItem] = useState('');
   const [initQty, setInitQty] = useState('');
   const [initAmount, setInitAmount] = useState('');
@@ -81,7 +79,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
   const [customerFormError, setCustomerFormError] = useState('');
   const [savingCustomer, setSavingCustomer] = useState(false);
 
-  // Modal Adicionar / Editar Compra na Ficha
   const [purchaseTargetCustomer, setPurchaseTargetCustomer] = useState<CustomerRecord | null>(null);
   const [editingPurchase, setEditingPurchase] = useState<CustomerPurchase | null>(null);
   const [purchItem, setPurchItem] = useState('');
@@ -92,7 +89,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
   const [purchaseFormError, setPurchaseFormError] = useState('');
   const [savingPurchase, setSavingPurchase] = useState(false);
 
-  // Confirmação de Exclusão
   const [deleteTarget, setDeleteTarget] = useState<
     | null
     | { kind: 'customer'; customer: CustomerRecord }
@@ -177,7 +173,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
     }
   };
 
-  // Identifica todos os anos com pedidos ou eventos registrados para permitir filtro por ano
   const availableYears = useMemo(() => {
     const years = new Set<string>();
     customers.forEach((c) => {
@@ -224,7 +219,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
     const filtered = enrichedCustomers.filter((c) => {
       if (filter === 'loyal' && !c.isLoyal) return false;
 
-      // Filtro por ano específico (permite encontrar clientes de anos anteriores com 1 clique)
       if (selectedYear !== 'all') {
         const hasPurchaseInYear = c.purchases.some((p) => {
           const dateMatch = p.date && p.date.startsWith(selectedYear);
@@ -504,7 +498,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
 
   return (
     <section className={styles.container}>
-      {/* Cabeçalho */}
       <div className={styles.headerRow}>
         <div>
           <h2 className={styles.heading}>Fichas de Clientes & Fidelidade</h2>
@@ -553,7 +546,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
         </div>
       )}
 
-      {/* KPIs */}
       <div className={styles.kpiGrid}>
         <div className={styles.kpiCard}>
           <div>
@@ -589,7 +581,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
         </div>
       </div>
 
-      {/* Busca, Filtros e Ordenação */}
       <div className={styles.toolbar}>
         <div className={styles.searchWrap}>
           <Search size={16} className={styles.searchIcon} />
@@ -651,7 +642,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
         </div>
       </div>
 
-      {/* Aviso de Filtro de Ano Ativo */}
       {selectedYear !== 'all' && (
         <div className={styles.yearFilterNotice}>
           <span>
@@ -667,7 +657,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
         </div>
       )}
 
-      {/* Listagem */}
       {loading ? (
         <div className={styles.emptyBox}>Carregando fichas de clientes...</div>
       ) : filteredAndSorted.length === 0 ? (
@@ -886,7 +875,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
         </div>
       )}
 
-      {/* Modal Criar / Editar Ficha do Cliente */}
       {isCustomerModalOpen && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalCard}>
@@ -1052,7 +1040,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
         </div>
       )}
 
-      {/* Modal Adicionar / Editar Compra na Ficha */}
       {purchaseTargetCustomer && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalCard}>
@@ -1170,7 +1157,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
         </div>
       )}
 
-      {/* Modal Confirmação de Exclusão */}
       {deleteTarget && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalCard} style={{ maxWidth: '26rem' }}>

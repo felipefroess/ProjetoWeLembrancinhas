@@ -11,7 +11,6 @@ export function HeroBanner() {
 
   return (
     <section className={styles.heroSection}>
-      {/* Elementos decorativos de fundo */}
       <div className={styles.decorCircleTop} />
       <div className={styles.decorCircleBottom} />
 
@@ -30,10 +29,8 @@ export function HeroBanner() {
           </div>
         </div>
 
-        {/* Linha divisória tracejada na largura normal da página */}
         <div className={styles.heroDivider} />
 
-        {/* 3 Passos Simples Didáticos */}
         <div className={styles.stepsSection}>
           <div className={styles.stepsHeader}>
             <span className={styles.stepsTag}>Como funciona</span>
@@ -41,7 +38,6 @@ export function HeroBanner() {
           </div>
 
             <div className={styles.stepsGrid}>
-              {/* Passo 1 */}
               <div className={styles.stepCard}>
                 <div className={styles.stepIconWrap}>
                   <span className={styles.stepNumber}>1</span>
@@ -53,7 +49,6 @@ export function HeroBanner() {
                 </p>
               </div>
 
-              {/* Passo 2 */}
               <div className={styles.stepCard}>
                 <div className={styles.stepIconWrap}>
                   <span className={styles.stepNumber}>2</span>
@@ -65,7 +60,6 @@ export function HeroBanner() {
                 </p>
               </div>
 
-              {/* Passo 3 */}
               <div className={styles.stepCard}>
                 <div className={styles.stepIconWrap}>
                   <span className={styles.stepNumber}>3</span>

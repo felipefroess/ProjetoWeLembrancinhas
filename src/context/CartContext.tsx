@@ -41,9 +41,6 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 const STORAGE_KEY = 'welembrancinhas_cart_v1';
 const COUPON_STORAGE_KEY = 'welembrancinhas_coupon_v1';
 
-/**
- * Identifica se um item do carrinho é de atacado (possui tabela progressiva ou recebeu preço com desconto de atacado)
- */
 export function isWholesaleCartItem(item: CartItem): boolean {
   const hasWholesaleTiers = Boolean(
     item.product.quantityDiscounts &&
@@ -65,24 +62,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [selectedVariationIdForCustomization, setSelectedVariationIdForCustomization] = useState<string | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Carregar do localStorage ao montar o componente
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setItems(JSON.parse(stored));
+    queueMicrotask(() => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          setItems(JSON.parse(stored));
+        }
+        const storedCoupon = localStorage.getItem(COUPON_STORAGE_KEY);
+        if (storedCoupon) {
+          setAppliedCoupon(JSON.parse(storedCoupon));
+        }
+      } catch (e) {
+        console.error('Falha ao ler carrinho do localStorage:', e);
       }
-      const storedCoupon = localStorage.getItem(COUPON_STORAGE_KEY);
-      if (storedCoupon) {
-        setAppliedCoupon(JSON.parse(storedCoupon));
-      }
-    } catch (e) {
-      console.error('Falha ao ler carrinho do localStorage:', e);
-    }
-    setIsHydrated(true);
+      setIsHydrated(true);
+    });
   }, []);
 
-  // Salvar no localStorage ao alterar itens
   useEffect(() => {
     if (!isHydrated) return;
     try {
@@ -92,7 +89,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isHydrated]);
 
-  // Salvar cupom no localStorage
   useEffect(() => {
     if (!isHydrated) return;
     try {
@@ -145,8 +141,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addToCart = (product: Product, quantity: number, customization: CustomizationOptions) => {
-    // Cria um identificador único considerando as opções de personalização
-    const customKey = `${product.id}_${customization.variation || ''}_${customization.theme || ''}_${customization.childName || ''}_${customization.ribbonColor || ''}`;
+    const customFieldsKey = customization.customFieldValues
+      ? Object.entries(customization.customFieldValues)
+          .filter(([, v]) => v && String(v).trim())
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([k, v]) => `${k}:${String(v).trim()}`)
+          .join('|')
+      : '';
+    const customKey = `${product.id}_${customization.variation || ''}_${customization.theme || ''}_${customization.childName || ''}_${customization.ribbonColor || ''}_${customFieldsKey}_${(customization.notes || '').trim()}`;
 
     setItems((prev) => {
       const existingIndex = prev.findIndex((item) => item.cartItemId === customKey);
@@ -215,14 +217,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
   const subtotalAmount = items.reduce((acc, item) => acc + item.subtotal, 0);
 
-  // Verifica se o cupom atual exclui produtos de atacado (que já possuem desconto por volume)
   const isCouponExcludedFromWholesale = Boolean(
     appliedCoupon?.firstPurchaseOnly ||
     appliedCoupon?.code === 'PRIMEIRACOMPRA' ||
     appliedCoupon?.excludeWholesale !== false
   );
 
-  // Itens elegíveis para o desconto do cupom
   const eligibleItems = items.filter((item) => {
     if (isCouponExcludedFromWholesale && isWholesaleCartItem(item)) {
       return false;
@@ -233,7 +233,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const eligibleSubtotal = eligibleItems.reduce((acc, item) => acc + item.subtotal, 0);
   const hasWholesaleInCart = items.some(isWholesaleCartItem);
 
-  // Calcula desconto dinamicamente sobre a base de produtos elegíveis
   const discountAmount = appliedCoupon
     ? isCouponExcludedFromWholesale && eligibleSubtotal <= 0
       ? 0
@@ -255,7 +254,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       .filter((i) => !isWholesaleCartItem(i))
       .reduce((acc, i) => acc + i.subtotal, 0);
 
-    // Validação preventiva imediata para o cupom de primeira compra
     if (onlyWholesale && (cleanCode === 'PRIMEIRACOMPRA' || cleanCode.includes('PRIMEIR'))) {
       return {
         success: false,
@@ -263,7 +261,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       };
     }
 
-    // 1. Verifica se o cupom já foi utilizado anteriormente neste aparelho
     try {
       const usedCoupons = JSON.parse(localStorage.getItem('we_used_coupons') || '[]');
       if (Array.isArray(usedCoupons) && usedCoupons.includes(cleanCode)) {
@@ -273,7 +270,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         };
       }
     } catch {
-      // Ignora erro de localStorage
     }
 
     try {
@@ -310,7 +306,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setAppliedCoupon(null);
   };
 
-  // Formata o pedido em Markdown limpo para WhatsApp
   const generateWhatsAppOrderUrl = (orderData: CustomerOrderData): string => {
     let message = `Olá, Wê! Tudo bem?\n`;
     message += `Gostaria de fazer um pedido pela sua loja online:\n\n`;
@@ -320,7 +315,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const rawUnit = item.product.unit?.toLowerCase() || '';
       const unitLabel = rawUnit.includes('un') || !rawUnit ? 'unidade(s)' : `${item.product.unit}(s)`;
       message += `   • ${item.quantity} ${unitLabel}\n`;
-      
+
       if (item.customization.variation) {
         message += `   • Modelo: *${item.customization.variation}*\n`;
       }

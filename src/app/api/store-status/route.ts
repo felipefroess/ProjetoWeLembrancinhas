@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { isAuthenticated } from '@/lib/auth';
 import { getStoreStatus, updateStoreStatus } from '@/lib/storeSettingsStore';
 
 export async function GET(request: Request) {
@@ -20,6 +21,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ success: false, error: 'Não autorizado' }, { status: 401 });
+  }
   try {
     const body = await request.json();
     const updated = await updateStoreStatus(Boolean(body.isOnline));

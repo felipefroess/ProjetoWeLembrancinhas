@@ -11,10 +11,10 @@ export interface AdminCoupon {
   value: number;
   description?: string;
   minOrderValue?: number;
-  expiresAt?: string | null; // Formato YYYY-MM-DD ou ISO
+  expiresAt?: string | null;
   isActive: boolean;
-  firstPurchaseOnly?: boolean; // Válido apenas na 1ª compra do cliente
-  excludeWholesale?: boolean;  // Não cumulativo com produtos de atacado / desconto por quantidade
+  firstPurchaseOnly?: boolean;
+  excludeWholesale?: boolean;
   createdAt: string;
 }
 
@@ -99,15 +99,12 @@ function mapRowToCoupon(row: any): AdminCoupon {
   };
 }
 
-/**
- * Lê os cupons do Neon (com auto-seed inicial e fallback local)
- */
 export async function getAllCoupons(): Promise<AdminCoupon[]> {
   if (isDbConfigured()) {
     try {
       const rows = await sql<any>`
-        SELECT 
-          id, code, type, value, description, min_order_value, 
+        SELECT
+          id, code, type, value, description, min_order_value,
           expires_at, is_active, first_purchase_only, created_at
         FROM public.coupons
         ORDER BY created_at DESC
@@ -149,9 +146,6 @@ export async function getAllCoupons(): Promise<AdminCoupon[]> {
   return readLocalCoupons();
 }
 
-/**
- * Cria um novo cupom no Neon
- */
 export async function createCoupon(data: {
   code: string;
   type: 'percentage' | 'fixed';
@@ -229,9 +223,6 @@ export async function createCoupon(data: {
   return { success: true, coupon: newCoupon };
 }
 
-/**
- * Atualiza um cupom existente no Neon
- */
 export async function updateCoupon(
   id: string,
   updates: Partial<Omit<AdminCoupon, 'id' | 'createdAt'>>
@@ -255,7 +246,17 @@ export async function updateCoupon(
     normalizedUpdates.code = cleanCode;
   }
 
-  if (normalizedUpdates.type === 'percentage' && normalizedUpdates.value && normalizedUpdates.value > 100) {
+  const effectiveType = normalizedUpdates.type ?? existing[index].type;
+  const effectiveValue =
+    normalizedUpdates.value !== undefined
+      ? Number(normalizedUpdates.value)
+      : existing[index].value;
+
+  if (!Number.isFinite(effectiveValue) || effectiveValue <= 0) {
+    return { success: false, error: 'O valor do desconto deve ser maior que zero.' };
+  }
+
+  if (effectiveType === 'percentage' && effectiveValue > 100) {
     return { success: false, error: 'A porcentagem de desconto não pode ser superior a 100%.' };
   }
 
@@ -298,9 +299,6 @@ export async function updateCoupon(
   return { success: true, coupon: updatedCoupon };
 }
 
-/**
- * Deleta um cupom por ID no Neon
- */
 export async function deleteCoupon(id: string): Promise<{ success: boolean; error?: string }> {
   const existing = await getAllCoupons();
   const filtered = existing.filter((c) => c.id !== id);
@@ -328,9 +326,6 @@ export async function deleteCoupon(id: string): Promise<{ success: boolean; erro
   return { success: true };
 }
 
-/**
- * Valida o cupom para uso no checkout / carrinho
- */
 export async function validateCoupon(
   rawCode: string,
   subtotal: number,
@@ -371,11 +366,12 @@ export async function validateCoupon(
   const isFirstPurchaseCoupon = matched.firstPurchaseOnly === true || matched.code === 'PRIMEIRACOMPRA';
   const shouldExcludeWholesale = isFirstPurchaseCoupon || matched.excludeWholesale !== false;
 
-  // Bloqueia uso em carrinho que contém apenas itens de atacado (desconto progressivo)
   if (shouldExcludeWholesale && options?.hasOnlyWholesale) {
     return {
       valid: false,
-      message: 'O cupom de 1ª compra não é aplicável em produtos de atacado (que já possuem desconto progressivo).',
+      message: isFirstPurchaseCoupon
+        ? 'O cupom de 1ª compra não é aplicável em produtos de atacado (que já possuem desconto progressivo).'
+        : 'Este cupom não é aplicável em produtos de atacado (que já possuem desconto progressivo).',
     };
   }
 
@@ -390,12 +386,14 @@ export async function validateCoupon(
   }
 
   if (matched.expiresAt) {
-    const expDate = new Date(matched.expiresAt);
-    if (matched.expiresAt.length === 10) {
-      expDate.setHours(23, 59, 59, 999);
-    }
-    if (Date.now() > expDate.getTime()) {
-      const formattedDate = new Date(matched.expiresAt).toLocaleDateString('pt-BR');
+    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(matched.expiresAt.trim());
+    const expDate = dateOnlyMatch
+      ? new Date(Number(dateOnlyMatch[1]), Number(dateOnlyMatch[2]) - 1, Number(dateOnlyMatch[3]), 23, 59, 59, 999)
+      : new Date(matched.expiresAt);
+    if (!Number.isNaN(expDate.getTime()) && Date.now() > expDate.getTime()) {
+      const formattedDate = dateOnlyMatch
+        ? `${dateOnlyMatch[3]}/${dateOnlyMatch[2]}/${dateOnlyMatch[1]}`
+        : expDate.toLocaleDateString('pt-BR');
       return {
         valid: false,
         message: `Este cupom expirou em ${formattedDate}.`,
@@ -403,7 +401,6 @@ export async function validateCoupon(
     }
   }
 
-  // Base de cálculo: se o cupom não for cumulativo com atacado, valida sobre o subtotal elegível
   const effectiveSubtotal =
     shouldExcludeWholesale && typeof options?.eligibleSubtotal === 'number'
       ? options.eligibleSubtotal

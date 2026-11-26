@@ -1,4 +1,3 @@
-/* Estilos do Rodapé (Footer) */
 .footerContainer {
   background-color: #2D231E;
   color: #D8CDC4;
@@ -43,7 +42,6 @@
   }
 }
 
-/* Coluna 1: Sobre a Loja */
 .brandHeader {
   display: flex;
   align-items: center;
@@ -127,7 +125,6 @@
   flex-shrink: 0;
 }
 
-/* Coluna 2: Redes e Contato */
 .columnTitle {
   font-family: var(--font-serif, "Cormorant Garamond", Georgia, serif);
   font-weight: 700;
@@ -170,7 +167,6 @@
   flex-shrink: 0;
 }
 
-/* Rodapé inferior */
 .bottomRow {
   padding-top: 1.5rem;
   display: flex;
@@ -192,7 +188,6 @@
   margin: 0;
 }
 
-/* Link discreto para painel administrativo */
 .discreetAdminLink {
   display: inline-flex;
   align-items: center;

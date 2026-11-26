@@ -3,17 +3,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '@/context/CartContext';
 import { ProductVariation } from '@/types';
-import { 
-  X, 
-  Check, 
-  Clock, 
-  AlertCircle, 
-  ChevronLeft, 
-  ChevronRight, 
-  ZoomIn, 
+import {
+  X,
+  Check,
+  Clock,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  ZoomIn,
   RotateCcw,
   Camera,
-  Tag 
+  Tag
 } from 'lucide-react';
 import { calculateUnitPrice, getSortedQuantityDiscounts, getNextDiscountTier } from '@/lib/pricing';
 import { CATEGORIES } from '@/data/categories';
@@ -38,7 +38,6 @@ export function ProductModal() {
   const [missingFields, setMissingFields] = useState<Record<string, boolean>>({});
   const fieldRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // Estados e referências para controle de Zoom interativo
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const imageContainerRef = useRef<HTMLDivElement>(null);
@@ -46,7 +45,6 @@ export function ProductModal() {
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef<{ x: number; y: number; posX: number; posY: number }>({ x: 0, y: 0, posX: 0, posY: 0 });
 
-  // Reseta os campos ao abrir o modal para um novo produto
   useEffect(() => {
     if (product) {
       setQuantity(product.minQuantity || 1);
@@ -67,13 +65,11 @@ export function ProductModal() {
     }
   }, [product, selectedVariationIdForCustomization]);
 
-  // Reseta o zoom sempre que a imagem selecionada mudar
   useEffect(() => {
     setScale(1);
     setPosition({ x: 0, y: 0 });
   }, [selectedImage]);
 
-  // Zoom pelo scroll do mouse (com passive: false para prevenir scroll do modal)
   useEffect(() => {
     const container = imageContainerRef.current;
     if (!container || !isCustomizingModalOpen) return;
@@ -82,8 +78,8 @@ export function ProductModal() {
       e.preventDefault();
       const zoomStep = 0.25;
       setScale((prevScale) => {
-        const nextScale = e.deltaY < 0 
-          ? Math.min(3.5, prevScale + zoomStep) 
+        const nextScale = e.deltaY < 0
+          ? Math.min(3.5, prevScale + zoomStep)
           : Math.max(1, prevScale - zoomStep);
         if (nextScale === 1) {
           setPosition({ x: 0, y: 0 });
@@ -110,17 +106,16 @@ export function ProductModal() {
   const currentPrice = calculateUnitPrice(product, currentQuantity, baseVariationPrice);
   const subtotal = currentPrice * currentQuantity;
   const sortedDiscounts = getSortedQuantityDiscounts(product);
-  const nextDiscount = getNextDiscountTier(product, currentQuantity);
+  const nextDiscount = getNextDiscountTier(product, currentQuantity, baseVariationPrice);
 
-  // Lista de imagens para navegação por setas:
-  // Se a variação selecionada tiver suas próprias fotos (ex: modelo com foto fechado e aberto), usa elas!
   const imagesList = (selectedVariation?.images && selectedVariation.images.length > 0)
     ? selectedVariation.images
-    : (product.images && product.images.length > 0 ? product.images : [product.image]);
+    : selectedVariation?.image
+      ? (product.images && product.images.includes(selectedVariation.image) ? product.images : [selectedVariation.image])
+      : (product.images && product.images.length > 0 ? product.images : [product.image]);
   const currentImageIndex = imagesList.indexOf(selectedImage || product.image);
   const validIndex = currentImageIndex >= 0 ? currentImageIndex : 0;
 
-  // Navegação: Foto anterior
   const handlePrevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     const newIndex = validIndex <= 0 ? imagesList.length - 1 : validIndex - 1;
@@ -130,7 +125,6 @@ export function ProductModal() {
     setPosition({ x: 0, y: 0 });
   };
 
-  // Navegação: Próxima foto
   const handleNextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     const newIndex = validIndex >= imagesList.length - 1 ? 0 : validIndex + 1;
@@ -140,7 +134,6 @@ export function ProductModal() {
     setPosition({ x: 0, y: 0 });
   };
 
-  // Zoom no mobile via pinça de 2 dedos (Pinch-to-zoom) e arrasto com 1 dedo
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
       const dist = Math.hypot(
@@ -195,7 +188,6 @@ export function ProductModal() {
     touchStartRef.current = null;
   };
 
-  // Arrasto no Desktop quando a imagem está com zoom
   const handleMouseDown = (e: React.MouseEvent) => {
     if (scale > 1) {
       isDraggingRef.current = true;
@@ -223,7 +215,6 @@ export function ProductModal() {
     isDraggingRef.current = false;
   };
 
-  // Duplo clique alterna entre zoom 2.2x e 1x
   const handleDoubleClick = () => {
     if (scale > 1) {
       setScale(1);
@@ -362,11 +353,10 @@ export function ProductModal() {
 
   return (
     <div className={styles.modalOverlay}>
-      <div 
+      <div
         className={styles.modalCard}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Cabeçalho do Modal */}
         <div className={styles.modalHeader}>
           <h3 className={styles.modalTitle}>
             Personalize seu Pedido
@@ -380,18 +370,13 @@ export function ProductModal() {
           </button>
         </div>
 
-        {/* Corpo com scroll em layout de 2 colunas */}
         <div className={styles.modalBody}>
           <div className={styles.modalGrid}>
-            
-            {/* ========================================================
-                COLUNA DA ESQUERDA: Foto Inteira com Zoom e Setas
-               ======================================================== */}
+
             <div className={styles.leftColumn}>
               <div className={styles.imageGalleryWrapper}>
-                
-                {/* Container Principal com Suporte a Zoom (Scroll e Pinça) */}
-                <div 
+
+                <div
                   ref={imageContainerRef}
                   className={styles.mainImageContainer}
                   onMouseDown={handleMouseDown}
@@ -417,7 +402,6 @@ export function ProductModal() {
                     draggable={false}
                   />
 
-                  {/* Setas de Navegação (Exibidas quando há mais de 1 foto) */}
                   {imagesList.length > 1 && (
                     <>
                       <button
@@ -440,14 +424,12 @@ export function ProductModal() {
                         <ChevronRight size={22} />
                       </button>
 
-                      {/* Contador de Fotos */}
                       <div className={styles.imageCounterBadge}>
                         <span>{validIndex + 1} / {imagesList.length}</span>
                       </div>
                     </>
                   )}
 
-                  {/* Indicador de Zoom ou Botão para Redefinir */}
                   {scale > 1 ? (
                     <button
                       type="button"
@@ -470,11 +452,6 @@ export function ProductModal() {
                   )}
                 </div>
 
-                {/* 
-                  Miniaturas de fotos adicionais:
-                  APENAS para produtos de modelo único que possuem múltiplos ângulos/fotos.
-                  Para produtos com múltiplos modelos, não exibe miniaturas aqui.
-                */}
                 {!hasVariations && product.images && product.images.length > 1 && (
                   <div className={styles.thumbnailsRow}>
                     {product.images.map((img, idx) => {
@@ -499,7 +476,6 @@ export function ProductModal() {
                 )}
               </div>
 
-              {/* Informações: Título, Descrição, Preço e Prazo */}
               <div className={styles.productInfoBlock}>
                 {modalCategoryName && (
                   <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -540,7 +516,6 @@ export function ProductModal() {
                   </span>
                 </div>
 
-                {/* Aviso afetivo */}
                 <div className={styles.craftAlert}>
                   <AlertCircle size={16} className={styles.alertIcon} />
                   <span>
@@ -550,13 +525,9 @@ export function ProductModal() {
               </div>
             </div>
 
-            {/* ========================================================
-                COLUNA DA DIREITA: Modelos (se houver), Formulário e Quantidade
-               ======================================================== */}
             <div className={styles.rightColumn}>
               <form onSubmit={handleConfirm} id="customization-form" className={styles.formSpace}>
-                
-                {/* Seletor de Modelo com Imagem (Estilo Mercado Livre) - APENAS para produtos com mais de um modelo */}
+
                 {hasVariations && product.variations && (
                   <div className={styles.variationsCard}>
                     <div className={styles.variationsHeader}>
@@ -617,7 +588,6 @@ export function ProductModal() {
                   </div>
                 )}
 
-                {/* Campos de Personalização com base nas configurações do produto */}
                 <div className={styles.fieldsContainer}>
                   {/* Nome na Lembrancinha (exibido se allowChildName !== false e aplicável ao modelo) */}
                   {(product.customizationSettings?.allowChildName !== false) &&
@@ -649,7 +619,6 @@ export function ProductModal() {
                     </div>
                   )}
 
-                  {/* Cor do Laço/Fita (se ativado nas configurações do produto) */}
                   {(() => {
                     const ribbonList = product.customizationSettings?.ribbonColors && product.customizationSettings.ribbonColors.length > 0
                       ? product.customizationSettings.ribbonColors
@@ -761,7 +730,6 @@ export function ProductModal() {
                     );
                   })}
 
-                  {/* Observações livres */}
                   {(product.customizationSettings?.allowNotes !== false) && (
                     <div>
                       <label className={styles.formLabel}>
@@ -782,7 +750,6 @@ export function ProductModal() {
                   )}
                 </div>
 
-                {/* Tabela de Preços por Quantidade (Atacado / Descontos Progressivos) */}
                 {sortedDiscounts.length > 0 && (
                   <div style={{
                     marginBottom: '1.25rem',
@@ -804,7 +771,6 @@ export function ProductModal() {
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: `repeat(${1 + sortedDiscounts.length}, minmax(0, 1fr))`, gap: '0.5rem' }}>
-                      {/* Faixa Padrão / Avulsa */}
                       <button
                         type="button"
                         onClick={() => setQuantity(product.minQuantity || 1)}
@@ -830,7 +796,6 @@ export function ProductModal() {
                         <span style={{ fontSize: '0.65rem', color: '#9CA3AF' }}>cada</span>
                       </button>
 
-                      {/* Faixas com Desconto */}
                       {[...sortedDiscounts].reverse().map((tier) => {
                         const isCurrentTier = currentPrice === tier.price;
                         const discountPct = Math.round(((baseVariationPrice - tier.price) / baseVariationPrice) * 100);
@@ -881,7 +846,6 @@ export function ProductModal() {
                       })}
                     </div>
 
-                    {/* Dica de incentivo para próxima faixa */}
                     {nextDiscount && (
                       <div style={{
                         marginTop: '0.65rem',
@@ -904,7 +868,6 @@ export function ProductModal() {
                   </div>
                 )}
 
-                {/* Controle de Quantidade */}
                 <div className={styles.qtySection}>
                   <div>
                     <span className={styles.qtyLabel}>
@@ -968,7 +931,6 @@ export function ProductModal() {
           </div>
         </div>
 
-        {/* Rodapé com Subtotal e Ação de Adicionar */}
         <div className={styles.modalFooter}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>

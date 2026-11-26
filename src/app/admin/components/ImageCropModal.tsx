@@ -22,10 +22,10 @@ export interface ImageCropModalProps {
 }
 
 interface CropRect {
-  x: number; // % 0..100
-  y: number; // % 0..100
-  width: number; // % 0..100
-  height: number; // % 0..100
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 type DragHandle =
@@ -56,12 +56,10 @@ function clamp(val: number, min: number, max: number) {
 async function resolveImageSrc(src: string): Promise<{ url: string; revoke?: () => void }> {
   if (!src) return { url: src };
 
-  // Data URLs e local blobs já estão seguros para canvas
   if (src.startsWith('data:') || src.startsWith('blob:')) {
     return { url: src };
   }
 
-  // Caminhos relativos de mesma origem
   if (!src.startsWith('http://') && !src.startsWith('https://')) {
     return { url: src };
   }
@@ -76,7 +74,6 @@ async function resolveImageSrc(src: string): Promise<{ url: string; revoke?: () 
       return { url: src };
     }
 
-    // Tenta fetch direto com CORS (caso o host externo já envie headers de CORS)
     try {
       const direct = await fetch(src, { mode: 'cors' });
       if (direct.ok) {
@@ -85,10 +82,8 @@ async function resolveImageSrc(src: string): Promise<{ url: string; revoke?: () 
         return { url: blobUrl, revoke: () => URL.revokeObjectURL(blobUrl) };
       }
     } catch {
-      // Bloqueado pelo CORS do navegador, fallback imediato para o proxy do servidor
     }
 
-    // Fallback: busca via proxy seguro no backend
     try {
       const proxyUrl = `/api/admin/proxy-image?url=${encodeURIComponent(src)}`;
       const proxyRes = await fetch(proxyUrl);
@@ -98,7 +93,6 @@ async function resolveImageSrc(src: string): Promise<{ url: string; revoke?: () 
         return { url: blobUrl, revoke: () => URL.revokeObjectURL(blobUrl) };
       }
     } catch {
-      // Se falhar, tenta usar a URL de proxy direta
       return { url: `/api/admin/proxy-image?url=${encodeURIComponent(src)}` };
     }
   }
@@ -153,7 +147,6 @@ function computeCenteredCropForRatio(
     return { x: 5, y: 5, width: 90, height: 90 };
   }
 
-  // Pixel aspect ratio of full image
   const imgRatio = imgW / imgH;
   let widthPct = 90;
   let heightPct = (widthPct * imgRatio) / ratio;
@@ -213,7 +206,6 @@ export function ImageCropModal({
     wrapperHeight: number;
   } | null>(null);
 
-  // Reset all settings whenever modal opens for a new image
   useEffect(() => {
     if (!isOpen) {
       sourceImageRef.current = null;
@@ -230,7 +222,6 @@ export function ImageCropModal({
     setSaving(false);
   }, [isOpen, imageUrl]);
 
-  // Render oriented canvas whenever source image, rotation, or flip changes
   useEffect(() => {
     if (!isOpen || !imageUrl) return;
     let cancelled = false;
@@ -306,7 +297,6 @@ export function ImageCropModal({
     };
   }, [isOpen, imageUrl, rotation, flipH, aspectRatio]);
 
-  // Apply aspect ratio change immediately
   const handleSelectAspect = (newRatio: number | null) => {
     setAspectRatio(newRatio);
     if (newRatio === null) return;
@@ -327,7 +317,6 @@ export function ImageCropModal({
     setCrop({ x: 0, y: 0, width: 100, height: 100 });
   };
 
-  // Pointer drag / resize handlers
   const handlePointerDown = useCallback(
     (e: React.PointerEvent, handle: DragHandle) => {
       e.preventDefault();
@@ -371,7 +360,6 @@ export function ImageCropModal({
         return;
       }
 
-      // Edges/corners
       let left = s.x;
       let top = s.y;
       let right = s.x + s.width;
@@ -391,7 +379,6 @@ export function ImageCropModal({
       }
 
       if (aspectRatio && orientedSize.w > 0 && orientedSize.h > 0) {
-        // pctWidth / pctHeight = aspectRatio * (imgH / imgW)
         const pctRatio = aspectRatio * (orientedSize.h / orientedSize.w);
         let newW = right - left;
         let newH = newW / pctRatio;

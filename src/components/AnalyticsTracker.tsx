@@ -8,7 +8,6 @@ export function AnalyticsTracker() {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Não contabiliza visitas feitas dentro da área admin
     if (pathname && !pathname.startsWith('/admin')) {
       trackPageView(pathname);
     }

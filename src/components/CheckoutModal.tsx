@@ -7,6 +7,7 @@ import { DeliveryMethod } from '@/types';
 import confetti from 'canvas-confetti';
 import styles from './CheckoutModal.module.css';
 import { trackOrderToDatabase } from '@/lib/tracking';
+import { WhatsappIcon } from '@/components/WhatsappIcon';
 
 interface ShippingOption {
   id: number;
@@ -66,6 +67,7 @@ export function CheckoutModal() {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [generalNotes, setGeneralNotes] = useState('');
   const [isSent, setIsSent] = useState(false);
+  const [sentWhatsAppUrl, setSentWhatsAppUrl] = useState('');
   const [isStoreOnline, setIsStoreOnline] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCepInvalid, setIsCepInvalid] = useState(false);
@@ -130,7 +132,6 @@ export function CheckoutModal() {
       const data = await res.json();
       setLastCalculatedCep(digits);
 
-      // Preenchimento automático do endereço com base no CEP (ViaCEP)
       if (data.addressInfo) {
         const parts = [
           data.addressInfo.street,
@@ -252,7 +253,6 @@ export function CheckoutModal() {
         setCouponWarning(null);
       }
     } catch {
-      // Ignora falha de rede
     }
   };
 
@@ -268,7 +268,6 @@ export function CheckoutModal() {
       return;
     }
 
-    // Se houver cupom aplicado, valida o telefone do cliente com o banco antes de enviar
     if (appliedCoupon) {
       const digits = customerPhone.replace(/\D/g, '');
       if (digits.length >= 10) {
@@ -281,6 +280,10 @@ export function CheckoutModal() {
               code: appliedCoupon.code,
               subtotal: subtotalAmount,
               phone: digits,
+              eligibleSubtotal,
+              hasOnlyWholesale:
+                items.length > 0 &&
+                items.every((i) => i.product.quantityDiscounts && i.product.quantityDiscounts.length > 0),
             }),
           });
           const data = await res.json();
@@ -295,15 +298,13 @@ export function CheckoutModal() {
             return;
           }
         } catch {
-          // Segue em caso de falha de conexão
         } finally {
           setIsSubmitting(false);
         }
       }
     }
 
-    // Se um cupom foi utilizado, grava no localStorage deste aparelho para prevenir reuso local
-    if (appliedCoupon) {
+    if (appliedCoupon && appliedCoupon.firstPurchaseOnly) {
       try {
         const used = JSON.parse(localStorage.getItem('we_used_coupons') || '[]');
         if (Array.isArray(used) && !used.includes(appliedCoupon.code)) {
@@ -312,7 +313,6 @@ export function CheckoutModal() {
         }
       } catch {}
     }
-
 
     const url = generateWhatsAppOrderUrl({
       customerName,
@@ -331,7 +331,6 @@ export function CheckoutModal() {
       shippingDeliveryDays: selectedShippingOption?.deliveryTime,
     });
 
-    // Efeito de celebração com confetes
     try {
       confetti({
         particleCount: 80,
@@ -340,18 +339,26 @@ export function CheckoutModal() {
         colors: ['#C89B6D', '#D4AF37', '#D97762', '#8C5835'],
       });
     } catch {
-      // Ignora erro se canvas não estiver disponível
     }
 
+    setSentWhatsAppUrl(url);
     setIsSent(true);
 
-    // Abre o WhatsApp na nova aba
-    window.open(url, '_blank');
+    const isMobileOrInstagram =
+      typeof navigator !== 'undefined' &&
+      /Android|iPhone|iPad|iPod|Instagram|FB_IAB|FB4A|FBIOS/i.test(navigator.userAgent);
 
-    // Limpa o carrinho de imediato para novas compras
+    if (isMobileOrInstagram) {
+      window.location.href = url;
+    } else {
+      const newWin = window.open(url, '_blank');
+      if (!newWin || newWin.closed || typeof newWin.closed === 'undefined') {
+        window.location.href = url;
+      }
+    }
+
     clearCart();
 
-    // Registra o pedido no banco de dados de forma assíncrona
     const shippingSummary = selectedShippingOption
       ? `Frete: ${selectedShippingOption.companyName} ${selectedShippingOption.name} (R$ ${selectedShippingOption.price.toFixed(2).replace('.', ',')}) - CEP ${shippingCep}`
       : deliveryMethod === 'entrega-correios' && shippingCep
@@ -384,11 +391,10 @@ export function CheckoutModal() {
 
   return (
     <div className={styles.modalOverlay}>
-      <div 
+      <div
         className={styles.modalCard}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Cabeçalho */}
         <div className={styles.modalHeader}>
           <h3 className={styles.modalTitle}>
             Finalizar Pedido via WhatsApp
@@ -403,7 +409,6 @@ export function CheckoutModal() {
         </div>
 
         {isSent ? (
-          /* Tela de Sucesso */
           <div className={styles.successScreen}>
             <div className={styles.successIconCircle}>
               <CheckCircle2 size={36} />
@@ -412,8 +417,19 @@ export function CheckoutModal() {
               Pedido Pronto para Envio!
             </h4>
             <p className={styles.successText}>
-              Abrimos a conversa com a Wê no WhatsApp com todos os detalhes do seu pedido formatados. Basta clicar em <strong>Enviar</strong> no chat para combinarem a data e o pagamento!
+              Redirecionamos você para o WhatsApp da Wê com todos os detalhes do seu pedido formatados. Se a conversa não abriu automaticamente, toque no botão verde abaixo:
             </p>
+            {sentWhatsAppUrl && (
+              <a
+                href={sentWhatsAppUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.whatsappDirectButton}
+              >
+                <WhatsappIcon size={20} />
+                <span>Abrir conversa no WhatsApp</span>
+              </a>
+            )}
             <button
               onClick={handleFinish}
               className={styles.finishButton}
@@ -422,10 +438,8 @@ export function CheckoutModal() {
             </button>
           </div>
         ) : (
-          /* Formulário de Dados */
           <form onSubmit={handleSubmit} className={styles.formBody}>
-            
-            {/* Resumo do Pedido */}
+
             <div className={styles.orderBrief}>
               <div>
                 <span className={styles.briefLabel}>Itens selecionados</span>
@@ -449,7 +463,6 @@ export function CheckoutModal() {
               </div>
             </div>
 
-            {/* Nome Completo */}
             <div>
               <label className={styles.fieldLabel}>
                 <User size={13} className={styles.labelIcon} /> Seu Nome Completo <span className={styles.reqStar}>*</span>
@@ -464,7 +477,6 @@ export function CheckoutModal() {
               />
             </div>
 
-            {/* Telefone e Data do Evento */}
             <div className={styles.twoColsGrid}>
               <div>
                 <label className={styles.fieldLabel} htmlFor="customerPhoneInput">
@@ -500,8 +512,8 @@ export function CheckoutModal() {
               </div>
 
               <div>
-                <label 
-                  className={styles.fieldLabel} 
+                <label
+                  className={styles.fieldLabel}
                   htmlFor="eventDateInput"
                   onClick={() => {
                     try {
@@ -514,7 +526,7 @@ export function CheckoutModal() {
                 >
                   <Calendar size={13} className={styles.labelIcon} /> Data do Evento <span className={styles.reqStar}>*</span>
                 </label>
-                <div 
+                <div
                   className={styles.dateBlockWrapper}
                   onClick={() => {
                     try {
@@ -542,7 +554,6 @@ export function CheckoutModal() {
               </div>
             </div>
 
-            {/* Opções de Entrega / Retirada */}
             <div>
               <label className={styles.fieldLabel} style={{ marginBottom: '0.5rem' }}>
                 <MapPin size={13} className={styles.labelIcon} /> Como deseja receber? <span className={styles.reqStar}>*</span>
@@ -608,7 +619,6 @@ export function CheckoutModal() {
               </div>
             </div>
 
-            {/* Endereço caso tenha escolhido frete */}
             {deliveryMethod === 'entrega-correios' && (
               <div className={styles.shippingBox}>
                 <label className={styles.fieldLabel}>
@@ -718,7 +728,6 @@ export function CheckoutModal() {
               </div>
             )}
 
-            {/* Observações adicionais */}
             <div>
               <label className={styles.fieldLabel}>
                 Mensagem adicional para a Wê (opcional)
@@ -732,7 +741,6 @@ export function CheckoutModal() {
               />
             </div>
 
-            {/* Botão de Envio */}
             <div className={styles.submitSection}>
               <div className={styles.finalTotalBox}>
                 <div className={styles.finalTotalBreakdown}>
@@ -771,9 +779,7 @@ export function CheckoutModal() {
                     </span>
                   </div>
 
-                  {/* PARTE DO CUPOM DE DESCONTO EM BAIXO DE RETIRADA */}
                   <div className={styles.checkoutCouponContainer}>
-                    {/* Alerta de Cupom (Ex: Cupom de 1ª compra já utilizado por este WhatsApp) */}
                     {couponWarning && (
                       <div className={styles.couponWarningBox} style={{ marginBottom: '0.625rem' }}>
                         <AlertTriangle size={15} className={styles.couponWarningIcon} />
@@ -885,7 +891,6 @@ export function CheckoutModal() {
                   </span>
                 </div>
 
-                {/* Aviso destacado: Condição de Pagamento dinâmica */}
                 <div className={styles.paymentTermsNotice}>
                   <div className={styles.paymentTermsHeader}>
                     <Info size={15} className={styles.paymentTermsIcon} />
