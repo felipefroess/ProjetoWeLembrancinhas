@@ -25,7 +25,7 @@ interface CustomersTabProps {
   onCustomersCountChange?: (count: number) => void;
 }
 
-type LoyaltyFilter = 'all' | 'loyal' | 'vip';
+type LoyaltyFilter = 'all' | 'loyal';
 type SortOption = 'most_orders' | 'highest_spent' | 'recent_purchase' | 'name_asc';
 
 function formatCurrency(val: number): string {
@@ -201,14 +201,12 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
       const totalSpent = c.purchases.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
       const lastPurchaseDate = c.purchases[0]?.date || '';
       const isLoyal = totalOrders >= 2;
-      const isVip = totalSpent >= 300 || totalOrders >= 3;
       return {
         ...c,
         totalOrders,
         totalSpent,
         lastPurchaseDate,
         isLoyal,
-        isVip,
       };
     });
   }, [customers]);
@@ -225,7 +223,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
 
     const filtered = enrichedCustomers.filter((c) => {
       if (filter === 'loyal' && !c.isLoyal) return false;
-      if (filter === 'vip' && !c.isVip) return false;
 
       // Filtro por ano específico (permite encontrar clientes de anos anteriores com 1 clique)
       if (selectedYear !== 'all') {
@@ -514,10 +511,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
           <p className={styles.subheading}>
             Cadastre seus clientes e o histórico de pedidos para lembrar exatamente o que cada um pediu nos anos anteriores.
           </p>
-          <span className={styles.autoBadge}>
-            <Check size={13} />
-            Novos pedidos do site são registrados automaticamente aqui pelo mesmo telefone ou nome
-          </span>
         </div>
 
         <div className={styles.headerActions}>
@@ -625,13 +618,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
             >
               <Crown size={12} /> Fiéis ({kpis.loyalCount})
             </button>
-            <button
-              type="button"
-              onClick={() => setFilter('vip')}
-              className={`${styles.pillBtn} ${filter === 'vip' ? styles.pillBtnActive : ''}`}
-            >
-              <Sparkles size={12} /> VIP
-            </button>
           </div>
 
           {availableYears.length > 0 && (
@@ -642,7 +628,7 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
               aria-label="Filtrar por ano"
               title="Filtrar clientes por ano de compra ou evento"
             >
-              <option value="all">📅 Todos os Anos</option>
+              <option value="all">Todos os Anos</option>
               {availableYears.map((yr) => (
                 <option key={yr} value={yr}>
                   Ano {yr}
@@ -729,11 +715,6 @@ export default function CustomersTab({ onCustomersCountChange }: CustomersTabPro
                         {c.isLoyal && (
                           <span className={styles.loyalBadge}>
                             <Crown size={11} /> Fiel • {c.totalOrders} compras
-                          </span>
-                        )}
-                        {c.isVip && (
-                          <span className={styles.vipBadge}>
-                            <Sparkles size={11} /> VIP
                           </span>
                         )}
                       </div>

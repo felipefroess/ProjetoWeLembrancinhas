@@ -33,6 +33,7 @@ export interface CustomFieldDefinition {
   placeholder?: string;
   options?: string[]; // Opções quando o tipo for 'select'
   optionsText?: string; // Helper para edição no painel
+  targetVariations?: string[]; // Nomes ou IDs dos modelos onde este campo é exibido/obrigatório. Se vazio ou undefined, exibe em todos.
 }
 
 export interface CustomizationSettings {
@@ -41,6 +42,7 @@ export interface CustomizationSettings {
   childNamePlaceholder?: string; // Exemplo/placeholder dentro da caixa (ex: "Ex: Professora Leandra, Luís...")
   notesPlaceholder?: string;     // Exemplo/placeholder de observações
   childNameRequired?: boolean;   // Se o nome é obrigatório (padrão: true)
+  childNameTargetVariations?: string[]; // Nomes ou IDs dos modelos onde o Nome é exibido/obrigatório. Se vazio ou undefined, exibe em todos.
   allowRibbonColors?: boolean;   // Oferece opções de laços/fitas
   ribbonColorRequired?: boolean; // Se a escolha da fita é obrigatória
   ribbonColors?: string[];       // Cores disponíveis
