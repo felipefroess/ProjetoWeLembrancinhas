@@ -4,12 +4,17 @@ import { setSessionCookie, safeTimingCompare } from '@/lib/auth';
 const loginAttempts = new Map<string, { count: number; lockedUntil: number }>();
 
 function getClientIp(request: Request): string {
-  const forwardedFor = request.headers.get('x-forwarded-for');
-  if (forwardedFor) {
-    return forwardedFor.split(',')[0].trim();
+  const vercelIp = request.headers.get('x-vercel-forwarded-for');
+  if (vercelIp) {
+    return vercelIp.split(',')[0].trim().slice(0, 64);
   }
   const realIp = request.headers.get('x-real-ip');
-  if (realIp) return realIp.trim();
+  if (realIp) return realIp.trim().slice(0, 64);
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  if (forwardedFor) {
+    const parts = forwardedFor.split(',').map((p) => p.trim()).filter(Boolean);
+    return (parts[parts.length - 1] || '127.0.0.1').slice(0, 64);
+  }
   return '127.0.0.1';
 }
 
@@ -62,13 +67,29 @@ export async function POST(request: Request) {
       );
     }
 
-    const { username, password } = await request.json();
+    const body = await request.json();
+    const { username, password } = body || {};
+
+    if (typeof username !== 'string' || typeof password !== 'string') {
+      return NextResponse.json(
+        { success: false, error: 'Usuário e senha devem ser informados.' },
+        { status: 400 }
+      );
+    }
 
     const expectedUser = (process.env.ADMIN_USER || 'admin').trim();
-    const expectedPassword = (process.env.ADMIN_PASSWORD || 'welembrancinhas2026').trim();
+    const envPassword = process.env.ADMIN_PASSWORD?.trim();
+    const expectedPassword = envPassword || (process.env.NODE_ENV !== 'production' ? 'welembrancinhas2026' : '');
 
-    const cleanUser = (username || '').trim();
-    const cleanPassword = (password || '').trim();
+    if (!expectedPassword) {
+      return NextResponse.json(
+        { success: false, error: 'ADMIN_PASSWORD não configurada no servidor.' },
+        { status: 500 }
+      );
+    }
+
+    const cleanUser = username.trim();
+    const cleanPassword = password.trim();
 
     const isUserValid = safeTimingCompare(cleanUser.toLowerCase(), expectedUser.toLowerCase());
     const isPasswordValid = safeTimingCompare(cleanPassword, expectedPassword);

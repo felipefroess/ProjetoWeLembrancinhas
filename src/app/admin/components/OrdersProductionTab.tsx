@@ -157,13 +157,28 @@ export default function OrdersProductionTab({ onOrderCountChange, onNavigateToCu
         if (stored) {
           const backupList = JSON.parse(stored);
           if (Array.isArray(backupList) && backupList.length > 0) {
+            const failedBackups: unknown[] = [];
             for (const backupOrder of backupList) {
-              fetch('/api/orders', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(backupOrder),
-              }).catch(() => {});
+              try {
+                const syncRes = await fetch('/api/orders', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(backupOrder),
+                });
+                if (!syncRes.ok) {
+                  failedBackups.push(backupOrder);
+                }
+              } catch {
+                failedBackups.push(backupOrder);
+              }
             }
+            if (failedBackups.length === 0) {
+              localStorage.removeItem(backupKey);
+            } else {
+              localStorage.setItem(backupKey, JSON.stringify(failedBackups));
+            }
+          } else {
+            localStorage.removeItem(backupKey);
           }
         }
       } catch {

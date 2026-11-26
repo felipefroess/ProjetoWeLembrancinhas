@@ -124,7 +124,7 @@ export async function updateStoreSettings(
     const current = await getStoreSettings();
 
     let whatsappNumber =
-      updates.whatsappNumber !== undefined
+      typeof updates.whatsappNumber === 'string'
         ? updates.whatsappNumber.replace(/\D/g, '')
         : current.whatsappNumber;
     if (whatsappNumber.length === 10 || whatsappNumber.length === 11) {
@@ -132,7 +132,7 @@ export async function updateStoreSettings(
     }
 
     const instagram =
-      updates.instagram !== undefined
+      typeof updates.instagram === 'string'
         ? updates.instagram.replace(/^@/, '').trim()
         : current.instagram;
     const instagramUrl = instagram ? `https://instagram.com/${instagram}` : current.instagramUrl;
@@ -176,8 +176,8 @@ export async function updateStoreSettings(
 
     writeLocalSettings(updatedSettings);
 
-    if (applyLeadTimeToAllProducts && updates.defaultLeadTimeDays) {
-      await updateAllCustomProductsLeadTime(updates.defaultLeadTimeDays);
+    if (applyLeadTimeToAllProducts && updatedSettings.defaultLeadTimeDays) {
+      await updateAllCustomProductsLeadTime(updatedSettings.defaultLeadTimeDays);
     }
 
     return { success: true, settings: updatedSettings };

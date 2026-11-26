@@ -22,7 +22,7 @@ export function calculateUnitPrice(
   }
 
   const applicable = discounts.find((d) => quantity >= d.minQuantity);
-  if (applicable && applicable.price > 0) {
+  if (applicable && applicable.price > 0 && (basePrice <= 0 || applicable.price <= basePrice)) {
     return applicable.price;
   }
 
@@ -31,14 +31,18 @@ export function calculateUnitPrice(
 
 export function getNextDiscountTier(
   product: Product,
-  currentQuantity: number
+  currentQuantity: number,
+  variationPrice?: number
 ): { neededQty: number; discountPrice: number; savingsPct: number } | null {
   const discounts = [...getSortedQuantityDiscounts(product)].sort((a, b) => a.minQuantity - b.minQuantity);
   const nextTier = discounts.find((d) => d.minQuantity > currentQuantity);
 
   if (!nextTier) return null;
 
-  const currentPrice = calculateUnitPrice(product, currentQuantity);
+  const currentPrice = calculateUnitPrice(product, currentQuantity, variationPrice);
+  if (currentPrice <= 0 || nextTier.price >= currentPrice) {
+    return null;
+  }
   const savingsPct = Math.round(((currentPrice - nextTier.price) / currentPrice) * 100);
 
   return {

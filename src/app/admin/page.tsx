@@ -390,6 +390,7 @@ export default function AdminDashboardPage() {
   };
 
   const handleToggleBestSeller = async (productId: string) => {
+    const previousProducts = products;
     const current = products.find((p) => p.id === productId);
     const willBeBestSeller = !current?.isBestSeller;
     const targetId = willBeBestSeller ? productId : null;
@@ -408,11 +409,16 @@ export default function AdminDashboardPage() {
         body: JSON.stringify({ productId: targetId }),
       });
       const data = await res.json();
-      if (data.success && Array.isArray(data.products)) {
+      if (res.ok && data.success && Array.isArray(data.products)) {
         setProducts(data.products);
+      } else {
+        setProducts(previousProducts);
+        alert(data.error || 'Erro ao atualizar produto mais vendido.');
       }
     } catch (err) {
       console.error('Erro ao alternar produto mais vendido:', err);
+      setProducts(previousProducts);
+      alert('Falha de conexão ao atualizar produto mais vendido.');
     }
   };
 
@@ -734,12 +740,14 @@ export default function AdminDashboardPage() {
       const data = await res.json();
       if (data.success) {
         if (isBestSeller) {
-          setProducts((prev) =>
-            prev.map((p) => {
+          setProducts((prev) => {
+            const exists = prev.some((p) => p.id === data.product.id);
+            const updated = prev.map((p) => {
               if (p.id === data.product.id) return data.product;
               return p.isBestSeller ? { ...p, isBestSeller: false } : p;
-            })
-          );
+            });
+            return exists ? updated : [...updated, data.product];
+          });
         } else if (editingProductId) {
           setProducts((prev) => prev.map((p) => (p.id === editingProductId ? data.product : p)));
         } else {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isAuthenticated } from '@/lib/auth';
 import { getStoreSettings, updateStoreSettings } from '@/lib/storeSettingsStore';
 
 export async function GET(request: NextRequest) {
@@ -25,6 +26,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ success: false, error: 'Não autorizado.' }, { status: 401 });
+  }
   try {
     const body = await request.json();
     const { applyLeadTimeToAllProducts, ...updates } = body;

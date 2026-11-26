@@ -38,7 +38,7 @@ export function ProductCard({ product, isMostRequested, categoryName }: ProductC
     .map((v) => (typeof v.price === 'number' ? v.price : parseFloat(String(v.price || 0))))
     .filter((p): p is number => typeof p === 'number' && !isNaN(p) && p > 0);
 
-  const minPrice = variationPrices.length > 0 ? Math.min(rawProductPrice, ...variationPrices) : rawProductPrice;
+  const minPrice = variationPrices.length > 0 ? Math.min(...variationPrices) : rawProductPrice;
   const hasVaryingPrices = variationPrices.length > 0 && (Math.min(...variationPrices) !== Math.max(...variationPrices, rawProductPrice));
 
   const displayPrice = selectedVariation && typeof selectedVariation.price === 'number' && selectedVariation.price > 0

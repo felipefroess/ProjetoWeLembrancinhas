@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isAuthenticated } from '@/lib/auth';
 import {
   getAllCoupons,
   createCoupon,
@@ -8,6 +9,9 @@ import {
 } from '@/lib/couponsStore';
 
 export async function GET() {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ success: false, error: 'Não autorizado.' }, { status: 401 });
+  }
   try {
     const coupons = await getAllCoupons();
     return NextResponse.json({ success: true, coupons });
@@ -25,6 +29,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     if (body.action === 'create') {
+      if (!(await isAuthenticated())) {
+        return NextResponse.json({ success: false, error: 'Não autorizado.' }, { status: 401 });
+      }
       const result = await createCoupon({
         code: body.code,
         type: body.type,
@@ -61,11 +68,14 @@ export async function POST(request: NextRequest) {
       hasOnlyWholesale,
     });
     if (!validation.valid) {
-      return NextResponse.json({
-        success: false,
-        valid: false,
-        message: validation.message,
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          valid: false,
+          message: validation.message,
+        },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json({
@@ -82,6 +92,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ success: false, error: 'Não autorizado.' }, { status: 401 });
+  }
   try {
     const body = await request.json();
     const { id, ...updates } = body;
@@ -116,6 +129,9 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ success: false, error: 'Não autorizado.' }, { status: 401 });
+  }
   try {
     const { searchParams } = new URL(request.url);
     let id = searchParams.get('id');

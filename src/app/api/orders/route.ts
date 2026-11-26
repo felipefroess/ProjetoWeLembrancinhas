@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { isAuthenticated } from '@/lib/auth';
 import {
   getAllProductionOrders,
   createProductionOrder,
@@ -16,7 +17,13 @@ const NO_CACHE_HEADERS = {
   'Surrogate-Control': 'no-store',
 };
 
-export async function GET(request: Request) {
+export async function GET() {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json(
+      { success: false, error: 'Não autorizado' },
+      { status: 401, headers: NO_CACHE_HEADERS }
+    );
+  }
   try {
     const { orders, source } = await getAllProductionOrders();
     return NextResponse.json(
@@ -66,6 +73,7 @@ export async function POST(request: Request) {
       );
     }
 
+    const isAdmin = await isAuthenticated();
     const created = await createProductionOrder({
       customerName,
       customerPhone,
@@ -79,7 +87,7 @@ export async function POST(request: Request) {
       discountAmount: discountAmount !== undefined ? Number(discountAmount) : undefined,
       subtotalAmount: subtotalAmount !== undefined ? Number(subtotalAmount) : undefined,
       items: items || [],
-      status: status as OrderStatus,
+      status: isAdmin ? (status as OrderStatus) : undefined,
     });
 
     let customerSyncResult: any = null;
@@ -115,6 +123,12 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json(
+      { success: false, error: 'Não autorizado' },
+      { status: 401, headers: NO_CACHE_HEADERS }
+    );
+  }
   try {
     const body = await request.json();
     const { id, status, generalNotes } = body;
@@ -170,6 +184,12 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json(
+      { success: false, error: 'Não autorizado' },
+      { status: 401, headers: NO_CACHE_HEADERS }
+    );
+  }
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

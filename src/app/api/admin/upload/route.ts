@@ -17,15 +17,40 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Nenhum arquivo enviado' }, { status: 400 });
     }
 
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({ success: false, error: 'Arquivo muito grande (máximo 10MB).' }, { status: 400 });
+    }
+
+    const ALLOWED_MIME_TYPES = new Set([
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+      'image/avif',
+    ]);
+    const ALLOWED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif']);
+
+    const rawExt = path.extname(file.name).toLowerCase();
+    if (
+      (!file.type || !ALLOWED_MIME_TYPES.has(file.type.toLowerCase())) &&
+      !ALLOWED_EXTENSIONS.has(rawExt)
+    ) {
+      return NextResponse.json(
+        { success: false, error: 'Formato de arquivo não permitido. Envie apenas imagens (JPG, PNG, WebP, GIF ou AVIF).' },
+        { status: 400 }
+      );
+    }
+
     const bytes = await file.arrayBuffer();
     const rawBuffer = Buffer.from(bytes);
 
-    let contentType = file.type || 'image/jpeg';
-    let cleanExt = path.extname(file.name).toLowerCase() || '.jpg';
+    let contentType = ALLOWED_MIME_TYPES.has(file.type?.toLowerCase()) ? file.type.toLowerCase() : 'image/jpeg';
+    let cleanExt = ALLOWED_EXTENSIONS.has(rawExt) ? rawExt : '.jpg';
 
     let buffer = rawBuffer;
     try {
-      // @ts-ignore
       const sharp = (await import('sharp')).default;
       const isPng = file.type === 'image/png' || cleanExt === '.png';
       const pipeline = sharp(rawBuffer).resize(1200, 1200, {

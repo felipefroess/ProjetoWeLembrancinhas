@@ -63,19 +63,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setItems(JSON.parse(stored));
+    queueMicrotask(() => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          setItems(JSON.parse(stored));
+        }
+        const storedCoupon = localStorage.getItem(COUPON_STORAGE_KEY);
+        if (storedCoupon) {
+          setAppliedCoupon(JSON.parse(storedCoupon));
+        }
+      } catch (e) {
+        console.error('Falha ao ler carrinho do localStorage:', e);
       }
-      const storedCoupon = localStorage.getItem(COUPON_STORAGE_KEY);
-      if (storedCoupon) {
-        setAppliedCoupon(JSON.parse(storedCoupon));
-      }
-    } catch (e) {
-      console.error('Falha ao ler carrinho do localStorage:', e);
-    }
-    setIsHydrated(true);
+      setIsHydrated(true);
+    });
   }, []);
 
   useEffect(() => {
@@ -139,7 +141,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addToCart = (product: Product, quantity: number, customization: CustomizationOptions) => {
-    const customKey = `${product.id}_${customization.variation || ''}_${customization.theme || ''}_${customization.childName || ''}_${customization.ribbonColor || ''}`;
+    const customFieldsKey = customization.customFieldValues
+      ? Object.entries(customization.customFieldValues)
+          .filter(([, v]) => v && String(v).trim())
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([k, v]) => `${k}:${String(v).trim()}`)
+          .join('|')
+      : '';
+    const customKey = `${product.id}_${customization.variation || ''}_${customization.theme || ''}_${customization.childName || ''}_${customization.ribbonColor || ''}_${customFieldsKey}_${(customization.notes || '').trim()}`;
 
     setItems((prev) => {
       const existingIndex = prev.findIndex((item) => item.cartItemId === customKey);

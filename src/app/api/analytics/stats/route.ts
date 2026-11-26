@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isAuthenticated } from '@/lib/auth';
 import { sql, isDbConfigured } from '@/server/db/client';
 import { AnalyticsPeriod, TopProductStat } from '@/lib/analytics';
 import { getAllProductionOrders } from '@/lib/ordersStore';
@@ -68,6 +69,9 @@ function aggregateOrders(
 }
 
 export async function GET(request: NextRequest) {
+  if (!(await isAuthenticated())) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+  }
   const period = (request.nextUrl.searchParams.get('period') || 'mes') as AnalyticsPeriod;
   try {
     const now = new Date();

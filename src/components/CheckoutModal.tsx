@@ -280,6 +280,10 @@ export function CheckoutModal() {
               code: appliedCoupon.code,
               subtotal: subtotalAmount,
               phone: digits,
+              eligibleSubtotal,
+              hasOnlyWholesale:
+                items.length > 0 &&
+                items.every((i) => i.product.quantityDiscounts && i.product.quantityDiscounts.length > 0),
             }),
           });
           const data = await res.json();
@@ -300,7 +304,7 @@ export function CheckoutModal() {
       }
     }
 
-    if (appliedCoupon) {
+    if (appliedCoupon && appliedCoupon.firstPurchaseOnly) {
       try {
         const used = JSON.parse(localStorage.getItem('we_used_coupons') || '[]');
         if (Array.isArray(used) && !used.includes(appliedCoupon.code)) {

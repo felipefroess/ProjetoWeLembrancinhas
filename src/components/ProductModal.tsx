@@ -106,11 +106,13 @@ export function ProductModal() {
   const currentPrice = calculateUnitPrice(product, currentQuantity, baseVariationPrice);
   const subtotal = currentPrice * currentQuantity;
   const sortedDiscounts = getSortedQuantityDiscounts(product);
-  const nextDiscount = getNextDiscountTier(product, currentQuantity);
+  const nextDiscount = getNextDiscountTier(product, currentQuantity, baseVariationPrice);
 
   const imagesList = (selectedVariation?.images && selectedVariation.images.length > 0)
     ? selectedVariation.images
-    : (product.images && product.images.length > 0 ? product.images : [product.image]);
+    : selectedVariation?.image
+      ? (product.images && product.images.includes(selectedVariation.image) ? product.images : [selectedVariation.image])
+      : (product.images && product.images.length > 0 ? product.images : [product.image]);
   const currentImageIndex = imagesList.indexOf(selectedImage || product.image);
   const validIndex = currentImageIndex >= 0 ? currentImageIndex : 0;
 

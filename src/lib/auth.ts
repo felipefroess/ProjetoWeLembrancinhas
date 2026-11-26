@@ -61,6 +61,14 @@ export function verifySessionToken(token: string | undefined): boolean {
 
   try {
     const payload = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString('utf8'));
+    if (
+      !payload ||
+      typeof payload.user !== 'string' ||
+      typeof payload.timestamp !== 'number' ||
+      !Number.isFinite(payload.timestamp)
+    ) {
+      return false;
+    }
     const maxAge = 7 * 24 * 60 * 60 * 1000;
     if (Date.now() - payload.timestamp > maxAge) {
       return false;

@@ -246,7 +246,17 @@ export async function updateCoupon(
     normalizedUpdates.code = cleanCode;
   }
 
-  if (normalizedUpdates.type === 'percentage' && normalizedUpdates.value && normalizedUpdates.value > 100) {
+  const effectiveType = normalizedUpdates.type ?? existing[index].type;
+  const effectiveValue =
+    normalizedUpdates.value !== undefined
+      ? Number(normalizedUpdates.value)
+      : existing[index].value;
+
+  if (!Number.isFinite(effectiveValue) || effectiveValue <= 0) {
+    return { success: false, error: 'O valor do desconto deve ser maior que zero.' };
+  }
+
+  if (effectiveType === 'percentage' && effectiveValue > 100) {
     return { success: false, error: 'A porcentagem de desconto não pode ser superior a 100%.' };
   }
 
@@ -359,7 +369,9 @@ export async function validateCoupon(
   if (shouldExcludeWholesale && options?.hasOnlyWholesale) {
     return {
       valid: false,
-      message: 'O cupom de 1ª compra não é aplicável em produtos de atacado (que já possuem desconto progressivo).',
+      message: isFirstPurchaseCoupon
+        ? 'O cupom de 1ª compra não é aplicável em produtos de atacado (que já possuem desconto progressivo).'
+        : 'Este cupom não é aplicável em produtos de atacado (que já possuem desconto progressivo).',
     };
   }
 
@@ -374,12 +386,14 @@ export async function validateCoupon(
   }
 
   if (matched.expiresAt) {
-    const expDate = new Date(matched.expiresAt);
-    if (matched.expiresAt.length === 10) {
-      expDate.setHours(23, 59, 59, 999);
-    }
-    if (Date.now() > expDate.getTime()) {
-      const formattedDate = new Date(matched.expiresAt).toLocaleDateString('pt-BR');
+    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(matched.expiresAt.trim());
+    const expDate = dateOnlyMatch
+      ? new Date(Number(dateOnlyMatch[1]), Number(dateOnlyMatch[2]) - 1, Number(dateOnlyMatch[3]), 23, 59, 59, 999)
+      : new Date(matched.expiresAt);
+    if (!Number.isNaN(expDate.getTime()) && Date.now() > expDate.getTime()) {
+      const formattedDate = dateOnlyMatch
+        ? `${dateOnlyMatch[3]}/${dateOnlyMatch[2]}/${dateOnlyMatch[1]}`
+        : expDate.toLocaleDateString('pt-BR');
       return {
         valid: false,
         message: `Este cupom expirou em ${formattedDate}.`,

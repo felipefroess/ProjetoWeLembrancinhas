@@ -100,36 +100,8 @@ export async function listCustomers(): Promise<CustomerRecord[]> {
 
       if (rows) {
         const remote = rows.map(normalizeCustomer);
-        const local = readLocalCustomers();
-
-        const remoteIds = new Set(remote.map((r) => r.id));
-        const unsynced = local.filter((l) => !remoteIds.has(l.id));
-
-        if (unsynced.length > 0) {
-          (async () => {
-            for (const u of unsynced) {
-              try {
-                const purchasesJson = JSON.stringify(u.purchases);
-                await sql`
-                  INSERT INTO public.customers (
-                    id, name, phone, instagram, notes, purchases, created_at, updated_at
-                  ) VALUES (
-                    ${u.id}, ${u.name}, ${u.phone || ''}, ${u.instagram || ''},
-                    ${u.notes || ''}, ${purchasesJson}::jsonb, ${u.createdAt}, ${u.updatedAt}
-                  )
-                  ON CONFLICT (id) DO UPDATE
-                  SET name = EXCLUDED.name, purchases = EXCLUDED.purchases, updated_at = EXCLUDED.updated_at
-                `;
-              } catch (e) {
-                console.error('Erro ao sincronizar cliente local para Neon:', e);
-              }
-            }
-          })();
-        }
-
-        const merged = [...unsynced, ...remote];
-        writeLocalCustomers(merged);
-        return merged;
+        writeLocalCustomers(remote);
+        return remote;
       }
     } catch (err) {
       console.error('Erro ao buscar fichas de clientes no Neon:', err);
@@ -159,8 +131,9 @@ async function saveCustomerRecord(record: CustomerRecord): Promise<CustomerRecor
           purchases = EXCLUDED.purchases,
           updated_at = EXCLUDED.updated_at
       `;
-    } catch (err) {
+      } catch (err) {
       console.error('Erro ao salvar ficha do cliente no Neon:', err);
+      throw err;
     }
   }
 

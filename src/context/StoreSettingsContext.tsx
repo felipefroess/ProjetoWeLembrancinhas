@@ -45,17 +45,19 @@ export function StoreSettingsProvider({
   }, []);
 
   useEffect(() => {
-    try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed && typeof parsed === 'object') {
-          setSettings((prev) => ({ ...prev, ...parsed }));
+    queueMicrotask(() => {
+      try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && typeof parsed === 'object') {
+            setSettings((prev) => ({ ...prev, ...parsed }));
+          }
         }
-      }
-    } catch {}
+      } catch {}
 
-    fetchSettings();
+      fetchSettings();
+    });
   }, [fetchSettings]);
 
   const updateSettings = async (

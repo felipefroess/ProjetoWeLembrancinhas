@@ -321,11 +321,19 @@ export async function updateProductionOrderStatus(
             general_notes: data.general_notes || '',
             total_units: Number(data.total_units) || 0,
             total_amount: Number(data.total_amount) || 0,
+            coupon_code: data.coupon_code || undefined,
+            discount_amount: data.discount_amount !== null && data.discount_amount !== undefined ? Number(data.discount_amount) : undefined,
+            subtotal_amount: data.subtotal_amount !== null && data.subtotal_amount !== undefined ? Number(data.subtotal_amount) : undefined,
             status: normalizeStatus(data.status),
             items: Array.isArray(data.items) ? data.items : [],
             created_at: data.created_at || nowIso,
             updated_at: data.updated_at || nowIso,
           };
+
+          if (index === -1) {
+            currentOrders.unshift(updatedOrder);
+            writeLocalOrders(currentOrders);
+          }
         }
       }
     } catch (err) {

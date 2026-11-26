@@ -82,35 +82,56 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
     }
   };
 
+  const [nowMs, setNowMs] = useState<number>(() => Date.now());
+
+  const parseExpiryDate = (expiresAt: string): Date | null => {
+    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(expiresAt.trim());
+    const d = dateOnlyMatch
+      ? new Date(Number(dateOnlyMatch[1]), Number(dateOnlyMatch[2]) - 1, Number(dateOnlyMatch[3]), 23, 59, 59, 999)
+      : new Date(expiresAt);
+    return Number.isNaN(d.getTime()) ? null : d;
+  };
+
+  const formatExpiryDate = (expiresAt: string): string => {
+    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(expiresAt.trim());
+    if (dateOnlyMatch) {
+      return `${dateOnlyMatch[3]}/${dateOnlyMatch[2]}/${dateOnlyMatch[1]}`;
+    }
+    const d = new Date(expiresAt);
+    return Number.isNaN(d.getTime()) ? expiresAt : d.toLocaleDateString('pt-BR');
+  };
+
   useEffect(() => {
-    loadCoupons();
+    queueMicrotask(() => {
+      loadCoupons();
+    });
+    const timer = setInterval(() => setNowMs(Date.now()), 60000);
+    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
     const activeCount = coupons.filter((c) => {
       if (!c.isActive) return false;
       if (c.expiresAt) {
-        const exp = new Date(c.expiresAt);
-        if (c.expiresAt.length === 10) exp.setHours(23, 59, 59, 999);
-        return Date.now() <= exp.getTime();
+        const exp = parseExpiryDate(c.expiresAt);
+        return exp ? nowMs <= exp.getTime() : true;
       }
       return true;
     }).length;
     onCouponsCountChange?.(activeCount);
-  }, [coupons, onCouponsCountChange]);
+  }, [coupons, nowMs, onCouponsCountChange]);
 
   const isCouponExpired = (coupon: CouponItem): boolean => {
     if (!coupon.expiresAt) return false;
-    const exp = new Date(coupon.expiresAt);
-    if (coupon.expiresAt.length === 10) exp.setHours(23, 59, 59, 999);
-    return Date.now() > exp.getTime();
+    const exp = parseExpiryDate(coupon.expiresAt);
+    return exp ? nowMs > exp.getTime() : false;
   };
 
   const getDaysUntilExpiry = (coupon: CouponItem): number | null => {
     if (!coupon.expiresAt) return null;
-    const exp = new Date(coupon.expiresAt);
-    if (coupon.expiresAt.length === 10) exp.setHours(23, 59, 59, 999);
-    const diff = exp.getTime() - Date.now();
+    const exp = parseExpiryDate(coupon.expiresAt);
+    if (!exp) return null;
+    const diff = exp.getTime() - nowMs;
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   };
 
@@ -553,16 +574,16 @@ export default function CouponsTab({ onCouponsCountChange }: CouponsTabProps) {
                       <Clock size={13} />
                       {expired ? (
                         <span className={styles.badgeExpired}>
-                          <AlertTriangle size={12} /> Expirou em {new Date(coupon.expiresAt!).toLocaleDateString('pt-BR')}
+                          <AlertTriangle size={12} /> Expirou em {formatExpiryDate(coupon.expiresAt!)}
                         </span>
                       ) : coupon.expiresAt ? (
                         daysLeft !== null && daysLeft <= 3 ? (
                           <span className={styles.badgeExpiringSoon}>
-                            Válido até {new Date(coupon.expiresAt).toLocaleDateString('pt-BR')} ({daysLeft === 0 ? 'Último dia!' : `restam ${daysLeft}d`})
+                            Válido até {formatExpiryDate(coupon.expiresAt)} ({daysLeft === 0 ? 'Último dia!' : `restam ${daysLeft}d`})
                           </span>
                         ) : (
                           <span>
-                            Válido até {new Date(coupon.expiresAt).toLocaleDateString('pt-BR')}
+                            Válido até {formatExpiryDate(coupon.expiresAt)}
                           </span>
                         )
                       ) : (
