@@ -255,6 +255,13 @@ export function ProductModal() {
          : ''))
     : '';
 
+  const isFieldApplicable = (targetVariations?: string[], currentVariation?: ProductVariation | null): boolean => {
+    if (!targetVariations || targetVariations.length === 0) return true;
+    if (!product?.variations || product.variations.length === 0) return true;
+    if (!currentVariation) return false;
+    return targetVariations.includes(currentVariation.id) || targetVariations.includes(currentVariation.name);
+  };
+
   const handleConfirm = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -268,8 +275,12 @@ export function ProductModal() {
       }
     };
 
-    if (
+    const isChildNameActive =
       product.customizationSettings?.allowChildName !== false &&
+      isFieldApplicable(product.customizationSettings?.childNameTargetVariations, selectedVariation);
+
+    if (
+      isChildNameActive &&
       product.customizationSettings?.childNameRequired !== false &&
       !childName.trim()
     ) {
@@ -289,7 +300,8 @@ export function ProductModal() {
 
     if (product.customizationSettings?.customFields) {
       for (const field of product.customizationSettings.customFields) {
-        if (field.required !== false) {
+        const isApplicable = isFieldApplicable(field.targetVariations, selectedVariation);
+        if (isApplicable && field.required !== false) {
           const fieldKey = field.label && field.label.trim() ? field.label.trim() : field.id;
           const val = customFieldValues[fieldKey];
           if (!val || !val.trim()) {
@@ -311,12 +323,31 @@ export function ProductModal() {
     const finalQuantity = Math.max(product.minQuantity || 1, quantity || 1);
     setQuantity(finalQuantity);
 
+    // Monta respostas dos campos extras apenas para os campos aplicáveis ao modelo selecionado
+    let filteredCustomFieldValues: Record<string, string> | undefined = undefined;
+    if (Object.keys(customFieldValues).length > 0) {
+      filteredCustomFieldValues = {};
+      for (const [key, val] of Object.entries(customFieldValues)) {
+        const fieldDef = product.customizationSettings?.customFields?.find(
+          (f) => (f.label && f.label.trim() === key) || f.id === key
+        );
+        if (!fieldDef || isFieldApplicable(fieldDef.targetVariations, selectedVariation)) {
+          if (val && val.trim()) {
+            filteredCustomFieldValues[key] = val.trim();
+          }
+        }
+      }
+      if (Object.keys(filteredCustomFieldValues).length === 0) {
+        filteredCustomFieldValues = undefined;
+      }
+    }
+
     addToCart(product, finalQuantity, {
       variation: selectedVariation ? selectedVariation.name : undefined,
-      childName: childName.trim() || undefined,
+      childName: isChildNameActive && childName.trim() ? childName.trim() : undefined,
       ribbonColor: ribbonColor || undefined,
       notes: notes.trim() || undefined,
-      customFieldValues: Object.keys(customFieldValues).length > 0 ? customFieldValues : undefined,
+      customFieldValues: filteredCustomFieldValues,
     });
   };
 
@@ -524,6 +555,7 @@ export function ProductModal() {
                               setSelectedImage(defaultImg);
                               setScale(1);
                               setPosition({ x: 0, y: 0 });
+                              setMissingFields({});
                             }}
                             className={isSelected ? styles.variationItemSelected : styles.variationItem}
                             title={`Modelo: ${v.name}`}
@@ -557,7 +589,9 @@ export function ProductModal() {
                 )}
 
                 <div className={styles.fieldsContainer}>
-                  {(product.customizationSettings?.allowChildName !== false) && (
+                  {/* Nome na Lembrancinha (exibido se allowChildName !== false e aplicável ao modelo) */}
+                  {(product.customizationSettings?.allowChildName !== false) &&
+                    isFieldApplicable(product.customizationSettings?.childNameTargetVariations, selectedVariation) && (
                     <div ref={(el) => { fieldRefs.current['childName'] = el; }}>
                       {renderRequiredPing('childName')}
                       <label className={styles.formLabel}>
@@ -625,7 +659,10 @@ export function ProductModal() {
                     );
                   })()}
 
-                  {product.customizationSettings?.customFields && product.customizationSettings.customFields.map((field) => {
+                  {/* Campos Extras Dinâmicos cadastrados no painel administrativo */}
+                  {product.customizationSettings?.customFields && product.customizationSettings.customFields
+                    .filter((field) => isFieldApplicable(field.targetVariations, selectedVariation))
+                    .map((field) => {
                     const fieldKey = field.label && field.label.trim() ? field.label.trim() : field.id;
                     const isReq = field.required !== false;
                     const inputPlaceholder = field.placeholder && field.placeholder.trim()

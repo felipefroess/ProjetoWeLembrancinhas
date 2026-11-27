@@ -27,22 +27,24 @@ export interface CustomFieldDefinition {
   type: 'text' | 'textarea' | 'select';
   required?: boolean;
   placeholder?: string;
-  options?: string[];
-  optionsText?: string;
+  options?: string[]; // Opções quando o tipo for 'select'
+  optionsText?: string; // Helper para edição no painel
+  targetVariations?: string[]; // Nomes ou IDs dos modelos onde este campo é exibido/obrigatório. Se vazio ou undefined, exibe em todos.
 }
 
 export interface CustomizationSettings {
-  allowChildName?: boolean;
-  childNameLabel?: string;
-  childNamePlaceholder?: string;
-  notesPlaceholder?: string;
-  childNameRequired?: boolean;
-  allowRibbonColors?: boolean;
-  ribbonColorRequired?: boolean;
-  ribbonColors?: string[];
-  allowNotes?: boolean;
-  variationsNote?: string;
-  customFields?: CustomFieldDefinition[];
+  allowChildName?: boolean;      // Solicita nome na lembrancinha (padrão: true)
+  childNameLabel?: string;       // Rótulo customizável (ex: "Nome da Criança", "Nome do Casal")
+  childNamePlaceholder?: string; // Exemplo/placeholder dentro da caixa (ex: "Ex: Professora Leandra, Luís...")
+  notesPlaceholder?: string;     // Exemplo/placeholder de observações
+  childNameRequired?: boolean;   // Se o nome é obrigatório (padrão: true)
+  childNameTargetVariations?: string[]; // Nomes ou IDs dos modelos onde o Nome é exibido/obrigatório. Se vazio ou undefined, exibe em todos.
+  allowRibbonColors?: boolean;   // Oferece opções de laços/fitas
+  ribbonColorRequired?: boolean; // Se a escolha da fita é obrigatória
+  ribbonColors?: string[];       // Cores disponíveis
+  allowNotes?: boolean;          // Campo de observações especiais (padrão: true)
+  variationsNote?: string;       // Mensagem/aviso exibido abaixo dos modelos
+  customFields?: CustomFieldDefinition[]; // Campos extras flexíveis
 }
 
 export interface QuantityDiscount {

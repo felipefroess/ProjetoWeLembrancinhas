@@ -62,6 +62,15 @@ export default function AdminDashboardPage() {
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
+  // Gerenciamento de Categorias (Modal e Edição de Nomes)
+  const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
+  const [editingCatId, setEditingCatId] = useState<string | null>(null);
+  const [editingCatName, setEditingCatName] = useState('');
+  const [newCategoryInput, setNewCategoryInput] = useState('');
+  const [savingCategory, setSavingCategory] = useState(false);
+  const [categoryActionFeedback, setCategoryActionFeedback] = useState<{ message: string; isError?: boolean } | null>(null);
+
+  // Aba Principal do Admin (Dashboard ou Produtos)
   const [mainTab, setMainTab] = useState<'pedidos' | 'clientes' | 'produtos' | 'ajustes' | 'cupons' | 'dashboard' | 'calculadora'>('pedidos');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isCalculatorModalOpen, setIsCalculatorModalOpen] = useState(false);
@@ -185,6 +194,7 @@ export default function AdminDashboardPage() {
   const [childNameRequired, setChildNameRequired] = useState(true);
   const [childNameLabel, setChildNameLabel] = useState('Nome na Lembrancinha');
   const [childNamePlaceholder, setChildNamePlaceholder] = useState('');
+  const [childNameTargetVariations, setChildNameTargetVariations] = useState<string[]>([]);
   const [notesPlaceholder, setNotesPlaceholder] = useState('');
   const [allowRibbonColors, setAllowRibbonColors] = useState(false);
   const [ribbonColorRequired, setRibbonColorRequired] = useState(false);
@@ -266,6 +276,57 @@ export default function AdminDashboardPage() {
     router.refresh();
   };
 
+  const handleSaveEditCategory = async (catId: string) => {
+    if (!editingCatName.trim()) return;
+    setSavingCategory(true);
+    setCategoryActionFeedback(null);
+    try {
+      const res = await fetch('/api/admin/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: catId, name: editingCatName.trim() }),
+      });
+      const data = await res.json();
+      if (data.success && data.categories) {
+        setCategories(data.categories);
+        setEditingCatId(null);
+        setCategoryActionFeedback({ message: `Nome da categoria alterado para "${editingCatName.trim()}" com sucesso!` });
+      } else {
+        setCategoryActionFeedback({ message: data.error || 'Erro ao alterar nome da categoria.', isError: true });
+      }
+    } catch {
+      setCategoryActionFeedback({ message: 'Erro de comunicação ao salvar.', isError: true });
+    } finally {
+      setSavingCategory(false);
+    }
+  };
+
+  const handleCreateCategoryDirect = async () => {
+    if (!newCategoryInput.trim()) return;
+    setSavingCategory(true);
+    setCategoryActionFeedback(null);
+    try {
+      const res = await fetch('/api/admin/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newCategoryInput.trim() }),
+      });
+      const data = await res.json();
+      if (data.success && data.categories) {
+        setCategories(data.categories);
+        const createdName = newCategoryInput.trim();
+        setNewCategoryInput('');
+        setCategoryActionFeedback({ message: `Categoria "${createdName}" criada com sucesso!` });
+      } else {
+        setCategoryActionFeedback({ message: data.error || 'Erro ao criar categoria.', isError: true });
+      }
+    } catch {
+      setCategoryActionFeedback({ message: 'Erro de comunicação ao criar.', isError: true });
+    } finally {
+      setSavingCategory(false);
+    }
+  };
+
   const handleOpenCreateModal = () => {
     setEditingProductId(null);
     setModalTab('basico');
@@ -292,6 +353,7 @@ export default function AdminDashboardPage() {
     setChildNameRequired(true);
     setChildNameLabel('Nome na Lembrancinha');
     setChildNamePlaceholder('');
+    setChildNameTargetVariations([]);
     setNotesPlaceholder('');
     setAllowRibbonColors(false);
     setRibbonColorRequired(false);
@@ -370,6 +432,7 @@ export default function AdminDashboardPage() {
     setChildNameRequired(cs?.childNameRequired ?? true);
     setChildNameLabel(cs?.childNameLabel || 'Nome na Lembrancinha');
     setChildNamePlaceholder(cs?.childNamePlaceholder || '');
+    setChildNameTargetVariations(cs?.childNameTargetVariations || []);
     setNotesPlaceholder(cs?.notesPlaceholder || '');
     const hasRibbonColors = cs?.allowRibbonColors ?? (product.availableRibbonColors && product.availableRibbonColors.length > 0 ? true : false);
     setAllowRibbonColors(hasRibbonColors);
@@ -385,6 +448,7 @@ export default function AdminDashboardPage() {
         ? cs.customFields.map((f) => ({
             ...f,
             type: f.type || 'text',
+            targetVariations: Array.isArray(f.targetVariations) ? [...f.targetVariations] : [],
             options: Array.isArray(f.options) ? [...f.options] : [],
             optionsText: Array.isArray(f.options) ? f.options.join(', ') : '',
           }))
@@ -769,6 +833,7 @@ export default function AdminDashboardPage() {
           childNameRequired,
           childNameLabel: childNameLabel.trim() || 'Nome na Lembrancinha',
           childNamePlaceholder: childNamePlaceholder.trim() || undefined,
+          childNameTargetVariations: childNameTargetVariations.length > 0 ? childNameTargetVariations : undefined,
           notesPlaceholder: notesPlaceholder.trim() || undefined,
           variationsNote: variationsNote.trim() || undefined,
           allowRibbonColors,
@@ -788,6 +853,9 @@ export default function AdminDashboardPage() {
                     };
                     if (f.placeholder && f.placeholder.trim()) {
                       fieldObj.placeholder = f.placeholder.trim();
+                    }
+                    if (f.targetVariations && f.targetVariations.length > 0) {
+                      fieldObj.targetVariations = f.targetVariations;
                     }
                     if (f.type === 'select') {
                       let opts: string[] = [];
@@ -847,6 +915,7 @@ export default function AdminDashboardPage() {
         setVariations([]);
         setHasVariations(false);
         setCustomFields([]);
+        setChildNameTargetVariations([]);
       } else {
         alert(data.error || 'Erro ao salvar produto.');
       }
@@ -1304,10 +1373,26 @@ export default function AdminDashboardPage() {
             </p>
           </div>
 
-          <button onClick={handleOpenCreateModal} className={styles.newProductBtn}>
-            <Plus size={18} />
-            <span>Novo Produto</span>
-          </button>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setIsCategoriesModalOpen(true);
+                setCategoryActionFeedback(null);
+                setEditingCatId(null);
+              }}
+              className={styles.manageCategoriesBtn}
+              title="Alterar o nome das categorias ou criar novas"
+            >
+              <FolderHeart size={18} />
+              <span>Categorias</span>
+            </button>
+
+            <button onClick={handleOpenCreateModal} className={styles.newProductBtn}>
+              <Plus size={18} />
+              <span>Novo Produto</span>
+            </button>
+          </div>
         </div>
 
         <div className={styles.searchFilterBar}>
@@ -1964,9 +2049,31 @@ export default function AdminDashboardPage() {
 
                 <div className={styles.grid2}>
                   <div className={styles.formField}>
-                    <label className={styles.label}>
-                      Categoria <span className={styles.reqStar}>*</span>
-                    </label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                      <label className={styles.label} style={{ margin: 0 }}>
+                        Categoria <span className={styles.reqStar}>*</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsCategoriesModalOpen(true);
+                          setCategoryActionFeedback(null);
+                          setEditingCatId(null);
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#8C5835',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                          padding: 0
+                        }}
+                      >
+                        ✏️ Alterar nomes das categorias
+                      </button>
+                    </div>
                     <select
                       value={isCreatingNewCategory ? '__new__' : categoryId}
                       onChange={(e) => {
@@ -2945,6 +3052,89 @@ export default function AdminDashboardPage() {
                           {childNameRequired ? 'Preenchimento Obrigatório *' : 'Opcional (cliente pode deixar em branco)'}
                         </span>
                       </label>
+
+                      {/* Vínculo a Modelos Específicos para Nome na Lembrancinha */}
+                      {hasVariations && variations.length > 0 && (
+                        <div style={{ marginTop: '0.35rem', padding: '0.625rem', backgroundColor: '#FAF7F2', borderRadius: '0.5rem', border: '1px solid #E8DFD5' }}>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#553A2D', marginBottom: '0.35rem' }}>
+                            Em quais modelos solicitar o Nome?
+                          </div>
+                          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78125rem', cursor: 'pointer', fontWeight: childNameTargetVariations.length === 0 ? 700 : 500, color: '#553A2D' }}>
+                              <input
+                                type="radio"
+                                name="childNameTargetMode"
+                                checked={childNameTargetVariations.length === 0}
+                                onChange={() => setChildNameTargetVariations([])}
+                              />
+                              Todos os modelos (padrão)
+                            </label>
+                            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78125rem', cursor: 'pointer', fontWeight: childNameTargetVariations.length > 0 ? 700 : 500, color: '#553A2D' }}>
+                              <input
+                                type="radio"
+                                name="childNameTargetMode"
+                                checked={childNameTargetVariations.length > 0}
+                                onChange={() => {
+                                  if (childNameTargetVariations.length === 0 && variations.length > 0) {
+                                    const first = variations[0].name.trim();
+                                    setChildNameTargetVariations(first ? [first] : []);
+                                  }
+                                }}
+                              />
+                              Apenas em modelos específicos
+                            </label>
+                          </div>
+
+                          {childNameTargetVariations.length > 0 && (
+                            <div>
+                              <span style={{ fontSize: '0.6875rem', color: '#8C7A6B', display: 'block', marginBottom: '0.35rem' }}>
+                                Marque os modelos que precisam que o cliente informe o nome:
+                              </span>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
+                                {variations.map((v, vIdx) => {
+                                  const vName = v.name.trim() || `Modelo ${vIdx + 1}`;
+                                  const isChecked = childNameTargetVariations.includes(vName);
+                                  return (
+                                    <label
+                                      key={vIdx}
+                                      style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '0.35rem',
+                                        padding: '0.35rem 0.65rem',
+                                        borderRadius: '0.375rem',
+                                        backgroundColor: isChecked ? '#6D4C3D' : '#FFFFFF',
+                                        color: isChecked ? '#FFFFFF' : '#553A2D',
+                                        border: isChecked ? '1px solid #6D4C3D' : '1px solid #DACFBF',
+                                        fontSize: '0.75rem',
+                                        fontWeight: isChecked ? 700 : 500,
+                                        cursor: 'pointer',
+                                        transition: 'all 0.15s ease',
+                                        userSelect: 'none'
+                                      }}
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={isChecked}
+                                        onChange={(e) => {
+                                          if (e.target.checked) {
+                                            setChildNameTargetVariations((prev) => [...prev, vName]);
+                                          } else {
+                                            setChildNameTargetVariations((prev) => prev.filter((item) => item !== vName));
+                                          }
+                                        }}
+                                        style={{ display: 'none' }}
+                                      />
+                                      <span>{isChecked ? '✓' : '+'}</span>
+                                      <span>{vName}</span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -3260,6 +3450,96 @@ export default function AdminDashboardPage() {
                             {field.required !== false ? 'Exige resposta antes de adicionar ao carrinho' : 'Não bloqueia a compra'}
                           </span>
                         </div>
+
+                        {/* Vínculo a Modelos Específicos para este Campo Extra */}
+                        {hasVariations && variations.length > 0 && (
+                          <div style={{ marginTop: '0.25rem', padding: '0.5rem', backgroundColor: '#FFFFFF', borderRadius: '0.5rem', border: '1px solid #E8DFD5' }}>
+                            <div style={{ fontSize: '0.71875rem', fontWeight: 700, color: '#553A2D', marginBottom: '0.35rem' }}>
+                              Em quais modelos exibir este campo?
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap', marginBottom: '0.35rem' }}>
+                              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', cursor: 'pointer', fontWeight: (!field.targetVariations || field.targetVariations.length === 0) ? 700 : 500, color: '#553A2D' }}>
+                                <input
+                                  type="radio"
+                                  name={`fieldTargetMode_${field.id}`}
+                                  checked={!field.targetVariations || field.targetVariations.length === 0}
+                                  onChange={() => {
+                                    const next = [...customFields];
+                                    next[idx].targetVariations = [];
+                                    setCustomFields(next);
+                                  }}
+                                />
+                                Todos os modelos (padrão)
+                              </label>
+                              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', cursor: 'pointer', fontWeight: Boolean(field.targetVariations && field.targetVariations.length > 0) ? 700 : 500, color: '#553A2D' }}>
+                                <input
+                                  type="radio"
+                                  name={`fieldTargetMode_${field.id}`}
+                                  checked={Boolean(field.targetVariations && field.targetVariations.length > 0)}
+                                  onChange={() => {
+                                    const next = [...customFields];
+                                    const first = variations[0]?.name?.trim();
+                                    next[idx].targetVariations = first ? [first] : [];
+                                    setCustomFields(next);
+                                  }}
+                                />
+                                Apenas em modelos específicos
+                              </label>
+                            </div>
+
+                            {field.targetVariations && field.targetVariations.length > 0 && (
+                              <div style={{ marginTop: '0.25rem' }}>
+                                <span style={{ fontSize: '0.6875rem', color: '#8C7A6B', display: 'block', marginBottom: '0.35rem' }}>
+                                  Selecione os modelos onde esta pergunta aparecerá:
+                                </span>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
+                                  {variations.map((v, vIdx) => {
+                                    const vName = v.name.trim() || `Modelo ${vIdx + 1}`;
+                                    const isChecked = field.targetVariations?.includes(vName);
+                                    return (
+                                      <label
+                                        key={vIdx}
+                                        style={{
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: '0.35rem',
+                                          padding: '0.3rem 0.55rem',
+                                          borderRadius: '0.375rem',
+                                          backgroundColor: isChecked ? '#6D4C3D' : '#FAF7F2',
+                                          color: isChecked ? '#FFFFFF' : '#553A2D',
+                                          border: isChecked ? '1px solid #6D4C3D' : '1px solid #DACFBF',
+                                          fontSize: '0.71875rem',
+                                          fontWeight: isChecked ? 700 : 500,
+                                          cursor: 'pointer',
+                                          transition: 'all 0.15s ease',
+                                          userSelect: 'none'
+                                        }}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={isChecked}
+                                          onChange={(e) => {
+                                            const next = [...customFields];
+                                            const currentTargets = next[idx].targetVariations || [];
+                                            if (e.target.checked) {
+                                              next[idx].targetVariations = [...currentTargets, vName];
+                                            } else {
+                                              next[idx].targetVariations = currentTargets.filter((item) => item !== vName);
+                                            }
+                                            setCustomFields(next);
+                                          }}
+                                          style={{ display: 'none' }}
+                                        />
+                                        <span>{isChecked ? '✓' : '+'}</span>
+                                        <span>{vName}</span>
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -3316,6 +3596,279 @@ export default function AdminDashboardPage() {
               setPrice(suggested);
               setIsCalculatorModalOpen(false);
             }} />
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE GERENCIAMENTO E ALTERAÇÃO DE NOMES DE CATEGORIAS */}
+      {isCategoriesModalOpen && (
+        <div className={styles.modalOverlay} onClick={() => setIsCategoriesModalOpen(false)}>
+          <div
+            className={styles.modalCard}
+            style={{ maxWidth: '620px', width: '92%' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header do Modal */}
+            <div className={styles.modalHeader}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '10px',
+                  backgroundColor: '#FAF5EE',
+                  color: '#8C5835',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid #E6D7C8'
+                }}>
+                  <FolderHeart size={20} />
+                </div>
+                <div>
+                  <h3 className={styles.modalTitle}>Categorias da Loja</h3>
+                  <p style={{ margin: 0, fontSize: '0.8125rem', color: '#7C6E64' }}>
+                    Altere o nome das categorias ou crie novas para seus produtos
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCategoriesModalOpen(false)}
+                className={styles.closeBtn}
+                title="Fechar"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Corpo do Modal */}
+            <div className={styles.modalBody} style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+              {categoryActionFeedback && (
+                <div
+                  style={{
+                    padding: '0.625rem 0.875rem',
+                    borderRadius: '0.5rem',
+                    marginBottom: '1rem',
+                    fontSize: '0.8125rem',
+                    backgroundColor: categoryActionFeedback.isError ? '#FEF2F2' : '#F0FDF4',
+                    border: `1px solid ${categoryActionFeedback.isError ? '#FCA5A5' : '#86EFAC'}`,
+                    color: categoryActionFeedback.isError ? '#991B1B' : '#166534',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  {categoryActionFeedback.isError ? <AlertCircle size={16} /> : <Check size={16} />}
+                  <span>{categoryActionFeedback.message}</span>
+                </div>
+              )}
+
+              {/* Seção de Adicionar Nova Categoria */}
+              <div style={{
+                backgroundColor: '#FAF7F2',
+                border: '1px solid #E8DFD5',
+                borderRadius: '0.75rem',
+                padding: '0.875rem',
+                marginBottom: '1.25rem'
+              }}>
+                <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: '#4A3B32', marginBottom: '0.4rem' }}>
+                  + Criar Nova Categoria
+                </label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    placeholder="Ex: Batizado, Bodas, Corporativo..."
+                    value={newCategoryInput}
+                    onChange={(e) => setNewCategoryInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleCreateCategoryDirect();
+                      }
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '0.55rem 0.75rem',
+                      borderRadius: '0.5rem',
+                      border: '1px solid #DACFBF',
+                      fontSize: '0.875rem',
+                      backgroundColor: '#FFFFFF',
+                      color: '#2D231E'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateCategoryDirect}
+                    disabled={!newCategoryInput.trim() || savingCategory}
+                    style={{
+                      padding: '0.55rem 1rem',
+                      borderRadius: '0.5rem',
+                      backgroundColor: '#6D4C3D',
+                      color: '#ffffff',
+                      border: 'none',
+                      fontWeight: 700,
+                      fontSize: '0.8125rem',
+                      cursor: newCategoryInput.trim() && !savingCategory ? 'pointer' : 'not-allowed',
+                      opacity: newCategoryInput.trim() && !savingCategory ? 1 : 0.6,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem'
+                    }}
+                  >
+                    <Plus size={15} />
+                    <span>Adicionar</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Lista de Categorias Atuais */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#8C7A6B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Categorias Ativas ({categories.filter((c) => c.id !== 'todos').length})
+                </div>
+
+                {categories.filter((c) => c.id !== 'todos').map((cat) => {
+                  const productCount = products.filter((p) => p.category === cat.id).length;
+                  const isEditingThis = editingCatId === cat.id;
+
+                  return (
+                    <div
+                      key={cat.id}
+                      style={{
+                        padding: '0.75rem 0.875rem',
+                        backgroundColor: '#FFFFFF',
+                        border: isEditingThis ? '1.5px solid #8C5835' : '1px solid #E8DFD5',
+                        borderRadius: '0.625rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '0.75rem',
+                        boxShadow: isEditingThis ? '0 2px 8px rgba(140,88,53,0.1)' : 'none',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {isEditingThis ? (
+                        <div style={{ display: 'flex', gap: '0.5rem', width: '100%', alignItems: 'center' }}>
+                          <input
+                            type="text"
+                            value={editingCatName}
+                            onChange={(e) => setEditingCatName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleSaveEditCategory(cat.id);
+                              } else if (e.key === 'Escape') {
+                                setEditingCatId(null);
+                              }
+                            }}
+                            autoFocus
+                            style={{
+                              flex: 1,
+                              padding: '0.45rem 0.65rem',
+                              borderRadius: '0.375rem',
+                              border: '1px solid #8C5835',
+                              fontSize: '0.875rem',
+                              fontWeight: 600,
+                              color: '#2D231E'
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleSaveEditCategory(cat.id)}
+                            disabled={savingCategory || !editingCatName.trim()}
+                            style={{
+                              padding: '0.45rem 0.75rem',
+                              backgroundColor: '#16a34a',
+                              color: '#ffffff',
+                              border: 'none',
+                              borderRadius: '0.375rem',
+                              fontWeight: 600,
+                              fontSize: '0.8rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.25rem'
+                            }}
+                            title="Salvar novo nome"
+                          >
+                            <Check size={14} />
+                            <span>Salvar</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingCatId(null)}
+                            style={{
+                              padding: '0.45rem 0.65rem',
+                              backgroundColor: '#F3F4F6',
+                              color: '#4B5563',
+                              border: '1px solid #D1D5DB',
+                              borderRadius: '0.375rem',
+                              fontWeight: 600,
+                              fontSize: '0.8rem',
+                              cursor: 'pointer'
+                            }}
+                            title="Cancelar"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <div>
+                            <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#2D231E' }}>
+                              {cat.name}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: '#8C7A6B', marginTop: '0.15rem' }}>
+                              {productCount} {productCount === 1 ? 'produto associado' : 'produtos associados'}
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingCatId(cat.id);
+                                setEditingCatName(cat.name);
+                                setCategoryActionFeedback(null);
+                              }}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.35rem',
+                                padding: '0.4rem 0.75rem',
+                                backgroundColor: '#FAF5EE',
+                                color: '#6D4C3D',
+                                border: '1px solid #DACFBF',
+                                borderRadius: '0.375rem',
+                                fontSize: '0.8125rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease'
+                              }}
+                              title="Alterar o nome desta categoria"
+                            >
+                              <Pencil size={13} />
+                              <span>Alterar Nome</span>
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Rodapé do Modal */}
+            <div className={styles.modalFooter} style={{ justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setIsCategoriesModalOpen(false)}
+                className={styles.cancelBtn}
+              >
+                Concluir
+              </button>
+            </div>
           </div>
         </div>
       )}

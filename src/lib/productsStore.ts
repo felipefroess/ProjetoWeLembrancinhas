@@ -291,3 +291,21 @@ export async function saveCategory(category: Category): Promise<Category> {
   writeJsonFile(CUSTOM_CATEGORIES_PATH, customCategories);
   return category;
 }
+
+/**
+ * Remove uma categoria personalizada do Neon e do JSON local
+ */
+export async function deleteCategory(id: string): Promise<boolean> {
+  if (isDbConfigured()) {
+    try {
+      await sql`DELETE FROM public.categories WHERE id = ${id}`;
+    } catch (error) {
+      console.error('Erro ao excluir categoria no Neon:', error);
+    }
+  }
+
+  const customCategories = readJsonFile<Category[]>(CUSTOM_CATEGORIES_PATH, []);
+  const filtered = customCategories.filter((c) => c.id !== id);
+  writeJsonFile(CUSTOM_CATEGORIES_PATH, filtered);
+  return true;
+}
