@@ -143,16 +143,17 @@ export default function AdminDashboardPage() {
   const [mainImage, setMainImage] = useState('');
   const [additionalImages, setAdditionalImages] = useState<string[]>([]);
   const [newAdditionalUrl, setNewAdditionalUrl] = useState('');
+  const [newVariationUrls, setNewVariationUrls] = useState<Record<number, string>>({});
   const [cropTarget, setCropTarget] = useState<
     | null
     | { type: 'main'; url: string; title: string }
     | { type: 'additional'; index: number; url: string; title: string }
-    | { type: 'variation'; index: number; slot: 1 | 2; url: string; title: string }
+    | { type: 'variation'; index: number; slot: 'main' | number; url: string; title: string }
   >(null);
 
   const [hasVariations, setHasVariations] = useState(false);
   const [modalTab, setModalTab] = useState<'basico' | 'fotos' | 'modelos' | 'promocoes' | 'personalizacao'>('basico');
-  const [variations, setVariations] = useState<Array<{ name: string; image: string; image2: string; description: string; price: string }>>([]);
+  const [variations, setVariations] = useState<Array<{ name: string; image: string; additionalImages: string[]; description: string; price: string }>>([]);
   const [variationsNote, setVariationsNote] = useState('');
 
   const [originalPrice, setOriginalPrice] = useState('');
@@ -337,18 +338,26 @@ export default function AdminDashboardPage() {
       setAdditionalImages([]);
     }
     setNewAdditionalUrl('');
+    setNewVariationUrls({});
 
     setModalTab('basico');
     if (product.variations && product.variations.length > 0) {
       setHasVariations(true);
       setVariations(
-        product.variations.map((v) => ({
-          name: v.name,
-          image: v.images?.[0] || v.image || '',
-          image2: v.images?.[1] || '',
-          description: v.description || '',
-          price: v.price !== undefined && v.price > 0 ? String(v.price) : '',
-        }))
+        product.variations.map((v) => {
+          const primaryVarImg = v.images?.[0] || v.image || '';
+          const extraVarImgs = (v.images || []).filter((img, imgIdx) => {
+            if (imgIdx === 0 && img === primaryVarImg) return false;
+            return Boolean(img && img.trim()) && img !== primaryVarImg;
+          });
+          return {
+            name: v.name,
+            image: primaryVarImg,
+            additionalImages: extraVarImgs,
+            description: v.description || '',
+            price: v.price !== undefined && v.price > 0 ? String(v.price) : '',
+          };
+        })
       );
     } else {
       setHasVariations(false);
@@ -424,7 +433,7 @@ export default function AdminDashboardPage() {
 
   const handleImageUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    target: 'main' | { index: number; slot: 1 | 2 }
+    target: 'main' | { index: number; slot: 'main' }
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -443,15 +452,9 @@ export default function AdminDashboardPage() {
         if (target === 'main') {
           setMainImage(data.url);
         } else if (typeof target === 'object' && target !== null) {
-          setVariations((prev) => {
-            const next = [...prev];
-            if (target.slot === 1) {
-              next[target.index].image = data.url;
-            } else {
-              next[target.index].image2 = data.url;
-            }
-            return next;
-          });
+          setVariations((prev) =>
+            prev.map((v, i) => (i === target.index ? { ...v, image: data.url } : v))
+          );
         }
       } else {
         alert(data.error || 'Erro ao fazer upload da imagem.');
@@ -462,6 +465,81 @@ export default function AdminDashboardPage() {
       setUploadingImage(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  const handleVariationAdditionalImagesUpload = async (
+    variationIndex: number,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingImage(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/admin/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.success && data.url) {
+          setVariations((prev) =>
+            prev.map((v, idx) =>
+              idx === variationIndex
+                ? { ...v, additionalImages: [...v.additionalImages, data.url] }
+                : v
+            )
+          );
+        }
+      }
+    } catch {
+      alert('Erro ao enviar fotos adicionais do modelo.');
+    } finally {
+      setUploadingImage(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleAddVariationAdditionalUrl = (variationIndex: number) => {
+    const url = (newVariationUrls[variationIndex] || '').trim();
+    if (!url) return;
+    setVariations((prev) =>
+      prev.map((v, idx) =>
+        idx === variationIndex
+          ? { ...v, additionalImages: [...v.additionalImages, url] }
+          : v
+      )
+    );
+    setNewVariationUrls((prev) => ({ ...prev, [variationIndex]: '' }));
+  };
+
+  const handleRemoveVariationAdditionalImage = (variationIndex: number, imgIndex: number) => {
+    setVariations((prev) =>
+      prev.map((v, idx) =>
+        idx === variationIndex
+          ? { ...v, additionalImages: v.additionalImages.filter((_, i) => i !== imgIndex) }
+          : v
+      )
+    );
+  };
+
+  const handlePromoteVariationImageToMain = (variationIndex: number, imgIndex: number) => {
+    setVariations((prev) =>
+      prev.map((v, idx) => {
+        if (idx !== variationIndex) return v;
+        const promoted = v.additionalImages[imgIndex];
+        if (!promoted) return v;
+        const oldMain = v.image;
+        const nextAdditional = v.additionalImages.filter((_, i) => i !== imgIndex);
+        if (oldMain && oldMain !== promoted) {
+          nextAdditional.unshift(oldMain);
+        }
+        return { ...v, image: promoted, additionalImages: nextAdditional };
+      })
+    );
   };
 
   const handleAdditionalImagesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -545,7 +623,7 @@ export default function AdminDashboardPage() {
   const handleAddVariation = () => {
     setVariations((prev) => [
       ...prev,
-      { name: `Modelo ${prev.length + 1}`, image: '', image2: '', description: '', price: '' },
+      { name: `Modelo ${prev.length + 1}`, image: '', additionalImages: [], description: '', price: '' },
     ]);
   };
 
@@ -609,7 +687,12 @@ export default function AdminDashboardPage() {
         ? variations.map((v, idx) => {
             const vImages: string[] = [];
             if (v.image && v.image.trim()) vImages.push(v.image.trim());
-            if (v.image2 && v.image2.trim()) vImages.push(v.image2.trim());
+            (v.additionalImages || []).forEach((img) => {
+              const trimmed = img.trim();
+              if (trimmed && !vImages.includes(trimmed)) {
+                vImages.push(trimmed);
+              }
+            });
             const primaryImg = vImages[0] || mainImage || '/images/placeholder.jpg';
 
             const parsedVarPrice = v.price && !isNaN(parseFloat(v.price.replace(',', '.')))
@@ -2566,9 +2649,9 @@ export default function AdminDashboardPage() {
                           </span>
                         </div>
 
-                        <div className={styles.grid2} style={{ marginTop: '0.5rem' }}>
+                        <div style={{ marginTop: '0.5rem' }}>
                           <div className={styles.formField}>
-                            <label className={styles.label}>1ª Foto do Modelo (Principal)</label>
+                            <label className={styles.label}>1ª Foto do Modelo (Principal / Capa)</label>
                             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                               <label className={styles.uploadBtn} style={{ padding: '0.4rem 0.65rem', fontSize: '0.75rem' }}>
                                 <Upload size={12} />
@@ -2577,12 +2660,12 @@ export default function AdminDashboardPage() {
                                   type="file"
                                   accept="image/*"
                                   style={{ display: 'none' }}
-                                  onChange={(e) => handleImageUpload(e, { index: idx, slot: 1 })}
+                                  onChange={(e) => handleImageUpload(e, { index: idx, slot: 'main' })}
                                 />
                               </label>
                               <input
                                 type="text"
-                                placeholder="URL ou envie a foto 1"
+                                placeholder="URL ou envie a foto principal do modelo"
                                 value={v.image}
                                 onChange={(e) => {
                                   const next = [...variations];
@@ -2602,7 +2685,7 @@ export default function AdminDashboardPage() {
                                     setCropTarget({
                                       type: 'variation',
                                       index: idx,
-                                      slot: 1,
+                                      slot: 'main',
                                       url: v.image,
                                       title: `Ajustar 1ª Foto — ${v.name || `Modelo ${idx + 1}`}`,
                                     })
@@ -2641,78 +2724,117 @@ export default function AdminDashboardPage() {
                             )}
                           </div>
 
-                          <div className={styles.formField}>
-                            <label className={styles.label}>2ª Foto do Modelo (Opcional - Ângulo 2)</label>
-                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                              <label className={styles.uploadBtn} style={{ padding: '0.4rem 0.65rem', fontSize: '0.75rem' }}>
-                                <Upload size={12} />
-                                <span>Upload</span>
+                          <div className={styles.photoBlock} style={{ marginTop: '0.75rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span className={styles.photoBlockTitle}>
+                                Fotos Adicionais do Modelo ({v.additionalImages.length})
+                              </span>
+                              <span style={{ fontSize: '0.75rem', color: '#9E9084' }}>
+                                Aparecem na rolagem de fotos do modelo
+                              </span>
+                            </div>
+
+                            {v.additionalImages.length > 0 ? (
+                              <div className={styles.galleryGrid}>
+                                {v.additionalImages.map((imgUrl, imgIdx) => (
+                                  <div key={imgIdx} className={styles.galleryCard}>
+                                    <div className={styles.galleryImgWrapper}>
+                                      <img
+                                        src={imgUrl}
+                                        alt={`${v.name || `Modelo ${idx + 1}`} - Foto ${imgIdx + 2}`}
+                                        className={styles.galleryImg}
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveVariationAdditionalImage(idx, imgIdx)}
+                                        className={styles.galleryRemoveBtn}
+                                        title="Remover esta foto do modelo"
+                                      >
+                                        <Trash2 size={13} />
+                                      </button>
+                                    </div>
+                                    <div className={styles.galleryCardFooter}>
+                                      <span className={styles.galleryPhotoIndex}>Foto #{imgIdx + 2}</span>
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          setCropTarget({
+                                            type: 'variation',
+                                            index: idx,
+                                            slot: imgIdx,
+                                            url: imgUrl,
+                                            title: `Ajustar Foto #${imgIdx + 2} — ${v.name || `Modelo ${idx + 1}`}`,
+                                          })
+                                        }
+                                        className={styles.galleryAdjustBtn}
+                                        title="Cortar, girar e ajustar esta foto"
+                                      >
+                                        <Crop size={11} /> Ajustar / Cortar
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleDownloadImage(
+                                            imgUrl,
+                                            `${name || 'produto'}-${(v.name || `modelo-${idx + 1}`).toLowerCase().replace(/[^a-z0-9]/g, '-')}-foto-${imgIdx + 2}.jpg`
+                                          )
+                                        }
+                                        className={styles.galleryDownloadBtn}
+                                        title="Baixar esta foto para o computador"
+                                      >
+                                        <Download size={11} /> Baixar
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handlePromoteVariationImageToMain(idx, imgIdx)}
+                                        className={styles.promoteBtn}
+                                        title="Definir esta foto como a 1ª foto do modelo"
+                                      >
+                                        Tornar Capa
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className={styles.emptyGalleryNote}>
+                                Nenhuma foto adicional neste modelo. Você pode adicionar mais fotos abaixo:
+                              </div>
+                            )}
+
+                            <div className={styles.addGalleryRow}>
+                              <label className={styles.uploadBtn}>
+                                <Upload size={14} />
+                                <span>{uploadingImage ? 'Enviando...' : 'Adicionar Foto do Computador'}</span>
                                 <input
                                   type="file"
                                   accept="image/*"
+                                  multiple
                                   style={{ display: 'none' }}
-                                  onChange={(e) => handleImageUpload(e, { index: idx, slot: 2 })}
+                                  onChange={(e) => handleVariationAdditionalImagesUpload(idx, e)}
                                 />
                               </label>
-                              <input
-                                type="text"
-                                placeholder="URL ou envie a foto 2"
-                                value={v.image2 || ''}
-                                onChange={(e) => {
-                                  const next = [...variations];
-                                  next[idx].image2 = e.target.value;
-                                  setVariations(next);
-                                }}
-                                className={styles.input}
-                                style={{ flex: 1 }}
-                              />
-                            </div>
-                            {v.image2 && (
-                              <div className={styles.modelPhotoPreviewRow}>
-                                <img src={v.image2} alt={v.name} className={styles.modelPhotoThumb} />
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setCropTarget({
-                                      type: 'variation',
-                                      index: idx,
-                                      slot: 2,
-                                      url: v.image2,
-                                      title: `Ajustar 2ª Foto — ${v.name || `Modelo ${idx + 1}`}`,
-                                    })
+                              <div className={styles.urlAddWrapper}>
+                                <input
+                                  type="text"
+                                  placeholder="Ou cole a URL da foto..."
+                                  value={newVariationUrls[idx] || ''}
+                                  onChange={(e) =>
+                                    setNewVariationUrls((prev) => ({ ...prev, [idx]: e.target.value }))
                                   }
-                                  className={styles.modelAdjustPhotoBtn}
-                                  title="Cortar, girar e ajustar 2ª foto"
-                                >
-                                  <Crop size={11} /> Ajustar / Cortar
-                                </button>
+                                  className={styles.input}
+                                  style={{ flex: 1 }}
+                                />
                                 <button
                                   type="button"
-                                  onClick={() =>
-                                    handleDownloadImage(
-                                      v.image2,
-                                      `${name || 'produto'}-${(v.name || `modelo-${idx + 1}`).toLowerCase().replace(/[^a-z0-9]/g, '-')}-foto2.jpg`
-                                    )
-                                  }
-                                  className={styles.modelDownloadPhotoBtn}
-                                  title="Baixar 2ª foto para o computador"
+                                  onClick={() => handleAddVariationAdditionalUrl(idx)}
+                                  className={styles.addUrlBtn}
+                                  disabled={!(newVariationUrls[idx] || '').trim()}
                                 >
-                                  <Download size={11} /> Baixar Foto
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const next = [...variations];
-                                    next[idx].image2 = '';
-                                    setVariations(next);
-                                  }}
-                                  className={styles.removeModelPhotoBtn}
-                                  title="Remover 2ª foto"
-                                >
-                                  <Trash2 size={11} /> Remover Foto
+                                  <Plus size={14} /> Adicionar
                                 </button>
                               </div>
-                            )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -3213,14 +3335,18 @@ export default function AdminDashboardPage() {
             );
           } else if (cropTarget.type === 'variation') {
             setVariations((prev) =>
-              prev.map((v, i) =>
-                i === cropTarget.index
-                  ? {
-                      ...v,
-                      [cropTarget.slot === 1 ? 'image' : 'image2']: newUrl,
-                    }
-                  : v
-              )
+              prev.map((v, i) => {
+                if (i !== cropTarget.index) return v;
+                if (cropTarget.slot === 'main') {
+                  return { ...v, image: newUrl };
+                }
+                return {
+                  ...v,
+                  additionalImages: v.additionalImages.map((img, imgIdx) =>
+                    imgIdx === cropTarget.slot ? newUrl : img
+                  ),
+                };
+              })
             );
           }
           setCropTarget(null);

@@ -421,9 +421,9 @@ export function ProductModal() {
                   )}
                 </div>
 
-                {!hasVariations && product.images && product.images.length > 1 && (
+                {imagesList.length > 1 && (
                   <div className={styles.thumbnailsRow}>
-                    {product.images.map((img, idx) => {
+                    {imagesList.map((img, idx) => {
                       const isCurrent = (selectedImage || product.image) === img;
                       return (
                         <button
